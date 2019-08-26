@@ -2,6 +2,8 @@
 
 :fire: [ONNX Runtime](https://github.com/Microsoft/onnxruntime) - the high performance scoring engine for ML models - for Ruby
 
+[![Build Status](https://travis-ci.org/ankane/onnxruntime.svg?branch=master)](https://travis-ci.org/ankane/onnxruntime)
+
 ## Installation
 
 First, [install ONNX Runtime](#onnx-runtime-installation).

@@ -1,0 +1,15 @@
+dist: xenial
+language: ruby
+rvm: 2.6.3
+before_install:
+  - export ONNXRUNTIME_VERSION=0.5.0
+  - ./test/ci/install_onnxruntime.sh
+  - export LD_LIBRARY_PATH=$HOME/onnxruntime/$ONNXRUNTIME_VERSION/lib:$LD_LIBRARY_PATH
+cache:
+  directories:
+    - $HOME/onnxruntime
+script: bundle exec rake test
+notifications:
+  email:
+    on_success: never
+    on_failure: change
