@@ -81,6 +81,14 @@ OnnxRuntime.ffi_lib << "/path/to/onnxruntime/lib/libonnxruntime.so"
 
 ### Mac
 
+With Homebrew, use:
+
+```sh
+brew install ankane/brew/onnxruntime
+```
+
+Alternatively, you can do:
+
 ```sh
 wget https://github.com/microsoft/onnxruntime/releases/download/v0.5.0/onnxruntime-osx-x64-0.5.0.tgz
 tar xf onnxruntime-osx-x64-0.5.0.tgz
