@@ -61,6 +61,16 @@ session.run(nil, {x: [1, 2, 3]})
 
 ONNX Runtime provides [prebuilt libraries](https://github.com/microsoft/onnxruntime/releases).
 
+### All Platforms [experimental]
+
+There’s an experimental branch that includes ONNX runtime with the gem for easiest installation.
+
+```ruby
+gem 'onnxruntime', github: 'ankane/onnxruntime', branch: 'vendor'
+```
+
+Please file an issue if it doesn’t work for you.
+
 ### Mac
 
 ```sh
