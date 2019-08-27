@@ -92,16 +92,24 @@ module OnnxRuntime
         input_tensor_size = flat_input.size
 
         # TODO support more types
-        inp = @inputs.find { |i| i[:name] == input_name.to_s } || {}
+        inp = @inputs.find { |i| i[:name] == input_name.to_s }
+        raise "Unknown input: #{input_name}" unless inp
+
         case inp[:type]
         when "tensor(bool)"
           input_tensor_values = ::FFI::MemoryPointer.new(:uchar, input_tensor_size)
           input_tensor_values.write_array_of_uchar(flat_input.map { |v| v ? 1 : 0 })
           type_enum = FFI::TensorElementDataType[:bool]
-        else
+        when "tensor(float)"
           input_tensor_values = ::FFI::MemoryPointer.new(:float, input_tensor_size)
           input_tensor_values.write_array_of_float(flat_input)
           type_enum = FFI::TensorElementDataType[:float]
+        when "tensor(uint8)"
+          input_tensor_values = ::FFI::MemoryPointer.new(:uint8, input_tensor_size)
+          input_tensor_values.write_array_of_uint8(flat_input)
+          type_enum = FFI::TensorElementDataType[:uint8]
+        else
+          unsupported_type("input", inp[:type])
         end
 
         input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
