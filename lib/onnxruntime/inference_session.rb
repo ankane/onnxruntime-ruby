@@ -10,6 +10,12 @@ module OnnxRuntime
       # session
       @session = ::FFI::MemoryPointer.new(:pointer)
       path_or_bytes = path_or_bytes.to_str
+
+      # fix for Windows "File doesn't exist"
+      if Gem.win_platform? && path_or_bytes.encoding != Encoding::BINARY
+        path_or_bytes = File.binread(path_or_bytes)
+      end
+
       if path_or_bytes.encoding == Encoding::BINARY
         check_status FFI.OrtCreateSessionFromArray(env.read_pointer, path_or_bytes, path_or_bytes.bytesize, session_options.read_pointer, @session)
       else
