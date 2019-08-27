@@ -148,7 +148,7 @@ module OnnxRuntime
           when :bool
             tensor_data.read_pointer.read_array_of_uchar(output_tensor_size).map { |v| v == 1 }
           else
-            raise "Unsupported element type: #{type}"
+            unsupported_type("element", type)
           end
 
         Utils.reshape(arr, shape)
@@ -184,10 +184,10 @@ module OnnxRuntime
           end
           ret
         else
-          raise "Unsupported element type: #{elem_type}"
+          unsupported_type("element", elem_type)
         end
       else
-        raise "Unsupported ONNX type: #{type}"
+        unsupported_type("ONNX", type)
       end
     end
 
@@ -231,7 +231,7 @@ module OnnxRuntime
           shape: []
         }
       else
-        raise "Unsupported ONNX type: #{type}"
+        unsupported_type("ONNX", type)
       end
     ensure
       FFI.OrtReleaseTypeInfo(typeinfo.read_pointer)
@@ -249,6 +249,10 @@ module OnnxRuntime
       check_status FFI.OrtGetDimensions(tensor_info.read_pointer, node_dims, num_dims)
 
       [type.read_int, node_dims.read_array_of_int64(num_dims)]
+    end
+
+    def unsupported_type(name, type)
+      raise "Unsupported #{name} type: #{type}"
     end
 
     # share env
