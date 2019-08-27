@@ -56,19 +56,15 @@ module OnnxRuntime
     def run(output_names, input_feed)
       input_tensor = create_input_tensor(input_feed)
 
-      outputs = @outputs
-      if output_names
-        output_names = output_names.map(&:to_s)
-        outputs = outputs.select { |o| output_names.include?(o[:name]) }
-      end
+      output_names ||= @outputs.map { |v| v[:name] }
 
       output_tensor = ::FFI::MemoryPointer.new(:pointer, outputs.size)
       input_node_names = create_node_names(input_feed.keys.map(&:to_s))
-      output_node_names = create_node_names(outputs.map { |v| v[:name] })
+      output_node_names = create_node_names(output_names.map(&:to_s))
       # TODO support run options
-      check_status FFI.OrtRun(read_pointer, nil, input_node_names, input_tensor, input_feed.size, output_node_names, outputs.size, output_tensor)
+      check_status FFI.OrtRun(read_pointer, nil, input_node_names, input_tensor, input_feed.size, output_node_names, output_names.size, output_tensor)
 
-      outputs.size.times.map do |i|
+      output_names.size.times.map do |i|
         create_from_onnx_value(output_tensor[i].read_pointer)
       end
     end
