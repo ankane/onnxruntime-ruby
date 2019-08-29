@@ -1,5 +1,6 @@
 ## 0.1.1 [unreleased]
 
+- Added support for string input
 - Fixed output order with `output_names` option
 - Fixed `File doesn't exist` on Windows
 

@@ -91,26 +91,35 @@ module OnnxRuntime
         inp = @inputs.find { |i| i[:name] == input_name.to_s }
         raise "Unknown input: #{input_name}" unless inp
 
-        case inp[:type]
-        when "tensor(bool)"
-          input_tensor_values = ::FFI::MemoryPointer.new(:uchar, input_tensor_size)
-          input_tensor_values.write_array_of_uchar(flat_input.map { |v| v ? 1 : 0 })
-          type_enum = FFI::TensorElementDataType[:bool]
-        when "tensor(float)"
-          input_tensor_values = ::FFI::MemoryPointer.new(:float, input_tensor_size)
-          input_tensor_values.write_array_of_float(flat_input)
-          type_enum = FFI::TensorElementDataType[:float]
-        when "tensor(uint8)"
-          input_tensor_values = ::FFI::MemoryPointer.new(:uint8, input_tensor_size)
-          input_tensor_values.write_array_of_uint8(flat_input)
-          type_enum = FFI::TensorElementDataType[:uint8]
-        else
-          unsupported_type("input", inp[:type])
-        end
-
         input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
         input_node_dims.write_array_of_int64(shape)
-        check_status FFI.OrtCreateTensorWithDataAsOrtValue(allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, input_tensor[idx])
+
+        if inp[:type] == "tensor(string)"
+          input_tensor_values = ::FFI::MemoryPointer.new(:pointer, input_tensor_size)
+          input_tensor_values.write_array_of_pointer(flat_input.map { |v| ::FFI::MemoryPointer.from_string(v) })
+          type_enum = FFI::TensorElementDataType[:string]
+          check_status FFI.OrtCreateTensorAsOrtValue(@allocator.read_pointer, input_node_dims, shape.size, type_enum, input_tensor[idx])
+          check_status FFI.OrtFillStringTensor(input_tensor[idx].read_pointer, input_tensor_values, flat_input.size)
+        else
+          case inp[:type]
+          when "tensor(bool)"
+            input_tensor_values = ::FFI::MemoryPointer.new(:uchar, input_tensor_size)
+            input_tensor_values.write_array_of_uchar(flat_input.map { |v| v ? 1 : 0 })
+            type_enum = FFI::TensorElementDataType[:bool]
+          when "tensor(float)"
+            input_tensor_values = ::FFI::MemoryPointer.new(:float, input_tensor_size)
+            input_tensor_values.write_array_of_float(flat_input)
+            type_enum = FFI::TensorElementDataType[:float]
+          when "tensor(uint8)"
+            input_tensor_values = ::FFI::MemoryPointer.new(:uint8, input_tensor_size)
+            input_tensor_values.write_array_of_uint8(flat_input)
+            type_enum = FFI::TensorElementDataType[:uint8]
+          else
+            unsupported_type("input", inp[:type])
+          end
+
+          check_status FFI.OrtCreateTensorWithDataAsOrtValue(allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, input_tensor[idx])
+        end
       end
 
       input_tensor
