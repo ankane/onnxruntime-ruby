@@ -108,7 +108,7 @@ module OnnxRuntime
             input_tensor_values = ::FFI::MemoryPointer.new(tensor_type, input_tensor_size)
             if tensor_type == :bool
               tensor_type = :uchar
-              flat_map = flat_input.map { |v| v ? 1 : 0 }
+              flat_input = flat_input.map { |v| v ? 1 : 0 }
             end
             input_tensor_values.send("write_array_of_#{tensor_type}", flat_input)
             type_enum = FFI::TensorElementDataType[tensor_type]
