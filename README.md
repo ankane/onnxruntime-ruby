@@ -101,7 +101,7 @@ cp lib/libonnxruntime.0.5.0.dylib /usr/local/lib/libonnxruntime.dylib
 ```sh
 wget https://github.com/microsoft/onnxruntime/releases/download/v0.5.0/onnxruntime-linux-x64-0.5.0.tgz
 tar xf onnxruntime-linux-x64-0.5.0.tgz
-cd onnxruntime-linux-x64-0.5.0.tgz
+cd onnxruntime-linux-x64-0.5.0
 cp lib/libonnxruntime.0.5.0.so /usr/local/lib/libonnxruntime.so
 ```
 
