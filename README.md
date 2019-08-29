@@ -63,7 +63,7 @@ ONNX Runtime provides [prebuilt libraries](https://github.com/microsoft/onnxrunt
 
 ### All Platforms [experimental]
 
-There’s an experimental branch that includes ONNX runtime with the gem for easiest installation.
+There’s an experimental branch that includes ONNX Runtime with the gem for easiest installation.
 
 ```ruby
 gem 'onnxruntime', github: 'ankane/onnxruntime', branch: 'vendor'
