@@ -34,9 +34,11 @@ module OnnxRuntime
     attach_function :OrtSessionGetOutputName, %i[pointer size_t pointer pointer], :pointer
 
     # tensor
+    attach_function :OrtCreateTensorAsOrtValue, %i[pointer pointer size_t int pointer], :pointer
     attach_function :OrtCreateTensorWithDataAsOrtValue, %i[pointer pointer size_t pointer size_t int pointer], :pointer
     attach_function :OrtGetTensorMutableData, %i[pointer pointer], :pointer
     attach_function :OrtIsTensor, %i[pointer pointer], :pointer
+    attach_function :OrtFillStringTensor, %i[pointer pointer size_t], :pointer
     attach_function :OrtCastTypeInfoToTensorInfo, %i[pointer pointer], :pointer
     attach_function :OrtOnnxTypeFromTypeInfo, %i[pointer pointer], :pointer
     attach_function :OrtGetTensorElementType, %i[pointer pointer], :pointer

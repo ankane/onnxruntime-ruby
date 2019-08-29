@@ -63,7 +63,7 @@ ONNX Runtime provides [prebuilt libraries](https://github.com/microsoft/onnxrunt
 
 ### All Platforms [experimental]
 
-There’s an experimental branch that includes ONNX runtime with the gem for easiest installation.
+There’s an experimental branch that includes ONNX Runtime with the gem for easiest installation.
 
 ```ruby
 gem 'onnxruntime', github: 'ankane/onnxruntime', branch: 'vendor'
@@ -81,6 +81,14 @@ OnnxRuntime.ffi_lib << "/path/to/onnxruntime/lib/libonnxruntime.so"
 
 ### Mac
 
+With Homebrew, use:
+
+```sh
+brew install ankane/brew/onnxruntime
+```
+
+Alternatively, you can do:
+
 ```sh
 wget https://github.com/microsoft/onnxruntime/releases/download/v0.5.0/onnxruntime-osx-x64-0.5.0.tgz
 tar xf onnxruntime-osx-x64-0.5.0.tgz
@@ -93,7 +101,7 @@ cp lib/libonnxruntime.0.5.0.dylib /usr/local/lib/libonnxruntime.dylib
 ```sh
 wget https://github.com/microsoft/onnxruntime/releases/download/v0.5.0/onnxruntime-linux-x64-0.5.0.tgz
 tar xf onnxruntime-linux-x64-0.5.0.tgz
-cd onnxruntime-linux-x64-0.5.0.tgz
+cd onnxruntime-linux-x64-0.5.0
 cp lib/libonnxruntime.0.5.0.so /usr/local/lib/libonnxruntime.so
 ```
 
