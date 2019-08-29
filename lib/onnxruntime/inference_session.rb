@@ -101,19 +101,17 @@ module OnnxRuntime
           check_status FFI.OrtCreateTensorAsOrtValue(@allocator.read_pointer, input_node_dims, shape.size, type_enum, input_tensor[idx])
           check_status FFI.OrtFillStringTensor(input_tensor[idx].read_pointer, input_tensor_values, flat_input.size)
         else
-          case inp[:type]
-          when "tensor(bool)"
-            input_tensor_values = ::FFI::MemoryPointer.new(:uchar, input_tensor_size)
-            input_tensor_values.write_array_of_uchar(flat_input.map { |v| v ? 1 : 0 })
-            type_enum = FFI::TensorElementDataType[:bool]
-          when "tensor(float)"
-            input_tensor_values = ::FFI::MemoryPointer.new(:float, input_tensor_size)
-            input_tensor_values.write_array_of_float(flat_input)
-            type_enum = FFI::TensorElementDataType[:float]
-          when "tensor(uint8)"
-            input_tensor_values = ::FFI::MemoryPointer.new(:uint8, input_tensor_size)
-            input_tensor_values.write_array_of_uint8(flat_input)
-            type_enum = FFI::TensorElementDataType[:uint8]
+          tensor_types = Hash[[:float, :uint8, :int8, :uint16, :int16, :int32, :int64, :bool, :double, :uint32, :uint64].map { |v| ["tensor(#{v})", v] }]
+          tensor_type = tensor_types[inp[:type]]
+
+          if tensor_type
+            input_tensor_values = ::FFI::MemoryPointer.new(tensor_type, input_tensor_size)
+            if tensor_type == :bool
+              tensor_type = :uchar
+              flat_map = flat_input.map { |v| v ? 1 : 0 }
+            end
+            input_tensor_values.send("write_array_of_#{tensor_type}", flat_input)
+            type_enum = FFI::TensorElementDataType[tensor_type]
           else
             unsupported_type("input", inp[:type])
           end
@@ -154,10 +152,8 @@ module OnnxRuntime
         type = FFI::TensorElementDataType[type]
         arr =
           case type
-          when :float
-            tensor_data.read_pointer.read_array_of_float(output_tensor_size)
-          when :int64
-            tensor_data.read_pointer.read_array_of_int64(output_tensor_size)
+          when :float, :uint8, :int8, :uint16, :int16, :int32, :int64, :double, :uint32, :uint64
+            tensor_data.read_pointer.send("read_array_of_#{type}", output_tensor_size)
           when :bool
             tensor_data.read_pointer.read_array_of_uchar(output_tensor_size).map { |v| v == 1 }
           else
