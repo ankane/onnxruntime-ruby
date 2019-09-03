@@ -1,4 +1,4 @@
-## 0.1.1 [unreleased]
+## 0.1.1
 
 - Packaged ONNX Runtime with gem
 - Added support for many more types
