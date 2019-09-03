@@ -2,11 +2,9 @@
 
 :fire: [ONNX Runtime](https://github.com/Microsoft/onnxruntime) - the high performance scoring engine for ML models - for Ruby
 
-[![Build Status](https://travis-ci.org/ankane/onnxruntime.svg?branch=master)](https://travis-ci.org/ankane/onnxruntime)
+[![Build Status](https://travis-ci.org/ankane/onnxruntime.svg?branch=master)](https://travis-ci.org/ankane/onnxruntime) [![Build status](https://ci.appveyor.com/api/projects/status/f2bq6ruqjf4jx671/branch/master?svg=true)](https://ci.appveyor.com/project/ankane/onnxruntime/branch/master)
 
 ## Installation
-
-First, [install ONNX Runtime](#onnx-runtime-installation).
 
 Add this line to your application’s Gemfile:
 
@@ -56,58 +54,6 @@ You can also use the Inference Session API, which follows the [Python API](https
 session = OnnxRuntime::InferenceSession.new("model.onnx")
 session.run(nil, {x: [1, 2, 3]})
 ```
-
-## ONNX Runtime Installation
-
-ONNX Runtime provides [prebuilt libraries](https://github.com/microsoft/onnxruntime/releases).
-
-### All Platforms [experimental]
-
-There’s an experimental branch that includes ONNX Runtime with the gem for easiest installation.
-
-```ruby
-gem 'onnxruntime', github: 'ankane/onnxruntime', branch: 'vendor'
-```
-
-Please file an issue if it doesn’t work for you.
-
-You can also specify the path to ONNX Runtime in an initializer:
-
-```ruby
-OnnxRuntime.ffi_lib << "/path/to/onnxruntime/lib/libonnxruntime.so"
-```
-
-> Use `libonnxruntime.dylib` for Mac and `onnxruntime.dll` for Windows
-
-### Mac
-
-With Homebrew, use:
-
-```sh
-brew install ankane/brew/onnxruntime
-```
-
-Alternatively, you can do:
-
-```sh
-wget https://github.com/microsoft/onnxruntime/releases/download/v0.5.0/onnxruntime-osx-x64-0.5.0.tgz
-tar xf onnxruntime-osx-x64-0.5.0.tgz
-cd onnxruntime-osx-x64-0.5.0
-cp lib/libonnxruntime.0.5.0.dylib /usr/local/lib/libonnxruntime.dylib
-```
-
-### Linux
-
-```sh
-wget https://github.com/microsoft/onnxruntime/releases/download/v0.5.0/onnxruntime-linux-x64-0.5.0.tgz
-tar xf onnxruntime-linux-x64-0.5.0.tgz
-cd onnxruntime-linux-x64-0.5.0
-cp lib/libonnxruntime.0.5.0.so /usr/local/lib/libonnxruntime.so
-```
-
-### Windows
-
-Download [ONNX Runtime](https://github.com/microsoft/onnxruntime/releases/download/v0.5.0/onnxruntime-win-x64-0.5.0.zip). Unzip and move `lib/onnxruntime.dll` to `C:\Windows\System32\onnxruntime.dll`.
 
 ## History
 

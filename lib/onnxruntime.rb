@@ -13,7 +13,9 @@ module OnnxRuntime
   class << self
     attr_accessor :ffi_lib
   end
-  self.ffi_lib = ["onnxruntime"]
+  lib_name = ::FFI.map_library_name("onnxruntime")
+  vendor_lib = File.expand_path("../vendor/#{lib_name}", __dir__)
+  self.ffi_lib = ["onnxruntime", vendor_lib]
 
   def self.lib_version
     FFI.OrtGetVersionString
