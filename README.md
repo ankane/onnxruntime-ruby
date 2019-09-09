@@ -14,45 +14,38 @@ gem 'onnxruntime'
 
 ## Getting Started
 
-Load a model and make predictions
+This project follows the [Python API](https://microsoft.github.io/onnxruntime/api_summary.html).
+
+Load a model and run it
 
 ```ruby
-model = OnnxRuntime::Model.new("model.onnx")
-model.predict(x: [1, 2, 3])
+session = OnnxRuntime::InferenceSession.new("model.onnx")
+session.run(nil, x: [1, 2, 3])
 ```
 
 Get inputs
 
 ```ruby
-model.inputs
+session.inputs
 ```
 
 Get outputs
 
 ```ruby
-model.outputs
+session.outputs
 ```
 
 Load a model from a string
 
 ```ruby
 byte_str = File.binread("model.onnx")
-model = OnnxRuntime::Model.new(byte_str)
+session = OnnxRuntime::InferenceSession.new(byte_str)
 ```
 
 Get specific outputs
 
 ```ruby
-model.predict({x: [1, 2, 3]}, output_names: ["label"])
-```
-
-## Inference Session API
-
-You can also use the Inference Session API, which follows the [Python API](https://microsoft.github.io/onnxruntime/api_summary.html).
-
-```ruby
-session = OnnxRuntime::InferenceSession.new("model.onnx")
-session.run(nil, {x: [1, 2, 3]})
+session.run(["label"], x: [1, 2, 3])
 ```
 
 ## History
