@@ -21,6 +21,8 @@ model = OnnxRuntime::Model.new("model.onnx")
 model.predict(x: [1, 2, 3])
 ```
 
+> Download pre-trained models from the [ONNX Model Zoo](https://github.com/onnx/models)
+
 Get inputs
 
 ```ruby
