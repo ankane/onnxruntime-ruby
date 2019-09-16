@@ -77,6 +77,8 @@ module OnnxRuntime
       input_tensor = ::FFI::MemoryPointer.new(:pointer, input_feed.size)
 
       input_feed.each_with_index do |(input_name, input), idx|
+        input = input.to_a unless input.is_a?(Array)
+
         shape = []
         s = input
         while s.is_a?(Array)

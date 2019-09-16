@@ -1,3 +1,7 @@
+## 0.1.2 [unreleased]
+
+- Added support for Numo::NArray
+
 ## 0.1.1
 
 - Packaged ONNX Runtime with gem
