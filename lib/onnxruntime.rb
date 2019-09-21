@@ -11,12 +11,11 @@ module OnnxRuntime
   class Error < StandardError; end
 
   class << self
-    attr_accessor :ffi_lib, :mutex
+    attr_accessor :ffi_lib
   end
   lib_name = ::FFI.map_library_name("onnxruntime")
   vendor_lib = File.expand_path("../vendor/#{lib_name}", __dir__)
   self.ffi_lib = ["onnxruntime", vendor_lib]
-  self.mutex = Mutex.new # private
 
   def self.lib_version
     FFI.OrtGetVersionString

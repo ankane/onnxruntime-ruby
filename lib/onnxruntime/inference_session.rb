@@ -268,7 +268,7 @@ module OnnxRuntime
 
     def env
       # use mutex for thread-safety
-      OnnxRuntime.mutex.synchronize do
+      Utils.mutex.synchronize do
         @@env ||= begin
           env = ::FFI::MemoryPointer.new(:pointer)
           check_status FFI.OrtCreateEnv(3, "Default", env)
