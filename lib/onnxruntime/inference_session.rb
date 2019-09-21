@@ -266,14 +266,15 @@ module OnnxRuntime
       raise "Unsupported #{name} type: #{type}"
     end
 
-    # share env
-    # TODO mutex around creation?
     def env
-      @@env ||= begin
-        env = ::FFI::MemoryPointer.new(:pointer)
-        check_status FFI.OrtCreateEnv(3, "Default", env)
-        at_exit { FFI.OrtReleaseEnv(env.read_pointer) }
-        env
+      # use mutex for thread-safety
+      OnnxRuntime.mutex.synchronize do
+        @@env ||= begin
+          env = ::FFI::MemoryPointer.new(:pointer)
+          check_status FFI.OrtCreateEnv(3, "Default", env)
+          at_exit { FFI.OrtReleaseEnv(env.read_pointer) }
+          env
+        end
       end
     end
   end

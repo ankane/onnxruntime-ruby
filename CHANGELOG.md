@@ -1,6 +1,7 @@
 ## 0.1.2 [unreleased]
 
 - Added support for Numo::NArray
+- Made thread-safe
 
 ## 0.1.1
 
