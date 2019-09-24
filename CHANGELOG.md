@@ -2,6 +2,7 @@
 
 - Added support for Numo::NArray
 - Made thread-safe
+- Fixed error with JRuby
 
 ## 0.1.1
 

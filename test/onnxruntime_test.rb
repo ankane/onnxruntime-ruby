@@ -34,6 +34,8 @@ class OnnxRuntimeTest < Minitest::Test
   end
 
   def test_numo_narray
+    skip if RUBY_PLATFORM == "java"
+
     model = OnnxRuntime::Model.new("test/support/model.onnx")
 
     x = [[[0.5488135,  0.71518934, 0.60276335, 0.5448832,  0.4236548 ],
