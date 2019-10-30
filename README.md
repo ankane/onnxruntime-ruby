@@ -52,7 +52,7 @@ model.predict({x: [1, 2, 3]}, output_names: ["label"])
 
 ## Inference Session API
 
-You can also use the Inference Session API, which follows the [Python API](https://microsoft.github.io/onnxruntime/api_summary.html).
+You can also use the Inference Session API, which follows the [Python API](https://microsoft.github.io/onnxruntime/python/api_summary.html).
 
 ```ruby
 session = OnnxRuntime::InferenceSession.new("model.onnx")

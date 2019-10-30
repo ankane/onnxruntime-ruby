@@ -15,10 +15,10 @@ module OnnxRuntime
   end
   lib_name = ::FFI.map_library_name("onnxruntime")
   vendor_lib = File.expand_path("../vendor/#{lib_name}", __dir__)
-  self.ffi_lib = ["onnxruntime", vendor_lib]
+  self.ffi_lib = [vendor_lib]
 
   def self.lib_version
-    FFI.OrtGetVersionString
+    FFI.OrtGetApiBase[:GetVersionString].call
   end
 
   # friendlier error message

@@ -2,7 +2,7 @@ require_relative "test_helper"
 
 class OnnxRuntimeTest < Minitest::Test
   def test_lib_version
-    assert_equal "0.5.0", OnnxRuntime.lib_version
+    assert_equal "1.0.0", OnnxRuntime.lib_version
   end
 
   def test_basic
@@ -75,17 +75,26 @@ class OnnxRuntimeTest < Minitest::Test
     expected = [{:name=>"label", :type=>"tensor(int64)", :shape=>[1]}, {:name=>"probabilities", :type=>"seq", :shape=>[]}]
     assert_equal expected, model.outputs
 
-    x = [[5.8, 2.8],
+    x = [[5.8, 2.8]]
+
+    output = model.predict({input: x}) #, output_names: ["label"])
+    assert_equal [1], output["label"]
+    probabilities = output["probabilities"].first
+    assert_equal [0, 1, 2], probabilities.keys
+    assert_elements_in_delta [0.2593829035758972, 0.409047931432724, 0.3315691649913788], probabilities.values
+
+    x2 = [[5.8, 2.8],
          [6.0, 2.2],
          [5.5, 4.2],
          [7.3, 2.9],
          [5.0, 3.4]]
 
-    output = model.predict({input: x}) #, output_names: ["label"])
-    assert_equal [1, 1, 0, 2, 0], output["label"]
-    probabilities = output["probabilities"].first
-    assert_equal [0, 1, 2], probabilities.keys
-    assert_elements_in_delta [0.2593829035758972, 0.409047931432724, 0.3315691649913788], probabilities.values
+    labels = []
+    x2.each do |xi|
+      output = model.predict({input: [xi]})
+      labels << output["label"].first
+    end
+    assert_equal [1, 1, 0, 2, 0], labels
   end
 
   def test_random_forest

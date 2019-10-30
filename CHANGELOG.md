@@ -1,3 +1,8 @@
+## 0.2.0 [unreleased]
+
+- Added support for ONNX Runtime 1.0
+- Dropped support for ONNX Runtime < 1.0
+
 ## 0.1.2
 
 - Added support for Numo::NArray
