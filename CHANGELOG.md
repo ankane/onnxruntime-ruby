@@ -1,4 +1,4 @@
-## 0.2.0 [unreleased]
+## 0.2.0
 
 - Added support for ONNX Runtime 1.0
 - Dropped support for ONNX Runtime < 1.0
