@@ -12,6 +12,7 @@ before_test:
   - ruby -v
   - gem -v
   - bundle -v
+  - bundle exec rake vendor:windows
 
 test_script:
   - bundle exec rake

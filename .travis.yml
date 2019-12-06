@@ -1,6 +1,7 @@
-dist: xenial
+dist: bionic
 language: ruby
-rvm: 2.6.3
+rvm: 2.6
+before_script: bundle exec rake vendor:linux
 script: bundle exec rake test
 notifications:
   email:

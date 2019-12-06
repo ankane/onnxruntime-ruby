@@ -78,5 +78,6 @@ To get started with development and testing:
 git clone https://github.com/ankane/onnxruntime.git
 cd onnxruntime
 bundle install
+bundle exec rake vendor:all
 bundle exec rake test
 ```
