@@ -44,15 +44,15 @@ end
 # https://github.com/microsoft/onnxruntime/releases
 namespace :vendor do
   task :linux do
-    download_file("libonnxruntime.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-x64-1.0.0.tgz")
+    download_file("libonnxruntime.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-x64-#{version}.tgz")
   end
 
   task :mac do
-    download_file("libonnxruntime.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-x64-1.0.0.tgz")
+    download_file("libonnxruntime.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-x64-#{version}.tgz")
   end
 
   task :windows do
-    download_file("onnxruntime.dll", "onnxruntime.dll", "onnxruntime-win-x64-1.0.0.zip")
+    download_file("onnxruntime.dll", "onnxruntime.dll", "onnxruntime-win-x64-#{version}.zip")
   end
 
   task all: [:linux, :mac, :windows]
