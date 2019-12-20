@@ -2,7 +2,7 @@ require_relative "test_helper"
 
 class OnnxRuntimeTest < Minitest::Test
   def test_lib_version
-    assert_equal "1.0.0", OnnxRuntime.lib_version
+    assert_equal "1.1.0", OnnxRuntime.lib_version
   end
 
   def test_basic
