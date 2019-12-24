@@ -144,4 +144,12 @@ class OnnxRuntimeTest < Minitest::Test
     end
     assert_match "Missing Input: x", error.message
   end
+
+  def test_extra_input
+    model = OnnxRuntime::Model.new("test/support/model.onnx")
+    error = assert_raises RuntimeError do
+      model.predict(x: [], y: [])
+    end
+    assert_match "Unknown input: y", error.message
+  end
 end
