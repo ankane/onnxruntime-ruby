@@ -127,4 +127,11 @@ class OnnxRuntimeTest < Minitest::Test
       model.predict(x: [])
     end
   end
+
+  def test_missing_input
+    model = OnnxRuntime::Model.new("test/support/model.onnx")
+    assert_raises OnnxRuntime::Error do
+      model.predict({})
+    end
+  end
 end
