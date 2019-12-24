@@ -122,8 +122,7 @@ class OnnxRuntimeTest < Minitest::Test
   end
 
   def test_session_options
-    optimized_file = Tempfile.new
-    optimized_file.close
+    optimized_path = "#{Dir.tmpdir}/optimized.onnx"
 
     session_options = {
       inter_op_num_threads: 1,
@@ -131,15 +130,14 @@ class OnnxRuntimeTest < Minitest::Test
       log_severity_level: 4,
       log_verbosity_level: 4,
       logid: "test",
-      optimized_model_filepath: optimized_file.path
+      optimized_model_filepath: optimized_path
     }
 
     sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx", **session_options)
     x = [[5.8, 2.8]]
     sess.run(nil, input: x)
 
-    # fails on Windows
-    # assert_match "onnx", File.binread(optimized_file.path)
+    assert_match "onnx", File.binread(optimized_path)
   end
 
   def test_run_options
