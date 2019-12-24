@@ -29,7 +29,7 @@ module OnnxRuntime
         :CreateSessionFromArray, callback(%i[pointer pointer size_t pointer pointer], :pointer),
         :Run, callback(%i[pointer pointer pointer pointer size_t pointer size_t pointer], :pointer),
         :CreateSessionOptions, callback(%i[pointer], :pointer),
-        :SetOptimizedModelFilePath, callback(%i[], :pointer),
+        :SetOptimizedModelFilePath, callback(%i[pointer string], :pointer),
         :CloneSessionOptions, callback(%i[], :pointer),
         :SetSessionExecutionMode, callback(%i[], :pointer),
         :EnableProfiling, callback(%i[], :pointer),

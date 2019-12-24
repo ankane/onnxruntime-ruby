@@ -122,16 +122,21 @@ class OnnxRuntimeTest < Minitest::Test
   end
 
   def test_session_options
+    optimized_file = Tempfile.new
     session_options = {
       inter_op_num_threads: 1,
       intra_op_num_threads: 1,
       log_severity_level: 4,
       log_verbosity_level: 4,
-      logid: "test"
+      logid: "test",
+      optimized_model_filepath: optimized_file.path
     }
+
     sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx", **session_options)
     x = [[5.8, 2.8]]
     sess.run(nil, input: x)
+
+    assert_match "onnx", File.binread(optimized_file.path)
   end
 
   def test_run_options
