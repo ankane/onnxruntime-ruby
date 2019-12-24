@@ -123,15 +123,17 @@ class OnnxRuntimeTest < Minitest::Test
 
   def test_invalid_dimensions
     model = OnnxRuntime::Model.new("test/support/model.onnx")
-    assert_raises OnnxRuntime::Error do
+    error = assert_raises OnnxRuntime::Error do
       model.predict(x: [])
     end
+    assert_match "Invalid rank for input: x", error.message
   end
 
   def test_missing_input
     model = OnnxRuntime::Model.new("test/support/model.onnx")
-    assert_raises OnnxRuntime::Error do
+    error = assert_raises OnnxRuntime::Error do
       model.predict({})
     end
+    assert_match "Missing Input: x", error.message
   end
 end
