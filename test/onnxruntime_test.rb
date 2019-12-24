@@ -122,7 +122,14 @@ class OnnxRuntimeTest < Minitest::Test
   end
 
   def test_session_options
-    sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx", inter_op_num_threads: 1, intra_op_num_threads: 1)
+    session_options = {
+      inter_op_num_threads: 1,
+      intra_op_num_threads: 1,
+      log_severity_level: 4,
+      log_verbosity_level: 4,
+      logid: "test"
+    }
+    sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx", **session_options)
     x = [[5.8, 2.8]]
     sess.run(nil, input: x)
   end
@@ -130,7 +137,7 @@ class OnnxRuntimeTest < Minitest::Test
   def test_run_options
     sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx")
     x = [[5.8, 2.8]]
-    sess.run(nil, {input: x}, log_severity_level: 0, log_verbosity_level: 0)
+    sess.run(nil, {input: x}, log_severity_level: 4, log_verbosity_level: 4)
   end
 
   def test_invalid_rank
