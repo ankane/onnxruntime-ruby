@@ -50,6 +50,24 @@ Get specific outputs
 model.predict({x: [1, 2, 3]}, output_names: ["label"])
 ```
 
+## Session Options [master]
+
+```ruby
+OnnxRuntime::Model.new(path_or_bytes, {
+  enable_cpu_mem_arena: true,
+  enable_mem_pattern: true,
+  enable_profiling: false,
+  execution_mode: :sequential,
+  graph_optimization_level: nil,
+  inter_op_num_threads: nil,
+  intra_op_num_threads: nil,
+  log_severity_level: 2,
+  log_verbosity_level: 0,
+  logid: nil,
+  optimized_model_filepath: nil
+})
+```
+
 ## Inference Session API
 
 You can also use the Inference Session API, which follows the [Python API](https://microsoft.github.io/onnxruntime/python/api_summary.html).
