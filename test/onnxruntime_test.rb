@@ -187,6 +187,15 @@ class OnnxRuntimeTest < Minitest::Test
     assert_example "logreg_iris.onnx", ["float_input"]
     assert_example "mul_1.onnx", ["X"]
     assert_example "sigmoid.onnx", ["x"]
+
+    assert_raises ArgumentError do
+      OnnxRuntime::Datasets.example("bad.onnx")
+    end
+
+    # no path traversal
+    assert_raises ArgumentError do
+      OnnxRuntime::Datasets.example("../datasets/sigmoid.onnx")
+    end
   end
 
   private
