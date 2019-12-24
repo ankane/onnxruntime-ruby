@@ -94,6 +94,14 @@ The Python example models are included as well. [master]
 OnnxRuntime::Datasets.example("sigmoid.onnx")
 ```
 
+## GPU Support
+
+To enable GPU support on Linux and Windows, download the appropriate [GPU release](https://github.com/microsoft/onnxruntime/releases) and set:
+
+```ruby
+OnnxRuntime.ffi_lib = ["path/to/lib/libonnxruntime.so"] # onnxruntime.dll for Windows
+```
+
 ## History
 
 View the [changelog](https://github.com/ankane/onnxruntime/blob/master/CHANGELOG.md)
