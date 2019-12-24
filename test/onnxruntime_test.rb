@@ -121,6 +121,12 @@ class OnnxRuntimeTest < Minitest::Test
     assert_equal ["label"], output.keys
   end
 
+  def test_session_options
+    sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx", inter_op_num_threads: 1, intra_op_num_threads: 1)
+    x = [[5.8, 2.8]]
+    sess.run(nil, input: x)
+  end
+
   def test_invalid_rank
     model = OnnxRuntime::Model.new("test/support/model.onnx")
     error = assert_raises OnnxRuntime::Error do

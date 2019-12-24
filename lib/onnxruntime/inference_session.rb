@@ -2,10 +2,12 @@ module OnnxRuntime
   class InferenceSession
     attr_reader :inputs, :outputs
 
-    def initialize(path_or_bytes)
+    def initialize(path_or_bytes, inter_op_num_threads: nil, intra_op_num_threads: nil)
       # session options
       session_options = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:CreateSessionOptions].call(session_options)
+      check_status api[:SetInterOpNumThreads].call(session_options.read_pointer, inter_op_num_threads) if inter_op_num_threads
+      check_status api[:SetIntraOpNumThreads].call(session_options.read_pointer, intra_op_num_threads) if intra_op_num_threads
 
       # session
       @session = ::FFI::MemoryPointer.new(:pointer)

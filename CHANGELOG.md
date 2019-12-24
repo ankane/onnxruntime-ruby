@@ -1,3 +1,7 @@
+## 0.2.2 (unreleased)
+
+- Added support for session options
+
 ## 0.2.1 (2019-12-19)
 
 - Updated ONNX Runtime to 1.1.0

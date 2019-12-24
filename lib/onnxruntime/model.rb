@@ -1,7 +1,7 @@
 module OnnxRuntime
   class Model
-    def initialize(path_or_bytes)
-      @session = InferenceSession.new(path_or_bytes)
+    def initialize(path_or_bytes, **session_options)
+      @session = InferenceSession.new(path_or_bytes, **session_options)
     end
 
     def predict(input_feed, output_names: nil)
