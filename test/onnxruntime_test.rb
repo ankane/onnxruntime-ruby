@@ -124,7 +124,7 @@ class OnnxRuntimeTest < Minitest::Test
   def test_invalid_dimensions
     model = OnnxRuntime::Model.new("test/support/model.onnx")
     assert_raises OnnxRuntime::Error do
-      model.predict(x: [1])
+      model.predict(x: [])
     end
   end
 end
