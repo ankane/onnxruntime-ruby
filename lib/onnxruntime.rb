@@ -2,6 +2,7 @@
 require "ffi"
 
 # modules
+require "onnxruntime/datasets"
 require "onnxruntime/inference_session"
 require "onnxruntime/model"
 require "onnxruntime/utils"

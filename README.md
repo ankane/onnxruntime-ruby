@@ -88,6 +88,12 @@ session = OnnxRuntime::InferenceSession.new("model.onnx")
 session.run(nil, {x: [1, 2, 3]})
 ```
 
+The Python example models are included as well. [master]
+
+```ruby
+OnnxRuntime::Datasets.example("sigmoid.onnx")
+```
+
 ## History
 
 View the [changelog](https://github.com/ankane/onnxruntime/blob/master/CHANGELOG.md)

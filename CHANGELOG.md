@@ -2,6 +2,7 @@
 
 - Added support for session options
 - Added support for run options
+- Added `Datasets` module
 
 ## 0.2.1 (2019-12-19)
 
