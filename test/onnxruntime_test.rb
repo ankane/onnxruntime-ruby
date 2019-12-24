@@ -183,9 +183,17 @@ class OnnxRuntimeTest < Minitest::Test
     assert_match "Unknown input: y", error.message
   end
 
-  def test_example
-    example = OnnxRuntime::Datasets.example("sigmoid.onnx")
+  def test_examples
+    assert_example "logreg_iris.onnx", ["float_input"]
+    assert_example "mul_1.onnx", ["X"]
+    assert_example "sigmoid.onnx", ["x"]
+  end
+
+  private
+
+  def assert_example(name, input_names)
+    example = OnnxRuntime::Datasets.example(name)
     model = OnnxRuntime::Model.new(example)
-    assert_equal ["x"], model.inputs.map { |i| i[:name] }
+    assert_equal input_names, model.inputs.map { |i| i[:name] }
   end
 end
