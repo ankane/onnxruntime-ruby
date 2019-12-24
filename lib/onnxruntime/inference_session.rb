@@ -90,7 +90,7 @@ module OnnxRuntime
       check_status api[:CreateRunOptions].call(run_options)
       check_status api[:RunOptionsSetRunLogSeverityLevel].call(run_options.read_pointer, log_severity_level) if log_severity_level
       check_status api[:RunOptionsSetRunLogVerbosityLevel].call(run_options.read_pointer, log_verbosity_level) if log_verbosity_level
-      raise ArgumentError, "logid not supported yet" if logid
+      check_status api[:RunOptionsSetRunTag].call(run_options.read_pointer, logid) if logid
       check_status api[:RunOptionsSetTerminate].call(run_options.read_pointer) if terminate
 
       check_status api[:Run].call(read_pointer, run_options.read_pointer, input_node_names, input_tensor, input_feed.size, output_node_names, output_names.size, output_tensor)

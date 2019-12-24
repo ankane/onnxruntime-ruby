@@ -140,9 +140,15 @@ class OnnxRuntimeTest < Minitest::Test
   end
 
   def test_run_options
+    run_options = {
+      log_severity_level: 4,
+      log_verbosity_level: 4,
+      logid: "test"
+    }
+
     sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx")
     x = [[5.8, 2.8]]
-    sess.run(nil, {input: x}, log_severity_level: 4, log_verbosity_level: 4)
+    sess.run(nil, {input: x}, **run_options)
   end
 
   def test_invalid_rank

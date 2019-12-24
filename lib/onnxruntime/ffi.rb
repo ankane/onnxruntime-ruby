@@ -60,7 +60,7 @@ module OnnxRuntime
         :CreateRunOptions, callback(%i[pointer], :pointer),
         :RunOptionsSetRunLogVerbosityLevel, callback(%i[pointer int], :pointer),
         :RunOptionsSetRunLogSeverityLevel, callback(%i[pointer int], :pointer),
-        :RunOptionsSetRunTag, callback(%i[], :pointer),
+        :RunOptionsSetRunTag, callback(%i[pointer string], :pointer),
         :RunOptionsGetRunLogVerbosityLevel, callback(%i[], :pointer),
         :RunOptionsGetRunLogSeverityLevel, callback(%i[], :pointer),
         :RunOptionsGetRunTag, callback(%i[], :pointer),
