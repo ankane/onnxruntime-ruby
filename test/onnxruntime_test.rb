@@ -84,10 +84,10 @@ class OnnxRuntimeTest < Minitest::Test
     assert_elements_in_delta [0.2593829035758972, 0.409047931432724, 0.3315691649913788], probabilities.values
 
     x2 = [[5.8, 2.8],
-         [6.0, 2.2],
-         [5.5, 4.2],
-         [7.3, 2.9],
-         [5.0, 3.4]]
+          [6.0, 2.2],
+          [5.5, 4.2],
+          [7.3, 2.9],
+          [5.0, 3.4]]
 
     labels = []
     x2.each do |xi|
