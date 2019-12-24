@@ -8,10 +8,10 @@ class OnnxRuntimeTest < Minitest::Test
   def test_basic
     model = OnnxRuntime::Model.new("test/support/model.onnx")
 
-    expected = [{:name=>"x", :type=>"tensor(float)", :shape=>[3, 4, 5]}]
+    expected = [{name: "x", type: "tensor(float)", shape: [3, 4, 5]}]
     assert_equal expected, model.inputs
 
-    expected = [{:name=>"y", :type=>"tensor(float)", :shape=>[3, 4, 5]}]
+    expected = [{name: "y", type: "tensor(float)", shape: [3, 4, 5]}]
     assert_equal expected, model.outputs
 
     x = [[[0.5488135,  0.71518934, 0.60276335, 0.5448832,  0.4236548 ],
@@ -62,17 +62,17 @@ class OnnxRuntimeTest < Minitest::Test
   def test_string
     contents = File.binread("test/support/model.onnx")
     model = OnnxRuntime::Model.new(contents)
-    expected = [{:name=>"x", :type=>"tensor(float)", :shape=>[3, 4, 5]}]
+    expected = [{name: "x", type: "tensor(float)", shape: [3, 4, 5]}]
     assert_equal expected, model.inputs
   end
 
   def test_lightgbm
     model = OnnxRuntime::Model.new("test/support/lightgbm.onnx")
 
-    expected = [{:name=>"input", :type=>"tensor(float)", :shape=>[1, 2]}]
+    expected = [{name: "input", type: "tensor(float)", shape: [1, 2]}]
     assert_equal expected, model.inputs
 
-    expected = [{:name=>"label", :type=>"tensor(int64)", :shape=>[1]}, {:name=>"probabilities", :type=>"seq", :shape=>[]}]
+    expected = [{name: "label", type: "tensor(int64)", shape: [1]}, {name: "probabilities", type: "seq", shape: []}]
     assert_equal expected, model.outputs
 
     x = [[5.8, 2.8]]
@@ -100,10 +100,10 @@ class OnnxRuntimeTest < Minitest::Test
   def test_random_forest
     model = OnnxRuntime::Model.new("test/support/randomforest.onnx")
 
-    expected = [{:name=>"float_input", :type=>"tensor(float)", :shape=>[1, 4]}]
+    expected = [{name: "float_input", type: "tensor(float)", shape: [1, 4]}]
     assert_equal expected, model.inputs
 
-    expected = [{:name=>"output_label", :type=>"tensor(int64)", :shape=>[1]}, {:name=>"output_probability", :type=>"seq", :shape=>[]}]
+    expected = [{name: "output_label", type: "tensor(int64)", shape: [1]}, {name: "output_probability", type: "seq", shape: []}]
     assert_equal expected, model.outputs
 
     x = [[5.8, 2.8, 5.1, 2.4]]
