@@ -151,6 +151,11 @@ class OnnxRuntimeTest < Minitest::Test
     sess.run(nil, {input: x}, **run_options)
   end
 
+  def test_profiling
+    sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx", enable_profiling: true)
+    assert_match ".json", sess.end_profiling
+  end
+
   def test_invalid_rank
     model = OnnxRuntime::Model.new("test/support/model.onnx")
     error = assert_raises OnnxRuntime::Error do

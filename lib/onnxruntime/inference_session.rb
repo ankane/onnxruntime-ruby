@@ -28,6 +28,7 @@ module OnnxRuntime
       check_status api[:SetSessionLogVerbosityLevel].call(session_options.read_pointer, log_verbosity_level) if log_verbosity_level
       check_status api[:SetSessionLogId].call(session_options.read_pointer, logid) if logid
       check_status api[:SetOptimizedModelFilePath].call(session_options.read_pointer, optimized_model_filepath) if optimized_model_filepath
+      @session_options = session_options
 
       # session
       @session = ::FFI::MemoryPointer.new(:pointer)
@@ -98,6 +99,10 @@ module OnnxRuntime
       output_names.size.times.map do |i|
         create_from_onnx_value(output_tensor[i].read_pointer)
       end
+    end
+
+    def end_profiling
+      check_status api[:DisableProfiling].call(@session_options.read_pointer)
     end
 
     private
