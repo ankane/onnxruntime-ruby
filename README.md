@@ -68,6 +68,17 @@ OnnxRuntime::Model.new(path_or_bytes, {
 })
 ```
 
+## Run Options [master]
+
+```ruby
+model.predict(input_feed, {
+  log_severity_level: 2,
+  log_verbosity_level: 0,
+  logid: nil,
+  terminate: false
+})
+```
+
 ## Inference Session API
 
 You can also use the Inference Session API, which follows the [Python API](https://microsoft.github.io/onnxruntime/python/api_summary.html).
