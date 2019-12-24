@@ -55,7 +55,8 @@ module OnnxRuntime
       end
     end
 
-    def run(output_names, input_feed)
+    # TODO support logid
+    def run(output_names, input_feed, log_severity_level: nil, log_verbosity_level: nil, terminate: nil)
       input_tensor = create_input_tensor(input_feed)
 
       output_names ||= @outputs.map { |v| v[:name] }
@@ -63,8 +64,15 @@ module OnnxRuntime
       output_tensor = ::FFI::MemoryPointer.new(:pointer, outputs.size)
       input_node_names = create_node_names(input_feed.keys.map(&:to_s))
       output_node_names = create_node_names(output_names.map(&:to_s))
-      # TODO support run options
-      check_status api[:Run].call(read_pointer, nil, input_node_names, input_tensor, input_feed.size, output_node_names, output_names.size, output_tensor)
+
+      # run options
+      run_options = ::FFI::MemoryPointer.new(:pointer)
+      check_status api[:CreateRunOptions].call(run_options)
+      check_status api[:RunOptionsSetRunLogSeverityLevel].call(run_options.read_pointer, log_severity_level) if log_severity_level
+      check_status api[:RunOptionsSetRunLogVerbosityLevel].call(run_options.read_pointer, log_verbosity_level) if log_verbosity_level
+      check_status api[:RunOptionsSetTerminate].call(run_options.read_pointer) if terminate
+
+      check_status api[:Run].call(read_pointer, run_options.read_pointer, input_node_names, input_tensor, input_feed.size, output_node_names, output_names.size, output_tensor)
 
       output_names.size.times.map do |i|
         create_from_onnx_value(output_tensor[i].read_pointer)

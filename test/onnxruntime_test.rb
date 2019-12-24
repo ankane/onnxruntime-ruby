@@ -127,6 +127,12 @@ class OnnxRuntimeTest < Minitest::Test
     sess.run(nil, input: x)
   end
 
+  def test_run_options
+    sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx")
+    x = [[5.8, 2.8]]
+    sess.run(nil, {input: x}, log_severity_level: 0, log_verbosity_level: 0)
+  end
+
   def test_invalid_rank
     model = OnnxRuntime::Model.new("test/support/model.onnx")
     error = assert_raises OnnxRuntime::Error do

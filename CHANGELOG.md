@@ -1,6 +1,7 @@
 ## 0.2.2 (unreleased)
 
 - Added support for session options
+- Added support for run options
 
 ## 0.2.1 (2019-12-19)
 

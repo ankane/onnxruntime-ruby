@@ -4,8 +4,8 @@ module OnnxRuntime
       @session = InferenceSession.new(path_or_bytes, **session_options)
     end
 
-    def predict(input_feed, output_names: nil)
-      predictions = @session.run(output_names, input_feed)
+    def predict(input_feed, output_names: nil, **run_options)
+      predictions = @session.run(output_names, input_feed, **run_options)
       output_names ||= outputs.map { |o| o[:name] }
 
       result = {}
