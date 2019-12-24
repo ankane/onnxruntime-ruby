@@ -50,7 +50,7 @@ Get specific outputs
 model.predict({x: [1, 2, 3]}, output_names: ["label"])
 ```
 
-## Session Options [master]
+## Session Options
 
 ```ruby
 OnnxRuntime::Model.new(path_or_bytes, {
@@ -68,7 +68,7 @@ OnnxRuntime::Model.new(path_or_bytes, {
 })
 ```
 
-## Run Options [master]
+## Run Options
 
 ```ruby
 model.predict(input_feed, {
@@ -88,7 +88,7 @@ session = OnnxRuntime::InferenceSession.new("model.onnx")
 session.run(nil, {x: [1, 2, 3]})
 ```
 
-The Python example models are included as well. [master]
+The Python example models are included as well.
 
 ```ruby
 OnnxRuntime::Datasets.example("sigmoid.onnx")
@@ -99,7 +99,7 @@ OnnxRuntime::Datasets.example("sigmoid.onnx")
 To enable GPU support on Linux and Windows, download the appropriate [GPU release](https://github.com/microsoft/onnxruntime/releases) and set:
 
 ```ruby
-OnnxRuntime.ffi_lib = ["path/to/lib/libonnxruntime.so"] # onnxruntime.dll for Windows
+OnnxRuntime.ffi_lib = "path/to/lib/libonnxruntime.so" # onnxruntime.dll for Windows
 ```
 
 ## History

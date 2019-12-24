@@ -3,7 +3,7 @@ module OnnxRuntime
     extend ::FFI::Library
 
     begin
-      ffi_lib OnnxRuntime.ffi_lib
+      ffi_lib Array(OnnxRuntime.ffi_lib)
     rescue LoadError => e
       raise e if ENV["ONNXRUNTIME_DEBUG"]
       raise LoadError, "Could not find ONNX Runtime"
