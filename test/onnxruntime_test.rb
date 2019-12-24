@@ -123,6 +123,8 @@ class OnnxRuntimeTest < Minitest::Test
 
   def test_session_options
     optimized_file = Tempfile.new
+    optimized_file.close
+
     session_options = {
       inter_op_num_threads: 1,
       intra_op_num_threads: 1,
