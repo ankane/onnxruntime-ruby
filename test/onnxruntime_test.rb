@@ -185,6 +185,15 @@ class OnnxRuntimeTest < Minitest::Test
     assert_match "Unknown input: y", error.message
   end
 
+  def test_invalid_output_name
+    model = OnnxRuntime::Model.new("test/support/lightgbm.onnx")
+    x = [[5.8, 2.8]]
+    error = assert_raises OnnxRuntime::Error do
+      model.predict({input: x}, output_names: ["bad"])
+    end
+    assert_match "Invalid Output Name:bad", error.message
+  end
+
   def test_examples
     assert_example "logreg_iris.onnx", ["float_input"]
     assert_example "mul_1.onnx", ["X"]
