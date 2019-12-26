@@ -29,7 +29,7 @@ class OnnxRuntimeTest < Minitest::Test
           [0.57019675, 0.43860152, 0.9883738,  0.10204481, 0.20887676],
           [0.16130951, 0.6531083,  0.2532916,  0.46631077, 0.2444256 ]]]
 
-    output = model.predict(x: x)
+    output = model.predict({x: x})
     assert_elements_in_delta [0.6338603, 0.6715468, 0.6462883, 0.6329476, 0.6043575], output["y"].first.first
   end
 
@@ -108,7 +108,7 @@ class OnnxRuntimeTest < Minitest::Test
 
     x = [[5.8, 2.8, 5.1, 2.4]]
 
-    output = model.predict(float_input: x)
+    output = model.predict({float_input: x})
     assert_equal [2], output["output_label"]
     probabilities = output["output_probability"].first
     assert_equal [0, 1, 2], probabilities.keys
@@ -135,7 +135,7 @@ class OnnxRuntimeTest < Minitest::Test
 
     sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx", **session_options)
     x = [[5.8, 2.8]]
-    sess.run(nil, input: x)
+    sess.run(nil, {input: x})
 
     # file not created on Windows
     # assert_match "onnx", File.binread(optimized_path)
@@ -156,7 +156,7 @@ class OnnxRuntimeTest < Minitest::Test
   def test_invalid_rank
     model = OnnxRuntime::Model.new("test/support/model.onnx")
     error = assert_raises OnnxRuntime::Error do
-      model.predict(x: [])
+      model.predict({x: []})
     end
     assert_match "Invalid rank for input: x", error.message
   end
@@ -164,7 +164,7 @@ class OnnxRuntimeTest < Minitest::Test
   def test_invalid_dimensions
     model = OnnxRuntime::Model.new("test/support/model.onnx")
     error = assert_raises OnnxRuntime::Error do
-      model.predict(x: [[[1]]])
+      model.predict({x: [[[1]]]})
     end
     assert_match "Got invalid dimensions for input: x", error.message
   end
@@ -180,7 +180,7 @@ class OnnxRuntimeTest < Minitest::Test
   def test_extra_input
     model = OnnxRuntime::Model.new("test/support/model.onnx")
     error = assert_raises RuntimeError do
-      model.predict(x: [], y: [])
+      model.predict({x: [], y: []})
     end
     assert_match "Unknown input: y", error.message
   end
