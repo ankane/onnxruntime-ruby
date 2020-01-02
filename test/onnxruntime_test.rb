@@ -55,7 +55,7 @@ class OnnxRuntimeTest < Minitest::Test
 
     x = Numo::NArray.cast(x)
 
-    output = model.predict(x: x)
+    output = model.predict({x: x})
     assert_elements_in_delta [0.6338603, 0.6715468, 0.6462883, 0.6329476, 0.6043575], output["y"].first.first
   end
 
