@@ -129,8 +129,8 @@ class OnnxRuntimeTest < Minitest::Test
       intra_op_num_threads: 1,
       log_severity_level: 4,
       log_verbosity_level: 4,
-      logid: "test",
-      optimized_model_filepath: optimized_path
+      # logid: "test",
+      # optimized_model_filepath: optimized_path
     }
 
     sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx", **session_options)
