@@ -15,4 +15,4 @@ before_test:
   - bundle exec rake vendor:windows
 
 test_script:
-  - bundle exec rake
+  - bundle exec ruby test/onnxruntime_test.rb --name test_session_options
