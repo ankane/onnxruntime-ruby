@@ -20,7 +20,7 @@ end
 Rake::Task["release:guard_clean"].enhance [:ensure_vendor]
 
 def version
-  "1.1.0"
+  "1.1.1"
 end
 
 def download_file(library, remote_lib, file)
@@ -28,14 +28,13 @@ def download_file(library, remote_lib, file)
   require "open-uri"
   require "tmpdir"
 
-  url = "https://github.com/microsoft/onnxruntime/releases/download/v#{version}/#{file.sub(".tgz", ".zip")}"
+  url = "https://github.com/microsoft/onnxruntime/releases/download/v#{version}/#{file}"
   puts "Downloading #{file}..."
   dir = Dir.mktmpdir
   Dir.chdir(dir) do
-    File.binwrite(file, open(url).read)
-    system "unzip -j -d tmp #{file}"
+    File.binwrite(file, URI.open(url).read)
     command = file.end_with?(".zip") ? "unzip" : "tar xf"
-    system "#{command} tmp/#{file}"
+    system "#{command} #{file}"
     path = "#{dir}/#{file[0..-5]}/lib/#{remote_lib}"
     FileUtils.cp(path, File.expand_path("vendor/#{library}", __dir__))
     puts "Saved vendor/#{library}"
