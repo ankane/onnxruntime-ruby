@@ -37,6 +37,12 @@ Get outputs
 model.outputs
 ```
 
+Get metadata [master]
+
+```ruby
+model.metadata
+```
+
 Load a model from a string
 
 ```ruby
