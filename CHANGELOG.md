@@ -2,6 +2,7 @@
 
 - Updated ONNX Runtime to 1.2.0
 - Added model metadata
+- Added `end_profiling` method
 
 ## 0.2.3 (2020-01-23)
 

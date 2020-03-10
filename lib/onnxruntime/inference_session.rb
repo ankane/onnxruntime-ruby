@@ -125,6 +125,12 @@ module OnnxRuntime
       }
     end
 
+    def end_profiling
+      out = ::FFI::MemoryPointer.new(:string)
+      check_status api[:SessionEndProfiling].call(read_pointer, @allocator.read_pointer, out)
+      out.read_pointer.read_string
+    end
+
     private
 
     def create_input_tensor(input_feed)
