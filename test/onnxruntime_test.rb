@@ -209,6 +209,16 @@ class OnnxRuntimeTest < Minitest::Test
     end
   end
 
+  def test_modelmeta
+    sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx")
+    metadata = sess.modelmeta
+    assert_equal "", metadata[:description]
+    assert_equal "", metadata[:domain]
+    assert_equal "test_sigmoid", metadata[:graph_name]
+    assert_equal "backend-test", metadata[:producer_name]
+    assert_equal 9223372036854775807, metadata[:version]
+  end
+
   private
 
   def assert_example(name, input_names)

@@ -13,3 +13,11 @@ print("Outputs")
 [print((n.name, n.type, n.shape)) for n in sess.get_outputs()]
 print("Predictions")
 print(predictions)
+
+metadata = sess.get_modelmeta()
+print(metadata.custom_metadata_map)
+print(metadata.description)
+print(metadata.domain)
+print(metadata.graph_name)
+print(metadata.producer_name)
+print(metadata.version)

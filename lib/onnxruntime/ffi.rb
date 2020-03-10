@@ -119,7 +119,24 @@ module OnnxRuntime
         :ReleaseTypeInfo, callback(%i[pointer], :void),
         :ReleaseTensorTypeAndShapeInfo, callback(%i[pointer], :void),
         :ReleaseSessionOptions, callback(%i[pointer], :void),
-        :ReleaseCustomOpDomain, callback(%i[pointer], :void)
+        :ReleaseCustomOpDomain, callback(%i[pointer], :void),
+        :GetDenotationFromTypeInfo, callback(%i[], :pointer),
+        :CastTypeInfoToMapTypeInfo, callback(%i[], :pointer),
+        :CastTypeInfoToSequenceTypeInfo, callback(%i[], :pointer),
+        :GetMapKeyType, callback(%i[], :pointer),
+        :GetMapValueType, callback(%i[], :pointer),
+        :GetSequenceElementType, callback(%i[], :pointer),
+        :ReleaseMapTypeInfo, callback(%i[pointer], :void),
+        :ReleaseSequenceTypeInfo, callback(%i[pointer], :void),
+        :SessionEndProfiling, callback(%i[pointer pointer pointer], :pointer),
+        :SessionGetModelMetadata, callback(%i[pointer pointer], :pointer),
+        :ModelMetadataGetProducerName, callback(%i[pointer pointer pointer], :pointer),
+        :ModelMetadataGetGraphName, callback(%i[pointer pointer pointer], :pointer),
+        :ModelMetadataGetDomain, callback(%i[pointer pointer pointer], :pointer),
+        :ModelMetadataGetDescription, callback(%i[pointer pointer pointer], :pointer),
+        :ModelMetadataLookupCustomMetadataMap, callback(%i[pointer pointer pointer pointer], :pointer),
+        :ModelMetadataGetVersion, callback(%i[pointer pointer], :pointer),
+        :ReleaseModelMetadata, callback(%i[pointer], :void)
     end
 
     class ApiBase < ::FFI::Struct

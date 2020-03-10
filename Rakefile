@@ -20,7 +20,7 @@ end
 Rake::Task["release:guard_clean"].enhance [:ensure_vendor]
 
 def version
-  "1.1.1"
+  "1.2.0"
 end
 
 def download_file(library, remote_lib, file)

@@ -22,5 +22,9 @@ module OnnxRuntime
     def outputs
       @session.outputs
     end
+
+    def metadata
+      @session.modelmeta
+    end
   end
 end

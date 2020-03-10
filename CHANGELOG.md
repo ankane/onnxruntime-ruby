@@ -1,3 +1,8 @@
+## 0.2.4 (unreleased)
+
+- Updated ONNX Runtime to 1.2.0
+- Added model metadata
+
 ## 0.2.3 (2020-01-23)
 
 - Updated ONNX Runtime to 1.1.1

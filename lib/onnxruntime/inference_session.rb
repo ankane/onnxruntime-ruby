@@ -100,6 +100,31 @@ module OnnxRuntime
       end
     end
 
+    def modelmeta
+      description = ::FFI::MemoryPointer.new(:string)
+      domain = ::FFI::MemoryPointer.new(:string)
+      graph_name = ::FFI::MemoryPointer.new(:string)
+      producer_name = ::FFI::MemoryPointer.new(:string)
+      version = ::FFI::MemoryPointer.new(:int64_t)
+
+      metadata = ::FFI::MemoryPointer.new(:pointer)
+      api[:SessionGetModelMetadata].call(read_pointer, metadata)
+      api[:ModelMetadataGetDescription].call(metadata.read_pointer, @allocator.read_pointer, description)
+      api[:ModelMetadataGetDomain].call(metadata.read_pointer, @allocator.read_pointer, domain)
+      api[:ModelMetadataGetGraphName].call(metadata.read_pointer, @allocator.read_pointer, graph_name)
+      api[:ModelMetadataGetProducerName].call(metadata.read_pointer, @allocator.read_pointer, producer_name)
+      api[:ModelMetadataGetVersion].call(metadata.read_pointer, version)
+      api[:ReleaseModelMetadata].call(metadata.read_pointer)
+
+      {
+        description: description.read_pointer.read_string,
+        domain: domain.read_pointer.read_string,
+        graph_name: graph_name.read_pointer.read_string,
+        producer_name: producer_name.read_pointer.read_string,
+        version: version.read_int64
+      }
+    end
+
     private
 
     def create_input_tensor(input_feed)
