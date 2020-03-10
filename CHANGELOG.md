@@ -1,8 +1,9 @@
-## 0.2.4 (unreleased)
+## 0.3.0 (unreleased)
 
 - Updated ONNX Runtime to 1.2.0
 - Added model metadata
 - Added `end_profiling` method
+- Improved `input` and `output` for `seq` and `map` types
 
 ## 0.2.3 (2020-01-23)
 

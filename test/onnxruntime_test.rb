@@ -72,7 +72,7 @@ class OnnxRuntimeTest < Minitest::Test
     expected = [{name: "input", type: "tensor(float)", shape: [1, 2]}]
     assert_equal expected, model.inputs
 
-    expected = [{name: "label", type: "tensor(int64)", shape: [1]}, {name: "probabilities", type: "seq", shape: []}]
+    expected = [{name: "label", type: "tensor(int64)", shape: [1]}, {name: "probabilities", type: "seq(map(int64,tensor(float)))", shape: []}]
     assert_equal expected, model.outputs
 
     x = [[5.8, 2.8]]
