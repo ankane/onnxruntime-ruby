@@ -108,13 +108,16 @@ module OnnxRuntime
       version = ::FFI::MemoryPointer.new(:int64_t)
 
       metadata = ::FFI::MemoryPointer.new(:pointer)
-      api[:SessionGetModelMetadata].call(read_pointer, metadata)
-      api[:ModelMetadataGetDescription].call(metadata.read_pointer, @allocator.read_pointer, description)
-      api[:ModelMetadataGetDomain].call(metadata.read_pointer, @allocator.read_pointer, domain)
-      api[:ModelMetadataGetGraphName].call(metadata.read_pointer, @allocator.read_pointer, graph_name)
-      api[:ModelMetadataGetProducerName].call(metadata.read_pointer, @allocator.read_pointer, producer_name)
-      api[:ModelMetadataGetVersion].call(metadata.read_pointer, version)
+      check_status api[:SessionGetModelMetadata].call(read_pointer, metadata)
+      check_status api[:ModelMetadataGetDescription].call(metadata.read_pointer, @allocator.read_pointer, description)
+      check_status api[:ModelMetadataGetDomain].call(metadata.read_pointer, @allocator.read_pointer, domain)
+      check_status api[:ModelMetadataGetGraphName].call(metadata.read_pointer, @allocator.read_pointer, graph_name)
+      check_status api[:ModelMetadataGetProducerName].call(metadata.read_pointer, @allocator.read_pointer, producer_name)
+      check_status api[:ModelMetadataGetVersion].call(metadata.read_pointer, version)
       api[:ReleaseModelMetadata].call(metadata.read_pointer)
+
+      # TODO add custom_metadata_map
+      # need a way to get keys
 
       {
         description: description.read_pointer.read_string,

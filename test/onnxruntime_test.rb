@@ -103,7 +103,7 @@ class OnnxRuntimeTest < Minitest::Test
     expected = [{name: "float_input", type: "tensor(float)", shape: [1, 4]}]
     assert_equal expected, model.inputs
 
-    expected = [{name: "output_label", type: "tensor(int64)", shape: [1]}, {name: "output_probability", type: "seq", shape: []}]
+    expected = [{name: "output_label", type: "tensor(int64)", shape: [1]}, {name: "output_probability", type: "seq(map(int64,tensor(float)))", shape: []}]
     assert_equal expected, model.outputs
 
     x = [[5.8, 2.8, 5.1, 2.4]]
@@ -217,6 +217,7 @@ class OnnxRuntimeTest < Minitest::Test
   def test_modelmeta
     sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx")
     metadata = sess.modelmeta
+    # assert_equal ({}), metadata[:custom_metadata_map]
     assert_equal "", metadata[:description]
     assert_equal "", metadata[:domain]
     assert_equal "test_sigmoid", metadata[:graph_name]
