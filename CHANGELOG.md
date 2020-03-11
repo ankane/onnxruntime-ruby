@@ -1,4 +1,4 @@
-## 0.3.0 (unreleased)
+## 0.3.0 (2020-03-11)
 
 - Updated ONNX Runtime to 1.2.0
 - Added model metadata

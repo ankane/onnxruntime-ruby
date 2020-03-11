@@ -37,7 +37,7 @@ Get outputs
 model.outputs
 ```
 
-Get metadata [master]
+Get metadata
 
 ```ruby
 model.metadata
