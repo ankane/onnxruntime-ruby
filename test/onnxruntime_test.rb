@@ -66,6 +66,21 @@ class OnnxRuntimeTest < Minitest::Test
     assert_equal expected, model.inputs
   end
 
+  def test_io
+    model = File.open("test/support/model.onnx") { |f| OnnxRuntime::Model.new(f) }
+    expected = [{name: "x", type: "tensor(float)", shape: [3, 4, 5]}]
+    assert_equal expected, model.inputs
+  end
+
+  def test_stringio
+    require "stringio"
+
+    contents = StringIO.new(File.binread("test/support/model.onnx"))
+    model = OnnxRuntime::Model.new(contents)
+    expected = [{name: "x", type: "tensor(float)", shape: [3, 4, 5]}]
+    assert_equal expected, model.inputs
+  end
+
   def test_lightgbm
     model = OnnxRuntime::Model.new("test/support/lightgbm.onnx")
 

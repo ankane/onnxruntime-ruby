@@ -46,7 +46,7 @@ model.metadata
 Load a model from a string
 
 ```ruby
-byte_str = File.binread("model.onnx")
+byte_str = StringIO.new("...")
 model = OnnxRuntime::Model.new(byte_str)
 ```
 

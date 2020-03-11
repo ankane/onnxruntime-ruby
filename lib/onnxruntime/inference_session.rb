@@ -31,14 +31,22 @@ module OnnxRuntime
 
       # session
       @session = ::FFI::MemoryPointer.new(:pointer)
-      path_or_bytes = path_or_bytes.to_str
+      from_memory =
+        if path_or_bytes.respond_to?(:read)
+          path_or_bytes = path_or_bytes.read
+          true
+        else
+          path_or_bytes = path_or_bytes.to_str
+          path_or_bytes.encoding == Encoding::BINARY
+        end
 
       # fix for Windows "File doesn't exist"
-      if Gem.win_platform? && path_or_bytes.encoding != Encoding::BINARY
+      if Gem.win_platform? && !from_memory
         path_or_bytes = File.binread(path_or_bytes)
+        from_memory = true
       end
 
-      if path_or_bytes.encoding == Encoding::BINARY
+      if from_memory
         check_status api[:CreateSessionFromArray].call(env.read_pointer, path_or_bytes, path_or_bytes.bytesize, session_options.read_pointer, @session)
       else
         check_status api[:CreateSession].call(env.read_pointer, path_or_bytes, session_options.read_pointer, @session)

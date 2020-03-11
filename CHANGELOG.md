@@ -3,6 +3,7 @@
 - Updated ONNX Runtime to 1.2.0
 - Added model metadata
 - Added `end_profiling` method
+- Added support for loading from IO objects
 - Improved `input` and `output` for `seq` and `map` types
 
 ## 0.2.3 (2020-01-23)
