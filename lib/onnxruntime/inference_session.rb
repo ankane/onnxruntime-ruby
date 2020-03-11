@@ -124,7 +124,7 @@ module OnnxRuntime
         domain: domain.read_pointer.read_string,
         graph_name: graph_name.read_pointer.read_string,
         producer_name: producer_name.read_pointer.read_string,
-        version: version.read_int64
+        version: version.read(:int64_t)
       }
     end
 
