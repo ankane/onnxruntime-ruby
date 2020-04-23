@@ -17,7 +17,7 @@ task :ensure_vendor do
   end
 end
 
-Rake::Task["release:guard_clean"].enhance [:ensure_vendor]
+Rake::Task["build"].enhance [:ensure_vendor]
 
 def version
   "1.2.0"
