@@ -1,6 +1,7 @@
 dist: bionic
 language: ruby
 rvm: 2.7
+cache: bundler
 before_script: bundle exec rake vendor:linux
 script: bundle exec rake test
 notifications:
