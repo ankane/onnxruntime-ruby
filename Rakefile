@@ -20,7 +20,7 @@ end
 Rake::Task["build"].enhance [:ensure_vendor]
 
 def version
-  "1.2.0"
+  "1.3.0"
 end
 
 def download_file(library, remote_lib, file)
