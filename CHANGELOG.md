@@ -1,4 +1,4 @@
-## 0.3.1 (unreleased)
+## 0.3.1 (2020-05-18)
 
 - Updated ONNX Runtime to 1.3.0
 - Added `custom_metadata_map` to model metadata
