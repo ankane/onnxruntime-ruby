@@ -19,7 +19,7 @@ module OnnxRuntime
   self.ffi_lib = [vendor_lib]
 
   def self.lib_version
-    FFI.OrtGetApiBase[:GetVersionString].call
+    FFI.OrtGetApiBase[:GetVersionString].call.read_string
   end
 
   # friendlier error message

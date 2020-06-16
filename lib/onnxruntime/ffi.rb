@@ -20,7 +20,7 @@ module OnnxRuntime
       layout \
         :CreateStatus, callback(%i[int string], :pointer),
         :GetErrorCode, callback(%i[pointer], :pointer),
-        :GetErrorMessage, callback(%i[pointer], :string),
+        :GetErrorMessage, callback(%i[pointer], :pointer),
         :CreateEnv, callback(%i[int string pointer], :pointer),
         :CreateEnvWithCustomLogger, callback(%i[], :pointer),
         :EnableTelemetryEvents, callback(%i[pointer], :pointer),
@@ -150,7 +150,7 @@ module OnnxRuntime
       # to prevent "unable to resolve type" error on Ubuntu
       layout \
         :GetApi, callback(%i[uint32], Api.by_ref),
-        :GetVersionString, callback(%i[], :string)
+        :GetVersionString, callback(%i[], :pointer)
     end
 
     attach_function :OrtGetApiBase, %i[], ApiBase.by_ref

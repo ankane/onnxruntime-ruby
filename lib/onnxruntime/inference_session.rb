@@ -291,7 +291,7 @@ module OnnxRuntime
 
     def check_status(status)
       unless status.null?
-        message = api[:GetErrorMessage].call(status)
+        message = api[:GetErrorMessage].call(status).read_string
         api[:ReleaseStatus].call(status)
         raise OnnxRuntime::Error, message
       end

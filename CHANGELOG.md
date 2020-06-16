@@ -1,3 +1,7 @@
+## 0.3.2 (unreleased)
+
+- Fixed error with FFI 1.13.0+
+
 ## 0.3.1 (2020-05-18)
 
 - Updated ONNX Runtime to 1.3.0
