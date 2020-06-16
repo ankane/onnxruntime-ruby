@@ -63,8 +63,8 @@ OnnxRuntime::Model.new(path_or_bytes, {
   enable_cpu_mem_arena: true,
   enable_mem_pattern: true,
   enable_profiling: false,
-  execution_mode: :sequential,
-  graph_optimization_level: nil,
+  execution_mode: :sequential,    # :sequential or :parallel
+  graph_optimization_level: nil,  # :none, :basic, :extended, or :all
   inter_op_num_threads: nil,
   intra_op_num_threads: nil,
   log_severity_level: 2,
