@@ -375,7 +375,7 @@ module OnnxRuntime
     end
 
     def api
-      @api ||= FFI.OrtGetApiBase[:GetApi].call(1)
+      @api ||= FFI.OrtGetApiBase[:GetApi].call(3)
     end
 
     def env
