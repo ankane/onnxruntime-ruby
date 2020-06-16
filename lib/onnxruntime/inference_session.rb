@@ -385,7 +385,7 @@ module OnnxRuntime
         @@env ||= begin
           env = ::FFI::MemoryPointer.new(:pointer)
           check_status api[:CreateEnv].call(3, "Default", env)
-          at_exit { api[:ReleaseEnv].call(env.read_pointer) }
+          # at_exit { api[:ReleaseEnv].call(env.read_pointer) }
           # disable telemetry
           # https://github.com/microsoft/onnxruntime/blob/master/docs/Privacy.md
           check_status api[:DisableTelemetryEvents].call(env)
