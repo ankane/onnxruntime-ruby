@@ -50,6 +50,7 @@ module OnnxRuntime
       else
         check_status api[:CreateSession].call(env.read_pointer, path_or_bytes, session_options.read_pointer, @session)
       end
+      ObjectSpace.define_finalizer(self, self.class.finalize(@session))
 
       # input info
       allocator = ::FFI::MemoryPointer.new(:pointer)
@@ -375,7 +376,16 @@ module OnnxRuntime
     end
 
     def api
+      self.class.api
+    end
+
+    def self.api
       @api ||= FFI.OrtGetApiBase[:GetApi].call(3)
+    end
+
+    def self.finalize(session)
+      # must use proc instead of stabby lambda
+      proc { api[:ReleaseSession].call(session.read_pointer) }
     end
 
     def env
