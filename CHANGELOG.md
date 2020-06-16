@@ -1,4 +1,4 @@
-## 0.3.2 (unreleased)
+## 0.3.2 (2020-06-16)
 
 - Fixed error with FFI 1.13.0+
 - Added friendly graph optimization levels
