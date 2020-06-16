@@ -1,10 +1,10 @@
 require_relative "test_helper"
 
 class OnnxRuntimeTest < Minitest::Test
-  def setup
-    puts "GC"
-    GC.start
-  end
+  # def setup
+  #   puts "GC"
+  #   GC.start
+  # end
 
   def test_lib_version
     assert OnnxRuntime.lib_version
