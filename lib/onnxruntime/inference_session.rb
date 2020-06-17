@@ -109,7 +109,7 @@ module OnnxRuntime
         create_from_onnx_value(output_tensor[i].read_pointer)
       end
     ensure
-      api[:ReleaseRunOptions].call(run_options.read_pointer) if run_options
+      release :RunOptions, run_options
     end
 
     def modelmeta
@@ -148,7 +148,7 @@ module OnnxRuntime
         version: version.read(:int64_t)
       }
     ensure
-      api[:ReleaseModelMetadata].call(metadata.read_pointer) if metadata
+      release :ModelMetadata, metadata
     end
 
     def end_profiling
@@ -352,7 +352,7 @@ module OnnxRuntime
         unsupported_type("ONNX", type)
       end
     ensure
-      api[:ReleaseTypeInfo].call(typeinfo.read_pointer)
+      release :TypeInfo, typeinfo
     end
 
     def tensor_type_and_shape(tensor_info)
@@ -380,6 +380,10 @@ module OnnxRuntime
       else
         ptr.read(:size_t)
       end
+    end
+
+    def release(type, pointer)
+      api[:"Release#{type}"].call(pointer.read_pointer) if pointer && !pointer.null?
     end
 
     def api
