@@ -110,6 +110,11 @@ module OnnxRuntime
       end
     ensure
       release :RunOptions, run_options
+      if input_tensor
+        input_feed.size.times do |i|
+          release :Value, input_tensor[i]
+        end
+      end
     end
 
     def modelmeta
