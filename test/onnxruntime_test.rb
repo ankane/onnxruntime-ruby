@@ -170,7 +170,9 @@ class OnnxRuntimeTest < Minitest::Test
 
   def test_profiling
     sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx", enable_profiling: true)
-    assert_match ".json", sess.end_profiling
+    file = sess.end_profiling
+    assert_match ".json", file
+    File.unlink(file)
   end
 
   def test_invalid_rank
