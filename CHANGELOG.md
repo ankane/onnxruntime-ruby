@@ -1,3 +1,7 @@
+## 0.4.0 (unreleased)
+
+- Added support for global threadpool
+
 ## 0.3.2 (2020-06-16)
 
 - Fixed error with FFI 1.13.0+

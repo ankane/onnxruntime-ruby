@@ -137,10 +137,10 @@ module OnnxRuntime
         :ModelMetadataLookupCustomMetadataMap, callback(%i[pointer pointer pointer pointer], :pointer),
         :ModelMetadataGetVersion, callback(%i[pointer pointer], :pointer),
         :ReleaseModelMetadata, callback(%i[pointer], :void),
-        :CreateEnvWithGlobalThreadPools, callback(%i[], :pointer),
-        :DisablePerSessionThreads, callback(%i[], :pointer),
-        :CreateThreadingOptions, callback(%i[], :pointer),
-        :ReleaseThreadingOptions, callback(%i[], :pointer),
+        :CreateEnvWithGlobalThreadPools, callback(%i[int string pointer pointer], :pointer),
+        :DisablePerSessionThreads, callback(%i[pointer], :pointer),
+        :CreateThreadingOptions, callback(%i[pointer], :pointer),
+        :ReleaseThreadingOptions, callback(%i[pointer], :pointer),
         :ModelMetadataGetCustomMetadataMapKeys, callback(%i[pointer pointer pointer pointer], :pointer),
         :AddFreeDimensionOverrideByName, callback(%i[], :pointer)
     end

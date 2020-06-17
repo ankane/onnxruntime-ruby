@@ -27,6 +27,7 @@ module OnnxRuntime
       check_status api[:SetSessionLogVerbosityLevel].call(session_options.read_pointer, log_verbosity_level) if log_verbosity_level
       check_status api[:SetSessionLogId].call(session_options.read_pointer, logid) if logid
       check_status api[:SetOptimizedModelFilePath].call(session_options.read_pointer, optimized_model_filepath) if optimized_model_filepath
+      check_status api[:DisablePerSessionThreads].call(session_options.read_pointer)
 
       # session
       @session = ::FFI::MemoryPointer.new(:pointer)
@@ -414,8 +415,11 @@ module OnnxRuntime
       # use mutex for thread-safety
       Utils.mutex.synchronize do
         @@env ||= begin
+          threading_options = ::FFI::MemoryPointer.new(:pointer)
+          check_status api[:CreateThreadingOptions].call(threading_options)
+
           env = ::FFI::MemoryPointer.new(:pointer)
-          check_status api[:CreateEnv].call(3, "Default", env)
+          check_status api[:CreateEnvWithGlobalThreadPools].call(3, "Default", threading_options.read_pointer, env)
           at_exit { release :Env, env }
           # disable telemetry
           # https://github.com/microsoft/onnxruntime/blob/master/docs/Privacy.md
