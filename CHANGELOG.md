@@ -1,3 +1,7 @@
+## 0.3.3 (2020-06-17)
+
+- Fixed segmentation fault on exit on Linux
+
 ## 0.3.2 (2020-06-16)
 
 - Fixed error with FFI 1.13.0+
