@@ -82,7 +82,7 @@ module OnnxRuntime
         @outputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
       end
     ensure
-      api[:ReleaseSessionOptions].call(session_options.read_pointer) if session_options
+      # api[:ReleaseSessionOptions].call(session_options.read_pointer) if session_options
     end
 
     # TODO support logid
