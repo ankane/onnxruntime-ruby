@@ -317,6 +317,7 @@ module OnnxRuntime
       case type
       when :tensor
         tensor_info = ::FFI::MemoryPointer.new(:pointer)
+        # don't free tensor_info
         check_status api[:CastTypeInfoToTensorInfo].call(typeinfo.read_pointer, tensor_info)
 
         type, shape = tensor_type_and_shape(tensor_info)
