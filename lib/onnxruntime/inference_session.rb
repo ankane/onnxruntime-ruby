@@ -50,8 +50,6 @@ module OnnxRuntime
       else
         check_status api[:CreateSession].call(env.read_pointer, path_or_bytes, session_options.read_pointer, @session)
       end
-      api[:ReleaseSessionOptions].call(session_options.read_pointer)
-
       ObjectSpace.define_finalizer(self, self.class.finalize(@session))
 
       # input info
@@ -83,6 +81,8 @@ module OnnxRuntime
         check_status api[:SessionGetOutputTypeInfo].call(read_pointer, i, typeinfo)
         @outputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
       end
+    ensure
+      api[:ReleaseSessionOptions].call(session_options.read_pointer) if session_options
     end
 
     # TODO support logid
@@ -96,18 +96,20 @@ module OnnxRuntime
       output_node_names = create_node_names(output_names.map(&:to_s))
 
       # run options
-      with_run_options do |run_options|
-        check_status api[:RunOptionsSetRunLogSeverityLevel].call(run_options.read_pointer, log_severity_level) if log_severity_level
-        check_status api[:RunOptionsSetRunLogVerbosityLevel].call(run_options.read_pointer, log_verbosity_level) if log_verbosity_level
-        check_status api[:RunOptionsSetRunTag].call(run_options.read_pointer, logid) if logid
-        check_status api[:RunOptionsSetTerminate].call(run_options.read_pointer) if terminate
+      run_options = ::FFI::MemoryPointer.new(:pointer)
+      check_status api[:CreateRunOptions].call(run_options)
+      check_status api[:RunOptionsSetRunLogSeverityLevel].call(run_options.read_pointer, log_severity_level) if log_severity_level
+      check_status api[:RunOptionsSetRunLogVerbosityLevel].call(run_options.read_pointer, log_verbosity_level) if log_verbosity_level
+      check_status api[:RunOptionsSetRunTag].call(run_options.read_pointer, logid) if logid
+      check_status api[:RunOptionsSetTerminate].call(run_options.read_pointer) if terminate
 
-        check_status api[:Run].call(read_pointer, run_options.read_pointer, input_node_names, input_tensor, input_feed.size, output_node_names, output_names.size, output_tensor)
-      end
+      check_status api[:Run].call(read_pointer, run_options.read_pointer, input_node_names, input_tensor, input_feed.size, output_node_names, output_names.size, output_tensor)
 
       output_names.size.times.map do |i|
         create_from_onnx_value(output_tensor[i].read_pointer)
       end
+    ensure
+      api[:ReleaseRunOptions].call(run_options.read_pointer) if run_options
     end
 
     def modelmeta
@@ -136,7 +138,6 @@ module OnnxRuntime
       check_status api[:ModelMetadataGetGraphName].call(metadata.read_pointer, @allocator.read_pointer, graph_name)
       check_status api[:ModelMetadataGetProducerName].call(metadata.read_pointer, @allocator.read_pointer, producer_name)
       check_status api[:ModelMetadataGetVersion].call(metadata.read_pointer, version)
-      api[:ReleaseModelMetadata].call(metadata.read_pointer)
 
       {
         custom_metadata_map: custom_metadata_map,
@@ -146,6 +147,8 @@ module OnnxRuntime
         producer_name: producer_name.read_pointer.read_string,
         version: version.read(:int64_t)
       }
+    ensure
+      api[:ReleaseModelMetadata].call(metadata.read_pointer) if metadata
     end
 
     def end_profiling
@@ -390,16 +393,6 @@ module OnnxRuntime
     def self.finalize(session)
       # must use proc instead of stabby lambda
       proc { api[:ReleaseSession].call(session.read_pointer) }
-    end
-
-    def with_run_options
-      run_options = ::FFI::MemoryPointer.new(:pointer)
-      check_status api[:CreateRunOptions].call(run_options)
-      begin
-        yield run_options
-      ensure
-        api[:ReleaseRunOptions].call(run_options.read_pointer)
-      end
     end
 
     def env
