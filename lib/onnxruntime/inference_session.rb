@@ -50,6 +50,8 @@ module OnnxRuntime
       else
         check_status api[:CreateSession].call(env.read_pointer, path_or_bytes, session_options.read_pointer, @session)
       end
+      api[:ReleaseSessionOptions].call(session_options.read_pointer)
+
       ObjectSpace.define_finalizer(self, self.class.finalize(@session))
 
       # input info
@@ -233,7 +235,7 @@ module OnnxRuntime
         output_tensor_size = api[:GetTensorShapeElementCount].call(typeinfo.read_pointer, out_size)
         output_tensor_size = read_size_t(out_size)
 
-        api[:ReleaseTensorTypeAndShapeInfo].call(typeinfo.read_pointer)
+        # api[:ReleaseTensorTypeAndShapeInfo].call(typeinfo.read_pointer)
 
         # TODO support more types
         type = FFI::TensorElementDataType[type]
