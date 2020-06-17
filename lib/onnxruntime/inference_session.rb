@@ -243,7 +243,7 @@ module OnnxRuntime
         output_tensor_size = api[:GetTensorShapeElementCount].call(typeinfo.read_pointer, out_size)
         output_tensor_size = read_size_t(out_size)
 
-        # release :TensorTypeAndShapeInfo, typeinfo
+        release :TensorTypeAndShapeInfo, typeinfo
 
         # TODO support more types
         type = FFI::TensorElementDataType[type]
@@ -277,6 +277,7 @@ module OnnxRuntime
         check_status api[:GetValue].call(out_ptr, 1, @allocator.read_pointer, map_values)
         check_status api[:GetTensorTypeAndShape].call(map_keys.read_pointer, type_shape)
         check_status api[:GetTensorElementType].call(type_shape.read_pointer, elem_type)
+        release :TensorTypeAndShapeInfo, type_shape
 
         # TODO support more types
         elem_type = FFI::TensorElementDataType[elem_type.read_int]
