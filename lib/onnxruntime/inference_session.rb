@@ -94,14 +94,14 @@ module OnnxRuntime
       output_node_names = create_node_names(output_names.map(&:to_s))
 
       # run options
-      run_options = ::FFI::MemoryPointer.new(:pointer)
-      check_status api[:CreateRunOptions].call(run_options)
-      check_status api[:RunOptionsSetRunLogSeverityLevel].call(run_options.read_pointer, log_severity_level) if log_severity_level
-      check_status api[:RunOptionsSetRunLogVerbosityLevel].call(run_options.read_pointer, log_verbosity_level) if log_verbosity_level
-      check_status api[:RunOptionsSetRunTag].call(run_options.read_pointer, logid) if logid
-      check_status api[:RunOptionsSetTerminate].call(run_options.read_pointer) if terminate
+      with_run_options do |run_options|
+        check_status api[:RunOptionsSetRunLogSeverityLevel].call(run_options.read_pointer, log_severity_level) if log_severity_level
+        check_status api[:RunOptionsSetRunLogVerbosityLevel].call(run_options.read_pointer, log_verbosity_level) if log_verbosity_level
+        check_status api[:RunOptionsSetRunTag].call(run_options.read_pointer, logid) if logid
+        check_status api[:RunOptionsSetTerminate].call(run_options.read_pointer) if terminate
 
-      check_status api[:Run].call(read_pointer, run_options.read_pointer, input_node_names, input_tensor, input_feed.size, output_node_names, output_names.size, output_tensor)
+        check_status api[:Run].call(read_pointer, run_options.read_pointer, input_node_names, input_tensor, input_feed.size, output_node_names, output_names.size, output_tensor)
+      end
 
       output_names.size.times.map do |i|
         create_from_onnx_value(output_tensor[i].read_pointer)
@@ -386,6 +386,16 @@ module OnnxRuntime
     def self.finalize(session)
       # must use proc instead of stabby lambda
       proc { api[:ReleaseSession].call(session.read_pointer) }
+    end
+
+    def with_run_options
+      run_options = ::FFI::MemoryPointer.new(:pointer)
+      check_status api[:CreateRunOptions].call(run_options)
+      begin
+        yield run_options
+      ensure
+        api[:ReleaseRunOptions].call(run_options.read_pointer)
+      end
     end
 
     def env
