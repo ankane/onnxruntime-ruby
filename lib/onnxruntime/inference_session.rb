@@ -82,7 +82,7 @@ module OnnxRuntime
         @outputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
       end
     ensure
-      # api[:ReleaseSessionOptions].call(session_options.read_pointer) if session_options
+      # release :SessionOptions, session_options
     end
 
     # TODO support logid
@@ -238,7 +238,7 @@ module OnnxRuntime
         output_tensor_size = api[:GetTensorShapeElementCount].call(typeinfo.read_pointer, out_size)
         output_tensor_size = read_size_t(out_size)
 
-        # api[:ReleaseTensorTypeAndShapeInfo].call(typeinfo.read_pointer)
+        # release :TensorTypeAndShapeInfo, typeinfo
 
         # TODO support more types
         type = FFI::TensorElementDataType[type]
@@ -382,21 +382,25 @@ module OnnxRuntime
       end
     end
 
-    def release(type, pointer)
-      api[:"Release#{type}"].call(pointer.read_pointer) if pointer && !pointer.null?
-    end
-
     def api
       self.class.api
+    end
+
+    def release(*args)
+      self.class.release(*args)
     end
 
     def self.api
       @api ||= FFI.OrtGetApiBase[:GetApi].call(3)
     end
 
+    def self.release(type, pointer)
+      api[:"Release#{type}"].call(pointer.read_pointer) if pointer && !pointer.null?
+    end
+
     def self.finalize(session)
       # must use proc instead of stabby lambda
-      proc { api[:ReleaseSession].call(session.read_pointer) }
+      proc { release :Session, session }
     end
 
     def env
@@ -405,7 +409,7 @@ module OnnxRuntime
         @@env ||= begin
           env = ::FFI::MemoryPointer.new(:pointer)
           check_status api[:CreateEnv].call(3, "Default", env)
-          at_exit { api[:ReleaseEnv].call(env.read_pointer) }
+          at_exit { release :Env, env }
           # disable telemetry
           # https://github.com/microsoft/onnxruntime/blob/master/docs/Privacy.md
           check_status api[:DisableTelemetryEvents].call(env)
