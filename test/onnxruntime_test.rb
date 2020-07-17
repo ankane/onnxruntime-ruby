@@ -242,6 +242,11 @@ class OnnxRuntimeTest < Minitest::Test
     assert_equal 9223372036854775807, metadata[:version]
   end
 
+  def test_providers
+    sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx")
+    assert_includes sess.providers, "CPUExecutionProvider"
+  end
+
   private
 
   def assert_example(name, input_names)

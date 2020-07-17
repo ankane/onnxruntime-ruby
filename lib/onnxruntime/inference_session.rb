@@ -162,6 +162,21 @@ module OnnxRuntime
       out.read_pointer.read_string
     end
 
+    # no way to set providers with C API yet
+    # so we can return all available providers
+    def providers
+      out_ptr = ::FFI::MemoryPointer.new(:pointer)
+      length_ptr = ::FFI::MemoryPointer.new(:int)
+      check_status api[:GetAvailableProviders].call(out_ptr, length_ptr)
+      length = length_ptr.read_int
+      providers = []
+      length.times do |i|
+        providers << out_ptr.read_pointer[i * ::FFI::Pointer.size].read_pointer.read_string
+      end
+      api[:ReleaseAvailableProviders].call(out_ptr.read_pointer, length)
+      providers
+    end
+
     private
 
     def create_input_tensor(input_feed)
@@ -398,7 +413,7 @@ module OnnxRuntime
     end
 
     def self.api
-      @api ||= FFI.OrtGetApiBase[:GetApi].call(3)
+      @api ||= FFI.OrtGetApiBase[:GetApi].call(4)
     end
 
     def self.release(type, pointer)

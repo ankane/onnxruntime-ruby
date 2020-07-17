@@ -142,7 +142,9 @@ module OnnxRuntime
         :CreateThreadingOptions, callback(%i[], :pointer),
         :ReleaseThreadingOptions, callback(%i[], :pointer),
         :ModelMetadataGetCustomMetadataMapKeys, callback(%i[pointer pointer pointer pointer], :pointer),
-        :AddFreeDimensionOverrideByName, callback(%i[], :pointer)
+        :AddFreeDimensionOverrideByName, callback(%i[], :pointer),
+        :GetAvailableProviders, callback(%i[pointer pointer], :pointer),
+        :ReleaseAvailableProviders, callback(%i[pointer int], :pointer)
     end
 
     class ApiBase < ::FFI::Struct
