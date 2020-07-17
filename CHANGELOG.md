@@ -1,3 +1,7 @@
+## 0.3.4 (unreleased)
+
+- Updated ONNX Runtime to 1.4.0
+
 ## 0.3.3 (2020-06-17)
 
 - Fixed segmentation fault on exit on Linux
