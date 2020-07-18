@@ -2,12 +2,7 @@ module OnnxRuntime
   module FFI
     extend ::FFI::Library
 
-    begin
-      ffi_lib Array(OnnxRuntime.ffi_lib)
-    rescue LoadError => e
-      raise e if ENV["ONNXRUNTIME_DEBUG"]
-      raise LoadError, "Could not find ONNX Runtime"
-    end
+    ffi_lib Array(OnnxRuntime.ffi_lib)
 
     # https://github.com/microsoft/onnxruntime/blob/master/include/onnxruntime/core/session/onnxruntime_c_api.h
     # keep same order
