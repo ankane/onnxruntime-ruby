@@ -2,6 +2,7 @@
 
 - Updated ONNX Runtime to 1.4.0
 - Added `providers` method
+- Fixed errors on Windows
 
 ## 0.3.3 (2020-06-17)
 
