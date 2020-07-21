@@ -8,7 +8,7 @@ module OnnxRuntime
       check_status api[:CreateSessionOptions].call(session_options)
       check_status api[:EnableCpuMemArena].call(session_options.read_pointer) if enable_cpu_mem_arena
       check_status api[:EnableMemPattern].call(session_options.read_pointer) if enable_mem_pattern
-      check_status api[:EnableProfiling].call(session_options.read_pointer, "onnxruntime_profile_") if enable_profiling
+      check_status api[:EnableProfiling].call(session_options.read_pointer, ort_string("onnxruntime_profile_")) if enable_profiling
       if execution_mode
         execution_modes = {sequential: 0, parallel: 1}
         mode = execution_modes[execution_mode]
@@ -26,7 +26,7 @@ module OnnxRuntime
       check_status api[:SetSessionLogSeverityLevel].call(session_options.read_pointer, log_severity_level) if log_severity_level
       check_status api[:SetSessionLogVerbosityLevel].call(session_options.read_pointer, log_verbosity_level) if log_verbosity_level
       check_status api[:SetSessionLogId].call(session_options.read_pointer, logid) if logid
-      check_status api[:SetOptimizedModelFilePath].call(session_options.read_pointer, optimized_model_filepath) if optimized_model_filepath
+      check_status api[:SetOptimizedModelFilePath].call(session_options.read_pointer, ort_string(optimized_model_filepath)) if optimized_model_filepath
 
       # session
       @session = ::FFI::MemoryPointer.new(:pointer)
@@ -39,15 +39,10 @@ module OnnxRuntime
           path_or_bytes.encoding == Encoding::BINARY
         end
 
-      # fix for Windows "File doesn't exist"
-      if Gem.win_platform? && !from_memory
-        path_or_bytes = File.binread(path_or_bytes)
-        from_memory = true
-      end
-
       if from_memory
         check_status api[:CreateSessionFromArray].call(env.read_pointer, path_or_bytes, path_or_bytes.bytesize, session_options.read_pointer, @session)
       else
+        path_or_bytes = ort_string(path_or_bytes)
         check_status api[:CreateSession].call(env.read_pointer, path_or_bytes, session_options.read_pointer, @session)
       end
       ObjectSpace.define_finalizer(self, self.class.finalize(@session))
@@ -156,6 +151,7 @@ module OnnxRuntime
       release :ModelMetadata, metadata
     end
 
+    # return value has double underscore like Python
     def end_profiling
       out = ::FFI::MemoryPointer.new(:string)
       check_status api[:SessionEndProfiling].call(read_pointer, @allocator.read_pointer, out)
@@ -423,6 +419,20 @@ module OnnxRuntime
     def self.finalize(session)
       # must use proc instead of stabby lambda
       proc { release :Session, session }
+    end
+
+    # wide string on Windows
+    # char string on Linux
+    # see ORTCHAR_T in onnxruntime_c_api.h
+    def ort_string(str)
+      if Gem.win_platform?
+        max = str.size + 1 # for null byte
+        dest = ::FFI::MemoryPointer.new(:wchar_t, max)
+        FFI::Libc.mbstowcs(dest, str, max)
+        dest
+      else
+        str
+      end
     end
 
     def env

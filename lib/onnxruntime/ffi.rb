@@ -20,14 +20,14 @@ module OnnxRuntime
         :CreateEnvWithCustomLogger, callback(%i[], :pointer),
         :EnableTelemetryEvents, callback(%i[pointer], :pointer),
         :DisableTelemetryEvents, callback(%i[pointer], :pointer),
-        :CreateSession, callback(%i[pointer string pointer pointer], :pointer),
+        :CreateSession, callback(%i[pointer pointer pointer pointer], :pointer),
         :CreateSessionFromArray, callback(%i[pointer pointer size_t pointer pointer], :pointer),
         :Run, callback(%i[pointer pointer pointer pointer size_t pointer size_t pointer], :pointer),
         :CreateSessionOptions, callback(%i[pointer], :pointer),
-        :SetOptimizedModelFilePath, callback(%i[pointer string], :pointer),
+        :SetOptimizedModelFilePath, callback(%i[pointer pointer], :pointer),
         :CloneSessionOptions, callback(%i[], :pointer),
         :SetSessionExecutionMode, callback(%i[], :pointer),
-        :EnableProfiling, callback(%i[pointer string], :pointer),
+        :EnableProfiling, callback(%i[pointer pointer], :pointer),
         :DisableProfiling, callback(%i[pointer], :pointer),
         :EnableMemPattern, callback(%i[pointer], :pointer),
         :DisableMemPattern, callback(%i[pointer], :pointer),
@@ -151,5 +151,13 @@ module OnnxRuntime
     end
 
     attach_function :OrtGetApiBase, %i[], ApiBase.by_ref
+
+    if Gem.win_platform?
+      class Libc
+        extend ::FFI::Library
+        ffi_lib ::FFI::Library::LIBC
+        attach_function :mbstowcs, %i[pointer string size_t], :size_t
+      end
+    end
   end
 end
