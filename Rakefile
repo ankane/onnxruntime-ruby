@@ -44,7 +44,7 @@ end
 def download_file(file)
   require "open-uri"
 
-  url = "https://github.com/ankane/ml-builds/releases/download/onnxruntime-1.4.0/#{file}"
+  url = "https://github.com/ankane/ml-builds/releases/download/onnxruntime-#{version}/#{file}"
   puts "Downloading #{file}..."
   dest = "vendor/#{file}"
   File.binwrite(dest, URI.open(url).read)
