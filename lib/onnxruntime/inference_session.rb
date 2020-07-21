@@ -428,7 +428,8 @@ module OnnxRuntime
       if Gem.win_platform?
         max = str.size + 1 # for null byte
         dest = ::FFI::MemoryPointer.new(:wchar_t, max)
-        FFI::Libc.mbstowcs(dest, str, max)
+        ret = FFI::Libc.mbstowcs(dest, str, max)
+        raise Error, "Expected mbstowcs to return #{str.size}, got #{ret}" if ret != str.size
         dest
       else
         str
