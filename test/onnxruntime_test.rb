@@ -223,6 +223,7 @@ class OnnxRuntimeTest < Minitest::Test
     error = assert_raises(ArgumentError) do
       OnnxRuntime::Datasets.example("bad.onnx")
     end
+    # same message as Python
     assert_equal "Unable to find example 'bad.onnx'", error.message
 
     # no path traversal
