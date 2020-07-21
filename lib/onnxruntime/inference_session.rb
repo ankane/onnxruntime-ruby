@@ -17,8 +17,8 @@ module OnnxRuntime
       end
       if graph_optimization_level
         optimization_levels = {none: 0, basic: 1, extended: 2, all: 99}
-        # TODO raise error in 0.4.0
-        level = optimization_levels[graph_optimization_level] || graph_optimization_level
+        level = optimization_levels[graph_optimization_level]
+        raise ArgumentError, "Invalid graph optimization level" unless level
         check_status api[:SetSessionGraphOptimizationLevel].call(session_options.read_pointer, level)
       end
       check_status api[:SetInterOpNumThreads].call(session_options.read_pointer, inter_op_num_threads) if inter_op_num_threads
