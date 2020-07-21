@@ -67,7 +67,7 @@ class OnnxRuntimeTest < Minitest::Test
   end
 
   def test_io
-    model = File.open("test/support/model.onnx") { |f| OnnxRuntime::Model.new(f) }
+    model = File.open("test/support/model.onnx", "rb") { |f| OnnxRuntime::Model.new(f) }
     expected = [{name: "x", type: "tensor(float)", shape: [3, 4, 5]}]
     assert_equal expected, model.inputs
   end
