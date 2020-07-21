@@ -58,7 +58,7 @@ module OnnxRuntime
       # input
       num_input_nodes = ::FFI::MemoryPointer.new(:size_t)
       check_status api[:SessionGetInputCount].call(read_pointer, num_input_nodes)
-      read_size_t(num_input_nodes).times do |i|
+      num_input_nodes.read(:size_t).times do |i|
         name_ptr = ::FFI::MemoryPointer.new(:string)
         check_status api[:SessionGetInputName].call(read_pointer, i, @allocator.read_pointer, name_ptr)
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
@@ -69,7 +69,7 @@ module OnnxRuntime
       # output
       num_output_nodes = ::FFI::MemoryPointer.new(:size_t)
       check_status api[:SessionGetOutputCount].call(read_pointer, num_output_nodes)
-      read_size_t(num_output_nodes).times do |i|
+      num_output_nodes.read(:size_t).times do |i|
         name_ptr = ::FFI::MemoryPointer.new(:string)
         check_status api[:SessionGetOutputName].call(read_pointer, i, allocator.read_pointer, name_ptr)
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
@@ -252,7 +252,7 @@ module OnnxRuntime
 
         out_size = ::FFI::MemoryPointer.new(:size_t)
         output_tensor_size = api[:GetTensorShapeElementCount].call(typeinfo.read_pointer, out_size)
-        output_tensor_size = read_size_t(out_size)
+        output_tensor_size = out_size.read(:size_t)
 
         release :TensorTypeAndShapeInfo, typeinfo
 
@@ -273,7 +273,7 @@ module OnnxRuntime
         out = ::FFI::MemoryPointer.new(:size_t)
         check_status api[:GetValueCount].call(out_ptr, out)
 
-        read_size_t(out).times.map do |i|
+        out.read(:size_t).times.map do |i|
           seq = ::FFI::MemoryPointer.new(:pointer)
           check_status api[:GetValue].call(out_ptr, i, @allocator.read_pointer, seq)
           create_from_onnx_value(seq.read_pointer)
@@ -379,7 +379,7 @@ module OnnxRuntime
 
       num_dims_ptr = ::FFI::MemoryPointer.new(:size_t)
       check_status api[:GetDimensionsCount].call(tensor_info.read_pointer, num_dims_ptr)
-      num_dims = read_size_t(num_dims_ptr)
+      num_dims = num_dims_ptr.read(:size_t)
 
       node_dims = ::FFI::MemoryPointer.new(:int64, num_dims)
       check_status api[:GetDimensions].call(tensor_info.read_pointer, node_dims, num_dims)
@@ -389,15 +389,6 @@ module OnnxRuntime
 
     def unsupported_type(name, type)
       raise "Unsupported #{name} type: #{type}"
-    end
-
-    # read(:size_t) not supported in FFI JRuby
-    def read_size_t(ptr)
-      if RUBY_PLATFORM == "java"
-        ptr.read_long
-      else
-        ptr.read(:size_t)
-      end
     end
 
     def api
