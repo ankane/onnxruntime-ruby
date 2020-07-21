@@ -1,4 +1,4 @@
-## 0.4.0 (unreleased)
+## 0.4.0 (2020-07-20)
 
 - Updated ONNX Runtime to 1.4.0
 - Added `providers` method
