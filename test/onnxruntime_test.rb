@@ -220,20 +220,22 @@ class OnnxRuntimeTest < Minitest::Test
     # assert_example "mul_1.onnx", ["X"]
     assert_example "sigmoid.onnx", ["x"]
 
-    assert_raises ArgumentError do
+    error = assert_raises(ArgumentError) do
       OnnxRuntime::Datasets.example("bad.onnx")
     end
+    assert_equal "Unable to find example 'bad.onnx'", error.message
 
     # no path traversal
-    assert_raises ArgumentError do
+    error = assert_raises(ArgumentError) do
       OnnxRuntime::Datasets.example("../datasets/sigmoid.onnx")
     end
+    assert_equal "Unable to find example '../datasets/sigmoid.onnx'", error.message
   end
 
   def test_modelmeta
     sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx")
     metadata = sess.modelmeta
-    assert_equal ({"hello" => "world", "test" => "value"}), metadata[:custom_metadata_map]
+    assert_equal({"hello" => "world", "test" => "value"}, metadata[:custom_metadata_map])
     assert_equal "", metadata[:description]
     assert_equal "", metadata[:domain]
     assert_equal "test_sigmoid", metadata[:graph_name]
