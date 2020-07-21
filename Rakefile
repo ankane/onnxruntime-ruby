@@ -23,7 +23,7 @@ def version
   "1.4.0"
 end
 
-def download_file(library, remote_lib, file)
+def download_official(library, remote_lib, file)
   require "fileutils"
   require "open-uri"
   require "tmpdir"
@@ -41,18 +41,29 @@ def download_file(library, remote_lib, file)
   end
 end
 
+def download_file(file)
+  require "open-uri"
+
+  url = "https://github.com/ankane/ml-builds/releases/download/onnxruntime-1.4.0/#{file}"
+  puts "Downloading #{file}..."
+  dest = "vendor/#{file}"
+  File.binwrite(dest, URI.open(url).read)
+  puts "Saved #{dest}"
+end
+
 # https://github.com/microsoft/onnxruntime/releases
 namespace :vendor do
   task :linux do
-    download_file("libonnxruntime.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-x64-#{version}.tgz")
+    download_official("libonnxruntime.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-x64-#{version}.tgz")
   end
 
   task :mac do
-    download_file("libonnxruntime.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-x64-#{version}.tgz")
+    download_official("libonnxruntime.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-x64-#{version}.tgz")
   end
 
   task :windows do
-    download_file("onnxruntime.dll", "onnxruntime.dll", "onnxruntime-win-x64-#{version}.zip")
+    # OpenMP disabled to prevent segmentation fault
+    download_file("onnxruntime.dll")
   end
 
   task all: [:linux, :mac, :windows]
