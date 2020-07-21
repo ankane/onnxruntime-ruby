@@ -195,7 +195,7 @@ module OnnxRuntime
 
         # TODO support more types
         inp = @inputs.find { |i| i[:name] == input_name.to_s }
-        raise "Unknown input: #{input_name}" unless inp
+        raise Error, "Unknown input: #{input_name}" unless inp
 
         input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
         input_node_dims.write_array_of_int64(shape)
@@ -317,7 +317,7 @@ module OnnxRuntime
       unless status.null?
         message = api[:GetErrorMessage].call(status).read_string
         api[:ReleaseStatus].call(status)
-        raise OnnxRuntime::Error, message
+        raise Error, message
       end
     end
 
@@ -388,7 +388,7 @@ module OnnxRuntime
     end
 
     def unsupported_type(name, type)
-      raise "Unsupported #{name} type: #{type}"
+      raise Error, "Unsupported #{name} type: #{type}"
     end
 
     def api

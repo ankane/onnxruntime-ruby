@@ -176,7 +176,7 @@ class OnnxRuntimeTest < Minitest::Test
 
   def test_invalid_rank
     model = OnnxRuntime::Model.new("test/support/model.onnx")
-    error = assert_raises OnnxRuntime::Error do
+    error = assert_raises(OnnxRuntime::Error) do
       model.predict({x: []})
     end
     assert_match "Invalid rank for input: x", error.message
@@ -184,7 +184,7 @@ class OnnxRuntimeTest < Minitest::Test
 
   def test_invalid_dimensions
     model = OnnxRuntime::Model.new("test/support/model.onnx")
-    error = assert_raises OnnxRuntime::Error do
+    error = assert_raises(OnnxRuntime::Error) do
       model.predict({x: [[[1]]]})
     end
     assert_match "Got invalid dimensions for input: x", error.message
@@ -192,7 +192,7 @@ class OnnxRuntimeTest < Minitest::Test
 
   def test_missing_input
     model = OnnxRuntime::Model.new("test/support/model.onnx")
-    error = assert_raises OnnxRuntime::Error do
+    error = assert_raises(OnnxRuntime::Error) do
       model.predict({})
     end
     assert_match "Missing Input: x", error.message
@@ -200,7 +200,7 @@ class OnnxRuntimeTest < Minitest::Test
 
   def test_extra_input
     model = OnnxRuntime::Model.new("test/support/model.onnx")
-    error = assert_raises RuntimeError do
+    error = assert_raises(OnnxRuntime::Error) do
       model.predict({x: [], y: []})
     end
     assert_match "Unknown input: y", error.message
@@ -209,7 +209,7 @@ class OnnxRuntimeTest < Minitest::Test
   def test_invalid_output_name
     model = OnnxRuntime::Model.new("test/support/lightgbm.onnx")
     x = [[5.8, 2.8]]
-    error = assert_raises OnnxRuntime::Error do
+    error = assert_raises(OnnxRuntime::Error) do
       model.predict({input: x}, output_names: ["bad"])
     end
     assert_match "Invalid Output Name:bad", error.message
