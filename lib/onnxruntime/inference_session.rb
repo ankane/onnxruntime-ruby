@@ -42,8 +42,7 @@ module OnnxRuntime
       if from_memory
         check_status api[:CreateSessionFromArray].call(env.read_pointer, path_or_bytes, path_or_bytes.bytesize, session_options.read_pointer, @session)
       else
-        path_or_bytes = ort_string(path_or_bytes)
-        check_status api[:CreateSession].call(env.read_pointer, path_or_bytes, session_options.read_pointer, @session)
+        check_status api[:CreateSession].call(env.read_pointer, ort_string(path_or_bytes), session_options.read_pointer, @session)
       end
       ObjectSpace.define_finalizer(self, self.class.finalize(@session))
 
