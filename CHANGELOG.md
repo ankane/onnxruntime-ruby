@@ -1,3 +1,7 @@
+## 0.4.1 (unreleased)
+
+- Fixed `mul_1.onnx` example
+
 ## 0.4.0 (2020-07-20)
 
 - Updated ONNX Runtime to 1.4.0

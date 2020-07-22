@@ -217,7 +217,7 @@ class OnnxRuntimeTest < Minitest::Test
 
   def test_examples
     assert_example "logreg_iris.onnx", ["float_input"]
-    # assert_example "mul_1.onnx", ["X"]
+    assert_example "mul_1.onnx", ["X"]
     assert_example "sigmoid.onnx", ["x"]
 
     error = assert_raises(ArgumentError) do
