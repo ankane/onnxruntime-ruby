@@ -5,7 +5,6 @@ task default: :test
 Rake::TestTask.new do |t|
   t.libs << "test"
   t.pattern = "test/**/*_test.rb"
-  t.warning = false
 end
 
 shared_libraries = %w(libonnxruntime.so libonnxruntime.dylib onnxruntime.dll)

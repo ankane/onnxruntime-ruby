@@ -124,7 +124,7 @@ module OnnxRuntime
       check_status api[:SessionGetModelMetadata].call(read_pointer, metadata)
 
       custom_metadata_map = {}
-      check_status = api[:ModelMetadataGetCustomMetadataMapKeys].call(metadata.read_pointer, @allocator.read_pointer, keys, num_keys)
+      check_status api[:ModelMetadataGetCustomMetadataMapKeys].call(metadata.read_pointer, @allocator.read_pointer, keys, num_keys)
       num_keys.read(:int64_t).times do |i|
         key = keys.read_pointer[i * ::FFI::Pointer.size].read_pointer.read_string
         value = ::FFI::MemoryPointer.new(:string)
@@ -176,7 +176,7 @@ module OnnxRuntime
 
     def create_input_tensor(input_feed)
       allocator_info = ::FFI::MemoryPointer.new(:pointer)
-      check_status = api[:CreateCpuMemoryInfo].call(1, 0, allocator_info)
+      check_status api[:CreateCpuMemoryInfo].call(1, 0, allocator_info)
       input_tensor = ::FFI::MemoryPointer.new(:pointer, input_feed.size)
 
       input_feed.each_with_index do |(input_name, input), idx|
@@ -236,7 +236,7 @@ module OnnxRuntime
 
     def create_from_onnx_value(out_ptr)
       out_type = ::FFI::MemoryPointer.new(:int)
-      check_status = api[:GetValueType].call(out_ptr, out_type)
+      check_status api[:GetValueType].call(out_ptr, out_type)
       type = FFI::OnnxType[out_type.read_int]
 
       case type
