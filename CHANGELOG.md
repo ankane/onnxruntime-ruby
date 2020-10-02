@@ -1,4 +1,4 @@
-## 0.5.0 (unreleased)
+## 0.5.0 (2020-10-01)
 
 - Updated ONNX Runtime to 1.5.1
 - OpenMP is now required on Mac
