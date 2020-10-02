@@ -2,7 +2,15 @@ module OnnxRuntime
   module FFI
     extend ::FFI::Library
 
-    ffi_lib Array(OnnxRuntime.ffi_lib)
+    begin
+      ffi_lib OnnxRuntime.ffi_lib
+    rescue LoadError => e
+      if e.message.include?("Library not loaded: /usr/local/opt/libomp/lib/libomp.dylib") && e.message.include?("Reason: image not found")
+        raise LoadError, "OpenMP not found. Run `brew install libomp`"
+      else
+        raise e
+      end
+    end
 
     # https://github.com/microsoft/onnxruntime/blob/master/include/onnxruntime/core/session/onnxruntime_c_api.h
     # keep same order

@@ -14,6 +14,12 @@ Add this line to your application’s Gemfile:
 gem 'onnxruntime'
 ```
 
+On Mac, also install OpenMP:
+
+```sh
+brew install libomp
+```
+
 ## Getting Started
 
 Load a model and make predictions
