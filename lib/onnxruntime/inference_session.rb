@@ -354,7 +354,7 @@ module OnnxRuntime
       offsets = output_tensor_size.times.map { |i| offsets[i].read(:size_t) }
       offsets << s_len
       output_tensor_size.times do |i|
-        result[i] = s[offsets[i]].read_string(offsets[i + 1] - offsets[i])
+        result[i] = s.get_bytes(offsets[i], offsets[i + 1] - offsets[i])
       end
       result
     end
