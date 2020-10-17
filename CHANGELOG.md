@@ -1,7 +1,7 @@
 ## 0.5.1 (unreleased)
 
 - Updated ONNX Runtime to 1.5.2
-- Added `tensor_type` option
+- Added `output_type` option
 - Improved performance for Numo array inputs
 
 ## 0.5.0 (2020-10-01)

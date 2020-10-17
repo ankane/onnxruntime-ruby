@@ -59,10 +59,10 @@ class OnnxRuntimeTest < Minitest::Test
     assert_elements_in_delta [0.6338603, 0.6715468, 0.6462883, 0.6329476, 0.6043575], output["y"].first.first
   end
 
-  def test_tensor_type
+  def test_output_type
     skip if RUBY_PLATFORM == "java"
 
-    model = OnnxRuntime::Model.new("test/support/model.onnx", tensor_type: :numo)
+    model = OnnxRuntime::Model.new("test/support/model.onnx", output_type: :numo)
 
     x = [[[0.5488135,  0.71518934, 0.60276335, 0.5448832,  0.4236548 ],
           [0.6458941,  0.4375872,  0.891773,   0.96366274, 0.3834415 ],

@@ -2,7 +2,7 @@ module OnnxRuntime
   class InferenceSession
     attr_reader :inputs, :outputs
 
-    def initialize(path_or_bytes, enable_cpu_mem_arena: true, enable_mem_pattern: true, enable_profiling: false, execution_mode: nil, graph_optimization_level: nil, inter_op_num_threads: nil, intra_op_num_threads: nil, log_severity_level: nil, log_verbosity_level: nil, logid: nil, optimized_model_filepath: nil, tensor_type: :ruby)
+    def initialize(path_or_bytes, enable_cpu_mem_arena: true, enable_mem_pattern: true, enable_profiling: false, execution_mode: nil, graph_optimization_level: nil, inter_op_num_threads: nil, intra_op_num_threads: nil, log_severity_level: nil, log_verbosity_level: nil, logid: nil, optimized_model_filepath: nil, output_type: :ruby)
       # session options
       session_options = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:CreateSessionOptions].call(session_options)
@@ -77,7 +77,7 @@ module OnnxRuntime
       end
 
       # Ruby-specific
-      @tensor_type = tensor_type
+      @output_type = output_type
     ensure
       # release :SessionOptions, session_options
     end
@@ -269,7 +269,7 @@ module OnnxRuntime
         # TODO support more types
         type = FFI::TensorElementDataType[type]
 
-        case @tensor_type
+        case @output_type
         when :numo
           numo_type = numo_types[type]
           numo_type.from_binary(tensor_data.read_pointer.read_bytes(output_tensor_size * numo_type::ELEMENT_BYTE_SIZE), shape)
@@ -286,7 +286,7 @@ module OnnxRuntime
 
           Utils.reshape(arr, shape)
         else
-          raise ArgumentError, "Invalid tensor type: #{@tensor_type}"
+          raise ArgumentError, "Invalid output type: #{@output_type}"
         end
       when :sequence
         out = ::FFI::MemoryPointer.new(:size_t)
