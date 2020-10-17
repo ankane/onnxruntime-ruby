@@ -347,10 +347,12 @@ module OnnxRuntime
     def create_strings_from_onnx_value(out_ptr, output_tensor_size, result)
       len = ::FFI::MemoryPointer.new(:size_t)
       check_status api[:GetStringTensorDataLength].call(out_ptr, len)
+
       s_len = len.read(:size_t)
       s = ::FFI::MemoryPointer.new(:uchar, s_len)
       offsets = ::FFI::MemoryPointer.new(:size_t, output_tensor_size)
       check_status api[:GetStringTensorContent].call(out_ptr, s, s_len, offsets, output_tensor_size)
+
       offsets = output_tensor_size.times.map { |i| offsets[i].read(:size_t) }
       offsets << s_len
       output_tensor_size.times do |i|
