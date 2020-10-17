@@ -180,17 +180,18 @@ module OnnxRuntime
       input_tensor = ::FFI::MemoryPointer.new(:pointer, input_feed.size)
 
       input_feed.each_with_index do |(input_name, input), idx|
-        input = input.to_a unless input.is_a?(Array)
+        if numo_array?(input)
+          shape = input.shape
+        else
+          input = input.to_a unless input.is_a?(Array)
 
-        shape = []
-        s = input
-        while s.is_a?(Array)
-          shape << s.size
-          s = s.first
+          shape = []
+          s = input
+          while s.is_a?(Array)
+            shape << s.size
+            s = s.first
+          end
         end
-
-        flat_input = input.flatten
-        input_tensor_size = flat_input.size
 
         # TODO support more types
         inp = @inputs.find { |i| i[:name] == input_name.to_s }
@@ -201,6 +202,8 @@ module OnnxRuntime
 
         if inp[:type] == "tensor(string)"
           input_tensor_values = ::FFI::MemoryPointer.new(:pointer, input_tensor_size)
+          # TODO make more performant for Numo
+          flat_input = input.flatten.to_a
           input_tensor_values.write_array_of_pointer(flat_input.map { |v| ::FFI::MemoryPointer.from_string(v) })
           type_enum = FFI::TensorElementDataType[:string]
           check_status api[:CreateTensorAsOrtValue].call(@allocator.read_pointer, input_node_dims, shape.size, type_enum, input_tensor[idx])
@@ -210,12 +213,18 @@ module OnnxRuntime
           tensor_type = tensor_types[inp[:type]]
 
           if tensor_type
-            input_tensor_values = ::FFI::MemoryPointer.new(tensor_type, input_tensor_size)
-            if tensor_type == :bool
-              tensor_type = :uchar
-              flat_input = flat_input.map { |v| v ? 1 : 0 }
+            if numo_array?(input)
+              input_tensor_values = input.cast_to(numo_types[tensor_type]).to_binary
+            else
+              flat_input = input.flatten.to_a
+              input_tensor_values = ::FFI::MemoryPointer.new(tensor_type, flat_input.size)
+              if tensor_type == :bool
+                tensor_type = :uchar
+                flat_input = flat_input.map { |v| v ? 1 : 0 }
+              end
+              input_tensor_values.send("write_array_of_#{tensor_type}", flat_input)
             end
-            input_tensor_values.send("write_array_of_#{tensor_type}", flat_input)
+
             type_enum = FFI::TensorElementDataType[tensor_type]
           else
             unsupported_type("input", inp[:type])
@@ -388,6 +397,26 @@ module OnnxRuntime
 
     def unsupported_type(name, type)
       raise Error, "Unsupported #{name} type: #{type}"
+    end
+
+    def numo_array?(obj)
+      defined?(Numo::NArray) && obj.is_a?(Numo::NArray)
+    end
+
+    def numo_types
+      @numo_types ||= {
+        float: Numo::SFloat,
+        uint8: Numo::UInt8,
+        int8: Numo::Int8,
+        uint16: Numo::UInt16,
+        int16: Numo::Int16,
+        int32: Numo::Int32,
+        int64: Numo::Int64,
+        bool: Numo::UInt8,
+        double: Numo::DFloat,
+        uint32: Numo::UInt32,
+        uint64: Numo::UInt64
+      }
     end
 
     def api
