@@ -212,7 +212,6 @@ module OnnxRuntime
           check_status api[:CreateTensorAsOrtValue].call(@allocator.read_pointer, input_node_dims, shape.size, type_enum, input_tensor[idx])
           check_status api[:FillStringTensor].call(input_tensor[idx].read_pointer, input_tensor_values, flat_input.size)
         else
-          tensor_types = [:float, :uint8, :int8, :uint16, :int16, :int32, :int64, :bool, :double, :uint32, :uint64].map { |v| ["tensor(#{v})", v] }.to_h
           tensor_type = tensor_types[inp[:type]]
 
           if tensor_type
@@ -409,6 +408,10 @@ module OnnxRuntime
 
     def unsupported_type(name, type)
       raise Error, "Unsupported #{name} type: #{type}"
+    end
+
+    def tensor_types
+      @tensor_types ||= [:float, :uint8, :int8, :uint16, :int16, :int32, :int64, :bool, :double, :uint32, :uint64].map { |v| ["tensor(#{v})", v] }.to_h
     end
 
     def numo_array?(obj)
