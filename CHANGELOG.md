@@ -1,6 +1,7 @@
 ## 0.5.1 (unreleased)
 
 - Updated ONNX Runtime to 1.5.2
+- Added support for string output
 - Added `output_type` option
 - Improved performance for Numo array inputs
 

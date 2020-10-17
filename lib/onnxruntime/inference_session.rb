@@ -277,8 +277,16 @@ module OnnxRuntime
 
         case @output_type
         when :numo
-          numo_type = numo_types[type]
-          numo_type.from_binary(tensor_data.read_pointer.read_bytes(output_tensor_size * numo_type::ELEMENT_BYTE_SIZE), shape)
+          case type
+          when :string
+            result = Numo::RObject.new(shape)
+            result.allocate
+            create_strings_from_onnx_value(out_ptr, output_tensor_size, result)
+          else
+            numo_type = numo_types[type]
+            unsupported_type("element", type) unless numo_type
+            numo_type.from_binary(tensor_data.read_pointer.read_bytes(output_tensor_size * numo_type::ELEMENT_BYTE_SIZE), shape)
+          end
         when :ruby
           arr =
             case type
@@ -286,6 +294,8 @@ module OnnxRuntime
               tensor_data.read_pointer.send("read_array_of_#{type}", output_tensor_size)
             when :bool
               tensor_data.read_pointer.read_array_of_uchar(output_tensor_size).map { |v| v == 1 }
+            when :string
+              create_strings_from_onnx_value(out_ptr, output_tensor_size, [])
             else
               unsupported_type("element", type)
             end
@@ -332,6 +342,21 @@ module OnnxRuntime
       else
         unsupported_type("ONNX", type)
       end
+    end
+
+    def create_strings_from_onnx_value(out_ptr, output_tensor_size, result)
+      len = ::FFI::MemoryPointer.new(:size_t)
+      check_status api[:GetStringTensorDataLength].call(out_ptr, len)
+      s_len = len.read(:size_t)
+      s = ::FFI::MemoryPointer.new(:uchar, s_len)
+      offsets = ::FFI::MemoryPointer.new(:size_t, output_tensor_size)
+      check_status api[:GetStringTensorContent].call(out_ptr, s, s_len, offsets, output_tensor_size)
+      offsets = output_tensor_size.times.map { |i| offsets[i].read(:size_t) }
+      offsets << s_len
+      output_tensor_size.times do |i|
+        result[i] = s[offsets[i]].read_string(offsets[i + 1] - offsets[i])
+      end
+      result
     end
 
     def read_pointer

@@ -33,6 +33,13 @@ class OnnxRuntimeTest < Minitest::Test
     assert_elements_in_delta [0.6338603, 0.6715468, 0.6462883, 0.6329476, 0.6043575], output["y"].first.first
   end
 
+  def test_input_string
+    model = OnnxRuntime::Model.new("test/support/identity_string.onnx")
+    x = [["one", "two"], ["three", "four"]]
+    output = model.predict({"input:0" => x})
+    assert_equal x, output["output:0"]
+  end
+
   def test_numo
     skip if RUBY_PLATFORM == "java"
 
@@ -57,6 +64,16 @@ class OnnxRuntimeTest < Minitest::Test
     output = model.predict({x: x})
     assert_kind_of Numo::SFloat, output["y"]
     assert_elements_in_delta [0.6338603, 0.6715468, 0.6462883, 0.6329476, 0.6043575], output["y"][0, 0, true]
+  end
+
+  def test_numo_string
+    skip if RUBY_PLATFORM == "java"
+
+    model = OnnxRuntime::Model.new("test/support/identity_string.onnx", output_type: :numo)
+    x = Numo::NArray.cast([["one", "two"], ["three", "four"]])
+    output = model.predict({"input:0" => x})
+    assert_kind_of Numo::RObject, output["output:0"]
+    assert_equal x.to_a, output["output:0"].to_a
   end
 
   def test_string
