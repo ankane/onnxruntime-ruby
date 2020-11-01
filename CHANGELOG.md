@@ -1,4 +1,4 @@
-## 0.5.1 (unreleased)
+## 0.5.1 (2020-11-01)
 
 - Updated ONNX Runtime to 1.5.2
 - Added support for string output

@@ -87,7 +87,8 @@ model.predict(input_feed, {
   log_severity_level: 2,
   log_verbosity_level: 0,
   logid: nil,
-  terminate: false
+  terminate: false,
+  output_type: :ruby       # :ruby or :numo
 })
 ```
 
