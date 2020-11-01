@@ -2,7 +2,7 @@ module OnnxRuntime
   class InferenceSession
     attr_reader :inputs, :outputs
 
-    def initialize(path_or_bytes, enable_cpu_mem_arena: true, enable_mem_pattern: true, enable_profiling: false, execution_mode: nil, graph_optimization_level: nil, inter_op_num_threads: nil, intra_op_num_threads: nil, log_severity_level: nil, log_verbosity_level: nil, logid: nil, optimized_model_filepath: nil, output_type: :ruby)
+    def initialize(path_or_bytes, enable_cpu_mem_arena: true, enable_mem_pattern: true, enable_profiling: false, execution_mode: nil, graph_optimization_level: nil, inter_op_num_threads: nil, intra_op_num_threads: nil, log_severity_level: nil, log_verbosity_level: nil, logid: nil, optimized_model_filepath: nil)
       # session options
       session_options = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:CreateSessionOptions].call(session_options)
@@ -75,15 +75,12 @@ module OnnxRuntime
         check_status api[:SessionGetOutputTypeInfo].call(read_pointer, i, typeinfo)
         @outputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
       end
-
-      # Ruby-specific
-      @output_type = output_type
     ensure
       # release :SessionOptions, session_options
     end
 
     # TODO support logid
-    def run(output_names, input_feed, log_severity_level: nil, log_verbosity_level: nil, logid: nil, terminate: nil)
+    def run(output_names, input_feed, log_severity_level: nil, log_verbosity_level: nil, logid: nil, terminate: nil, output_type: :ruby)
       input_tensor = create_input_tensor(input_feed)
 
       output_names ||= @outputs.map { |v| v[:name] }
@@ -103,7 +100,7 @@ module OnnxRuntime
       check_status api[:Run].call(read_pointer, run_options.read_pointer, input_node_names, input_tensor, input_feed.size, output_node_names, output_names.size, output_tensor)
 
       output_names.size.times.map do |i|
-        create_from_onnx_value(output_tensor[i].read_pointer)
+        create_from_onnx_value(output_tensor[i].read_pointer, output_type)
       end
     ensure
       release :RunOptions, run_options
@@ -251,7 +248,7 @@ module OnnxRuntime
       ptr
     end
 
-    def create_from_onnx_value(out_ptr)
+    def create_from_onnx_value(out_ptr, output_type)
       out_type = ::FFI::MemoryPointer.new(:int)
       check_status api[:GetValueType].call(out_ptr, out_type)
       type = FFI::OnnxType[out_type.read_int]
@@ -275,7 +272,7 @@ module OnnxRuntime
         # TODO support more types
         type = FFI::TensorElementDataType[type]
 
-        case @output_type
+        case output_type
         when :numo
           case type
           when :string
@@ -302,7 +299,7 @@ module OnnxRuntime
 
           Utils.reshape(arr, shape)
         else
-          raise ArgumentError, "Invalid output type: #{@output_type}"
+          raise ArgumentError, "Invalid output type: #{output_type}"
         end
       when :sequence
         out = ::FFI::MemoryPointer.new(:size_t)
@@ -311,7 +308,7 @@ module OnnxRuntime
         out.read(:size_t).times.map do |i|
           seq = ::FFI::MemoryPointer.new(:pointer)
           check_status api[:GetValue].call(out_ptr, i, @allocator.read_pointer, seq)
-          create_from_onnx_value(seq.read_pointer)
+          create_from_onnx_value(seq.read_pointer, output_type)
         end
       when :map
         type_shape = ::FFI::MemoryPointer.new(:pointer)
@@ -330,8 +327,8 @@ module OnnxRuntime
         case elem_type
         when :int64
           ret = {}
-          keys = create_from_onnx_value(map_keys.read_pointer)
-          values = create_from_onnx_value(map_values.read_pointer)
+          keys = create_from_onnx_value(map_keys.read_pointer, output_type)
+          values = create_from_onnx_value(map_values.read_pointer, output_type)
           keys.zip(values).each do |k, v|
             ret[k] = v
           end

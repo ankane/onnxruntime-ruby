@@ -43,7 +43,7 @@ class OnnxRuntimeTest < Minitest::Test
   def test_numo
     skip if RUBY_PLATFORM == "java"
 
-    model = OnnxRuntime::Model.new("test/support/model.onnx", output_type: :numo)
+    model = OnnxRuntime::Model.new("test/support/model.onnx")
 
     x = [[[0.5488135,  0.71518934, 0.60276335, 0.5448832,  0.4236548 ],
           [0.6458941,  0.4375872,  0.891773,   0.96366274, 0.3834415 ],
@@ -61,7 +61,7 @@ class OnnxRuntimeTest < Minitest::Test
           [0.16130951, 0.6531083,  0.2532916,  0.46631077, 0.2444256 ]]]
 
     x = Numo::NArray.cast(x)
-    output = model.predict({x: x})
+    output = model.predict({x: x}, output_type: :numo)
     assert_kind_of Numo::SFloat, output["y"]
     assert_elements_in_delta [0.6338603, 0.6715468, 0.6462883, 0.6329476, 0.6043575], output["y"][0, 0, true]
   end
@@ -69,9 +69,9 @@ class OnnxRuntimeTest < Minitest::Test
   def test_numo_string
     skip if RUBY_PLATFORM == "java"
 
-    model = OnnxRuntime::Model.new("test/support/identity_string.onnx", output_type: :numo)
+    model = OnnxRuntime::Model.new("test/support/identity_string.onnx")
     x = Numo::NArray.cast([["one", "two"], ["three", "four"]])
-    output = model.predict({"input:0" => x})
+    output = model.predict({"input:0" => x}, output_type: :numo)
     assert_kind_of Numo::RObject, output["output:0"]
     assert_equal x.to_a, output["output:0"].to_a
   end
