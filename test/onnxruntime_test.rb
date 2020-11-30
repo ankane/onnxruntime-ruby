@@ -158,6 +158,7 @@ class OnnxRuntimeTest < Minitest::Test
 
     session_options = {
       execution_mode: :sequential,
+      graph_optimization_level: :all,
       inter_op_num_threads: 1,
       intra_op_num_threads: 1,
       log_severity_level: 4,
