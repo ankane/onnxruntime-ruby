@@ -1,3 +1,7 @@
+## 0.5.2 (unreleased)
+
+- Fixed error with `execution_mode` option
+
 ## 0.5.1 (2020-11-01)
 
 - Updated ONNX Runtime to 1.5.2

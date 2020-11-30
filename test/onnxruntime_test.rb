@@ -157,6 +157,7 @@ class OnnxRuntimeTest < Minitest::Test
     optimized_path = "#{Dir.tmpdir}/optimized.onnx"
 
     session_options = {
+      execution_mode: :sequential,
       inter_op_num_threads: 1,
       intra_op_num_threads: 1,
       log_severity_level: 4,

@@ -34,7 +34,7 @@ module OnnxRuntime
         :CreateSessionOptions, callback(%i[pointer], :pointer),
         :SetOptimizedModelFilePath, callback(%i[pointer pointer], :pointer),
         :CloneSessionOptions, callback(%i[], :pointer),
-        :SetSessionExecutionMode, callback(%i[], :pointer),
+        :SetSessionExecutionMode, callback(%i[pointer int], :pointer),
         :EnableProfiling, callback(%i[pointer pointer], :pointer),
         :DisableProfiling, callback(%i[pointer], :pointer),
         :EnableMemPattern, callback(%i[pointer], :pointer),
