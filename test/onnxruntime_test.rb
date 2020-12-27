@@ -41,10 +41,11 @@ class OnnxRuntimeTest < Minitest::Test
   end
 
   def test_input_bool
-    model = OnnxRuntime::Model.new("test/support/bool.onnx")
-    x = [[true, true, false, true, false]]
-    output = model.predict({"input" => x})
-    assert_equal x, output["output"]
+    model = OnnxRuntime::Model.new("test/support/logical_and.onnx")
+    x = [[true, true], [false, false]]
+    x2 = [[true, false], [true, false]]
+    output = model.predict({"input:0" => x, "input1:0" => x2})
+    assert_equal [[true, false], [false, false]], output["output:0"]
   end
 
   def test_numo
@@ -86,10 +87,11 @@ class OnnxRuntimeTest < Minitest::Test
   def test_numo_bool
     skip if RUBY_PLATFORM == "java"
 
-    model = OnnxRuntime::Model.new("test/support/bool.onnx")
-    x = Numo::NArray.cast([[true, true, false, true, false]])
-    output = model.predict({"input" => x}, output_type: :numo)
-    assert_equal x.to_a, output["output"].to_a
+    model = OnnxRuntime::Model.new("test/support/logical_and.onnx")
+    x = Numo::NArray.cast([[true, true], [false, false]])
+    x2 = Numo::NArray.cast([[true, false], [true, false]])
+    output = model.predict({"input:0" => x, "input1:0" => x2}, output_type: :numo)
+    assert_equal Numo::NArray.cast([[true, false], [false, false]]).to_a, output["output:0"].to_a
   end
 
   def test_string
