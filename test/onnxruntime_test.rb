@@ -91,7 +91,7 @@ class OnnxRuntimeTest < Minitest::Test
     x = Numo::NArray.cast([[true, true], [false, false]])
     x2 = Numo::NArray.cast([[true, false], [true, false]])
     output = model.predict({"input:0" => x, "input1:0" => x2}, output_type: :numo)
-    assert_equal Numo::NArray.cast([[true, false], [false, false]]).to_a, output["output:0"].to_a
+    assert_equal [[1, 0], [0, 0]], output["output:0"].to_a
   end
 
   def test_string
