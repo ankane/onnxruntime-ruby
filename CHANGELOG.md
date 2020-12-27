@@ -1,6 +1,7 @@
 ## 0.5.2 (unreleased)
 
 - Fixed error with `execution_mode` option
+- Fixed error with `bool` input
 
 ## 0.5.1 (2020-11-01)
 
