@@ -1,5 +1,6 @@
 ## 0.5.2 (unreleased)
 
+- Updated ONNX Runtime to 1.6.0
 - Fixed error with `execution_mode` option
 - Fixed error with `bool` input
 
