@@ -1,4 +1,4 @@
-## 0.5.2 (unreleased)
+## 0.5.2 (2020-12-27)
 
 - Updated ONNX Runtime to 1.6.0
 - Fixed error with `execution_mode` option
