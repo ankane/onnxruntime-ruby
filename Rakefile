@@ -34,8 +34,11 @@ def download_official(library, remote_lib, file)
     File.binwrite(file, URI.open(url).read)
     command = file.end_with?(".zip") ? "unzip -q" : "tar xf"
     system "#{command} #{file}"
-    path = "#{dir}/#{file[0..-5]}/lib/#{remote_lib}"
-    FileUtils.cp(path, File.expand_path("vendor/#{library}", __dir__))
+    src = "#{dir}/#{file[0..-5]}"
+    dest = File.expand_path("vendor", __dir__)
+    FileUtils.cp("#{src}/lib/#{remote_lib}", "#{dest}/#{library}")
+    FileUtils.cp("#{src}/LICENSE", "#{dest}/LICENSE")
+    FileUtils.cp("#{src}/ThirdPartyNotices.txt", "#{dest}/ThirdPartyNotices.txt")
     puts "Saved vendor/#{library}"
   end
 end
