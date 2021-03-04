@@ -19,7 +19,7 @@ end
 Rake::Task["build"].enhance [:ensure_vendor]
 
 def version
-  "1.6.0"
+  "1.7.0"
 end
 
 def download_official(library, remote_lib, file)
@@ -62,8 +62,8 @@ namespace :vendor do
 
   task :windows do
     # OpenMP disabled to prevent segmentation fault
-    download_file("onnxruntime.dll")
-    # download_official("onnxruntime.dll", "onnxruntime.dll", "onnxruntime-win-x64-#{version}.zip")
+    # download_file("onnxruntime.dll")
+    download_official("onnxruntime.dll", "onnxruntime.dll", "onnxruntime-win-x64-#{version}.zip")
   end
 
   task all: [:linux, :mac, :windows]

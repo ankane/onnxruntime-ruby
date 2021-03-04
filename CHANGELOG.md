@@ -1,3 +1,8 @@
+## 0.6.0 (unreleased)
+
+- Updated ONNX Runtime to 1.7.0
+- OpenMP is no longer required
+
 ## 0.5.2 (2020-12-27)
 
 - Updated ONNX Runtime to 1.6.0
