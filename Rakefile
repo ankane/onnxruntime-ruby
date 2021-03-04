@@ -36,21 +36,17 @@ def download_official(library, remote_lib, file)
     system "#{command} #{file}"
     src = "#{dir}/#{file[0..-5]}"
     dest = File.expand_path("vendor", __dir__)
+
     FileUtils.cp("#{src}/lib/#{remote_lib}", "#{dest}/#{library}")
-    FileUtils.cp("#{src}/LICENSE", "#{dest}/LICENSE")
-    FileUtils.cp("#{src}/ThirdPartyNotices.txt", "#{dest}/ThirdPartyNotices.txt")
     puts "Saved vendor/#{library}"
+
+    if library.end_with?(".so")
+      FileUtils.cp("#{src}/LICENSE", "#{dest}/LICENSE")
+      puts "Saved vendor/LICENSE"
+      FileUtils.cp("#{src}/ThirdPartyNotices.txt", "#{dest}/ThirdPartyNotices.txt")
+      puts "Saved vendor/ThirdPartyNotices.txt"
+    end
   end
-end
-
-def download_file(file)
-  require "open-uri"
-
-  url = "https://github.com/ankane/ml-builds/releases/download/onnxruntime-#{version}/#{file}"
-  puts "Downloading #{file}..."
-  dest = "vendor/#{file}"
-  File.binwrite(dest, URI.open(url).read)
-  puts "Saved #{dest}"
 end
 
 # https://github.com/microsoft/onnxruntime/releases
@@ -64,8 +60,6 @@ namespace :vendor do
   end
 
   task :windows do
-    # OpenMP disabled to prevent segmentation fault
-    # download_file("onnxruntime.dll")
     download_official("onnxruntime.dll", "onnxruntime.dll", "onnxruntime-win-x64-#{version}.zip")
   end
 
