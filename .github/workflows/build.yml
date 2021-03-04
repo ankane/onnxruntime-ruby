@@ -14,5 +14,5 @@ jobs:
       with:
         ruby-version: 3.0
         bundler-cache: true
-    - run: bundle exec rake vendor:all
+    - run: bundle exec rake vendor:platform
     - run: bundle exec rake test
