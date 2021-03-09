@@ -22,16 +22,20 @@ def version
   "1.7.0"
 end
 
-def download_official(library, remote_lib, file)
+def download_official(library, remote_lib, file, sha256)
   require "fileutils"
   require "open-uri"
   require "tmpdir"
 
   url = "https://github.com/microsoft/onnxruntime/releases/download/v#{version}/#{file}"
   puts "Downloading #{file}..."
-  dir = Dir.mktmpdir
-  Dir.chdir(dir) do
-    File.binwrite(file, URI.open(url).read)
+  contents = URI.open(url).read
+
+  computed_sha256 = Digest::SHA256.hexdigest(contents)
+  raise "Bad hash: #{computed_sha256}" if computed_sha256 != sha256
+
+  Dir.chdir(Dir.mktmpdir) do
+    File.binwrite(file, contents)
     command = file.end_with?(".zip") ? "unzip -q" : "tar xf"
     system "#{command} #{file}"
     src = "#{dir}/#{file[0..-5]}"
@@ -52,15 +56,15 @@ end
 # https://github.com/microsoft/onnxruntime/releases
 namespace :vendor do
   task :linux do
-    download_official("libonnxruntime.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-x64-#{version}.tgz")
+    download_official("libonnxruntime.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-x64-#{version}.tgz", "0345f45f222208344406d79a6db3280ed2ccc884dc1e064ce6e6951ed4c70606")
   end
 
   task :mac do
-    download_official("libonnxruntime.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-x64-#{version}.tgz")
+    download_official("libonnxruntime.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-x64-#{version}.tgz", "5f8bde51f54915546781c3ae7572a395c05644c86de4f333dc1b1f54f0055583")
   end
 
   task :windows do
-    download_official("onnxruntime.dll", "onnxruntime.dll", "onnxruntime-win-x64-#{version}.zip")
+    download_official("onnxruntime.dll", "onnxruntime.dll", "onnxruntime-win-x64-#{version}.zip", "da8382b045473ce0a2bbf5a8d9a9e18e33e3b4cddaa59be489863416de4bdbde")
   end
 
   task all: [:linux, :mac, :windows]
