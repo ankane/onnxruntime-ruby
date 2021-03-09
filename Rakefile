@@ -38,7 +38,7 @@ def download_official(library, remote_lib, file, sha256)
     File.binwrite(file, contents)
     command = file.end_with?(".zip") ? "unzip -q" : "tar xf"
     system "#{command} #{file}"
-    src = "#{dir}/#{file[0..-5]}"
+    src = file[0..-5]
     dest = File.expand_path("vendor", __dir__)
 
     FileUtils.cp("#{src}/lib/#{remote_lib}", "#{dest}/#{library}")
