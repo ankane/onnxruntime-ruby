@@ -1,4 +1,4 @@
-## 0.6.0 (unreleased)
+## 0.6.0 (2021-03-14)
 
 - Updated ONNX Runtime to 1.7.0
 - OpenMP is no longer required
