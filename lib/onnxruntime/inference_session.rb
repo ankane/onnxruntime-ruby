@@ -81,13 +81,16 @@ module OnnxRuntime
 
     # TODO support logid
     def run(output_names, input_feed, log_severity_level: nil, log_verbosity_level: nil, logid: nil, terminate: nil, output_type: :ruby)
-      input_tensor = create_input_tensor(input_feed)
+      # pointer references
+      refs = []
+
+      input_tensor = create_input_tensor(input_feed, refs)
 
       output_names ||= @outputs.map { |v| v[:name] }
 
       output_tensor = ::FFI::MemoryPointer.new(:pointer, outputs.size)
-      input_node_names = create_node_names(input_feed.keys.map(&:to_s))
-      output_node_names = create_node_names(output_names.map(&:to_s))
+      input_node_names = create_node_names(input_feed.keys.map(&:to_s), refs)
+      output_node_names = create_node_names(output_names.map(&:to_s), refs)
 
       # run options
       run_options = ::FFI::MemoryPointer.new(:pointer)
@@ -174,7 +177,7 @@ module OnnxRuntime
 
     private
 
-    def create_input_tensor(input_feed)
+    def create_input_tensor(input_feed, refs)
       allocator_info = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:CreateCpuMemoryInfo].call(1, 0, allocator_info)
       input_tensor = ::FFI::MemoryPointer.new(:pointer, input_feed.size)
@@ -201,19 +204,21 @@ module OnnxRuntime
         input_node_dims.write_array_of_int64(shape)
 
         if inp[:type] == "tensor(string)"
-          if numo_array?(input)
-            input_tensor_size = input.size
-            input_tensor_values = ::FFI::MemoryPointer.new(:pointer, input.size)
-            input_tensor_values.write_array_of_pointer(input_tensor_size.times.map { |i| ::FFI::MemoryPointer.from_string(input[i]) })
-          else
-            flat_input = input.flatten.to_a
-            input_tensor_size = flat_input.size
-            input_tensor_values = ::FFI::MemoryPointer.new(:pointer, input_tensor_size)
-            input_tensor_values.write_array_of_pointer(flat_input.map { |v| ::FFI::MemoryPointer.from_string(v) })
-          end
+          str_ptrs =
+            if numo_array?(input)
+              input.size.times.map { |i| ::FFI::MemoryPointer.from_string(input[i]) }
+            else
+              input.flatten.map { |v| ::FFI::MemoryPointer.from_string(v) }
+            end
+
+          input_tensor_values = ::FFI::MemoryPointer.new(:pointer, str_ptrs.size)
+          input_tensor_values.write_array_of_pointer(str_ptrs)
+
           type_enum = FFI::TensorElementDataType[:string]
           check_status api[:CreateTensorAsOrtValue].call(@allocator.read_pointer, input_node_dims, shape.size, type_enum, input_tensor[idx])
-          check_status api[:FillStringTensor].call(input_tensor[idx].read_pointer, input_tensor_values, input_tensor_size)
+          check_status api[:FillStringTensor].call(input_tensor[idx].read_pointer, input_tensor_values, str_ptrs.size)
+
+          refs << str_ptrs
         else
           tensor_type = tensor_types[inp[:type]]
 
@@ -236,15 +241,23 @@ module OnnxRuntime
           end
 
           check_status api[:CreateTensorWithDataAsOrtValue].call(allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, input_tensor[idx])
+
+          refs << input_node_dims
+          refs << input_tensor_values
         end
       end
+
+      refs << allocator_info
 
       input_tensor
     end
 
-    def create_node_names(names)
+    def create_node_names(names, refs)
+      str_ptrs = names.map { |v| ::FFI::MemoryPointer.from_string(v) }
+      refs << str_ptrs
+
       ptr = ::FFI::MemoryPointer.new(:pointer, names.size)
-      ptr.write_array_of_pointer(names.map { |v| ::FFI::MemoryPointer.from_string(v) })
+      ptr.write_array_of_pointer(str_ptrs)
       ptr
     end
 
