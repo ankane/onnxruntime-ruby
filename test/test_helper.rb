@@ -12,7 +12,7 @@ class Minitest::Test
   end
 
   def teardown
-    GC.stress = false
+    GC.stress = false if stress?
   end
 
   def assert_elements_in_delta(expected, actual)
