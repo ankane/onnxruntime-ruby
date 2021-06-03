@@ -1,3 +1,7 @@
+## 0.6.2 (unreleased)
+
+- Updated ONNX Runtime to 1.8.0
+
 ## 0.6.1 (2021-05-17)
 
 - Fixed memory errors
