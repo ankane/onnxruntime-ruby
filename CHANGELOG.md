@@ -1,4 +1,4 @@
-## 0.6.2 (unreleased)
+## 0.6.2 (2021-06-03)
 
 - Updated ONNX Runtime to 1.8.0
 
