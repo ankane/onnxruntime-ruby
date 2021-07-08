@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-class OnnxRuntimeTest < Minitest::Test
+class ModelTest < Minitest::Test
   def test_basic
     model = OnnxRuntime::Model.new("test/support/model.onnx")
 
