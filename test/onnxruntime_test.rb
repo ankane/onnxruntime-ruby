@@ -1,10 +1,6 @@
 require_relative "test_helper"
 
 class OnnxRuntimeTest < Minitest::Test
-  def test_lib_version
-    assert OnnxRuntime.lib_version
-  end
-
   def test_basic
     model = OnnxRuntime::Model.new("test/support/model.onnx")
 
@@ -185,9 +181,9 @@ class OnnxRuntimeTest < Minitest::Test
       optimized_model_filepath: optimized_path
     }
 
-    sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx", **session_options)
+    model = OnnxRuntime::Model.new("test/support/lightgbm.onnx", **session_options)
     x = [[5.8, 2.8]]
-    sess.run(nil, {input: x})
+    model.predict({input: x})
 
     assert_match "onnx", File.binread(optimized_path)
   end
@@ -199,16 +195,9 @@ class OnnxRuntimeTest < Minitest::Test
       logid: "test"
     }
 
-    sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx")
+    model = OnnxRuntime::Model.new("test/support/lightgbm.onnx")
     x = [[5.8, 2.8]]
-    sess.run(nil, {input: x}, **run_options)
-  end
-
-  def test_profiling
-    sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx", enable_profiling: true)
-    file = sess.end_profiling
-    assert_match ".json", file
-    File.unlink(file)
+    model.predict({input: x}, **run_options)
   end
 
   def test_invalid_rank
@@ -252,9 +241,9 @@ class OnnxRuntimeTest < Minitest::Test
     assert_match "Invalid Output Name:bad", error.message
   end
 
-  def test_modelmeta
-    sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx")
-    metadata = sess.modelmeta
+  def test_metadata
+    model = OnnxRuntime::Model.new("test/support/model.onnx")
+    metadata = model.metadata
     assert_equal({"hello" => "world", "test" => "value"}, metadata[:custom_metadata_map])
     assert_equal "", metadata[:description]
     assert_equal "", metadata[:domain]
@@ -266,5 +255,16 @@ class OnnxRuntimeTest < Minitest::Test
   def test_providers
     sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx")
     assert_includes sess.providers, "CPUExecutionProvider"
+  end
+
+  def test_profiling
+    sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx", enable_profiling: true)
+    file = sess.end_profiling
+    assert_match ".json", file
+    File.unlink(file)
+  end
+
+  def test_lib_version
+    assert OnnxRuntime.lib_version
   end
 end
