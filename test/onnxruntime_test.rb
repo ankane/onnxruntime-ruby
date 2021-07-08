@@ -252,24 +252,6 @@ class OnnxRuntimeTest < Minitest::Test
     assert_match "Invalid Output Name:bad", error.message
   end
 
-  def test_examples
-    assert_example "logreg_iris.onnx", ["float_input"]
-    assert_example "mul_1.onnx", ["X"]
-    assert_example "sigmoid.onnx", ["x"]
-
-    error = assert_raises(ArgumentError) do
-      OnnxRuntime::Datasets.example("bad.onnx")
-    end
-    # same message as Python
-    assert_equal "Unable to find example 'bad.onnx'", error.message
-
-    # no path traversal
-    error = assert_raises(ArgumentError) do
-      OnnxRuntime::Datasets.example("../datasets/sigmoid.onnx")
-    end
-    assert_equal "Unable to find example '../datasets/sigmoid.onnx'", error.message
-  end
-
   def test_modelmeta
     sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx")
     metadata = sess.modelmeta
@@ -284,13 +266,5 @@ class OnnxRuntimeTest < Minitest::Test
   def test_providers
     sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx")
     assert_includes sess.providers, "CPUExecutionProvider"
-  end
-
-  private
-
-  def assert_example(name, input_names)
-    example = OnnxRuntime::Datasets.example(name)
-    model = OnnxRuntime::Model.new(example)
-    assert_equal input_names, model.inputs.map { |i| i[:name] }
   end
 end
