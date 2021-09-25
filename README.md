@@ -78,6 +78,7 @@ OnnxRuntime::Model.new(path_or_bytes, {
 
 ```ruby
 model.predict(input_feed, {
+  output_names: nil,
   log_severity_level: 2,
   log_verbosity_level: 0,
   logid: nil,
