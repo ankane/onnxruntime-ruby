@@ -1,10 +1,10 @@
-# ONNX Runtime
+# ONNX Runtime Ruby
 
 :fire: [ONNX Runtime](https://github.com/Microsoft/onnxruntime) - the high performance scoring engine for ML models - for Ruby
 
 Check out [an example](https://ankane.org/tensorflow-ruby)
 
-[![Build Status](https://github.com/ankane/onnxruntime/workflows/build/badge.svg?branch=master)](https://github.com/ankane/onnxruntime/actions)
+[![Build Status](https://github.com/ankane/onnxruntime-ruby/workflows/build/badge.svg?branch=master)](https://github.com/ankane/onnxruntime-ruby/actions)
 
 ## Installation
 
@@ -112,22 +112,22 @@ OnnxRuntime.ffi_lib = "path/to/lib/libonnxruntime.so" # onnxruntime.dll for Wind
 
 ## History
 
-View the [changelog](https://github.com/ankane/onnxruntime/blob/master/CHANGELOG.md)
+View the [changelog](https://github.com/ankane/onnxruntime-ruby/blob/master/CHANGELOG.md)
 
 ## Contributing
 
 Everyone is encouraged to help improve this project. Here are a few ways you can help:
 
-- [Report bugs](https://github.com/ankane/onnxruntime/issues)
-- Fix bugs and [submit pull requests](https://github.com/ankane/onnxruntime/pulls)
+- [Report bugs](https://github.com/ankane/onnxruntime-ruby/issues)
+- Fix bugs and [submit pull requests](https://github.com/ankane/onnxruntime-ruby/pulls)
 - Write, clarify, or fix documentation
 - Suggest or add new features
 
 To get started with development and testing:
 
 ```sh
-git clone https://github.com/ankane/onnxruntime.git
-cd onnxruntime
+git clone https://github.com/ankane/onnxruntime-ruby.git
+cd onnxruntime-ruby
 bundle install
 bundle exec rake vendor:all
 bundle exec rake test

@@ -4,7 +4,7 @@ Gem::Specification.new do |spec|
   spec.name          = "onnxruntime"
   spec.version       = OnnxRuntime::VERSION
   spec.summary       = "High performance scoring engine for ML models"
-  spec.homepage      = "https://github.com/ankane/onnxruntime"
+  spec.homepage      = "https://github.com/ankane/onnxruntime-ruby"
   spec.license       = "MIT"
 
   spec.author        = "Andrew Kane"
