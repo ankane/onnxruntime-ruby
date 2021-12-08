@@ -19,7 +19,7 @@ end
 Rake::Task["build"].enhance [:ensure_vendor]
 
 def version
-  "1.9.0"
+  "1.10.0"
 end
 
 def download_official(library, remote_lib, file, sha256)
@@ -56,15 +56,15 @@ end
 # https://github.com/microsoft/onnxruntime/releases
 namespace :vendor do
   task :linux do
-    download_official("libonnxruntime.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-x64-#{version}.tgz", "f386ab80e9d6d41f14ed9e61bff4acc6bf375770691bc3ba883ba0ba3cabca7f")
+    download_official("libonnxruntime.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-x64-#{version}.tgz", "cc1753424114b3f7490be8b4f79e3b1aa205c57811c011fefa68c6577d634c63")
   end
 
   task :mac do
-    download_official("libonnxruntime.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-x64-#{version}.tgz", "71517c8571186eddd31e78134ac441571494fc2f524153165f4a2fec22940d66")
+    download_official("libonnxruntime.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-universal2-#{version}.tgz", "0f7843c15cf98a270e9d180970d257247a58648d19112f6a3a920c6cae09fe3d")
   end
 
   task :windows do
-    download_official("onnxruntime.dll", "onnxruntime.dll", "onnxruntime-win-x64-#{version}.zip", "484b08c55867963bd8f74cc39d7c9b6199260f1184839cc40f37e50304597364")
+    download_official("onnxruntime.dll", "onnxruntime.dll", "onnxruntime-win-x64-#{version}.zip", "a0c6db3cff65bd282f6ba4a57789e619c27e55203321aa08c023019fe9da50d7")
   end
 
   task all: [:linux, :mac, :windows]
