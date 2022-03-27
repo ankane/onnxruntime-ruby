@@ -57,10 +57,12 @@ end
 namespace :vendor do
   task :linux do
     download_official("libonnxruntime.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-x64-#{version}.tgz", "a5c2a6f1cfdc4a5b5e4257a66c7d3c659889686a35d4f351bdc2a3cdf9879c10")
+    download_official("libonnxruntime.arm64.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-aarch64-#{version}.tgz", "22e5f232580451e5bf9b614db8d8f02f8a0e5d920d82bbe7f7d8f9539aa5252c")
   end
 
   task :mac do
-    download_official("libonnxruntime.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-universal2-#{version}.tgz", "d13676262f89e35aac83f0e450c779c2582989f5e47164395a021bb2d5956285")
+    download_official("libonnxruntime.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-x86_64-#{version}.tgz", "37a5baf65a417221e6d849ac7462f28c6b993a4ee0ea43ef39fd873a91ca3f40")
+    download_official("libonnxruntime.arm64.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-arm64-#{version}.tgz", "fc23479cf2a183ecf8a4436968314c83d00f820398019e7ca48519b49f6d521c")
   end
 
   task :windows do

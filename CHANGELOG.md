@@ -1,3 +1,7 @@
+## 0.6.7 (unreleased)
+
+- Added ARM shared library for Linux
+
 ## 0.6.6 (2022-03-27)
 
 - Updated ONNX Runtime to 1.11.0
