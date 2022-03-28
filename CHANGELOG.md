@@ -1,5 +1,6 @@
 ## 0.7.1 (unreleased)
 
+- Added `graph_description` to metadata
 - Fixed memory leaks
 - Fixed `enable_cpu_mem_arena: false`
 

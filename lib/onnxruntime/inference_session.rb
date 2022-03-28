@@ -138,6 +138,7 @@ module OnnxRuntime
       description = ::FFI::MemoryPointer.new(:string)
       domain = ::FFI::MemoryPointer.new(:string)
       graph_name = ::FFI::MemoryPointer.new(:string)
+      graph_description = ::FFI::MemoryPointer.new(:string)
       producer_name = ::FFI::MemoryPointer.new(:string)
       version = ::FFI::MemoryPointer.new(:int64_t)
 
@@ -161,6 +162,7 @@ module OnnxRuntime
       check_status api[:ModelMetadataGetDescription].call(metadata.read_pointer, @allocator.read_pointer, description)
       check_status api[:ModelMetadataGetDomain].call(metadata.read_pointer, @allocator.read_pointer, domain)
       check_status api[:ModelMetadataGetGraphName].call(metadata.read_pointer, @allocator.read_pointer, graph_name)
+      check_status api[:ModelMetadataGetGraphDescription].call(metadata.read_pointer, @allocator.read_pointer, graph_description)
       check_status api[:ModelMetadataGetProducerName].call(metadata.read_pointer, @allocator.read_pointer, producer_name)
       check_status api[:ModelMetadataGetVersion].call(metadata.read_pointer, version)
 
@@ -169,6 +171,7 @@ module OnnxRuntime
         description: description.read_pointer.read_string,
         domain: domain.read_pointer.read_string,
         graph_name: graph_name.read_pointer.read_string,
+        graph_description: graph_description.read_pointer.read_string,
         producer_name: producer_name.read_pointer.read_string,
         version: version.read(:int64_t)
       }
@@ -177,6 +180,7 @@ module OnnxRuntime
       allocator_free description
       allocator_free domain
       allocator_free graph_name
+      allocator_free graph_description
       allocator_free producer_name
     end
 

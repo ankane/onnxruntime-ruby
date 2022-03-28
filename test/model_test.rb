@@ -248,6 +248,7 @@ class ModelTest < Minitest::Test
     assert_equal "", metadata[:description]
     assert_equal "", metadata[:domain]
     assert_equal "test_sigmoid", metadata[:graph_name]
+    assert_equal "", metadata[:graph_description]
     assert_equal "backend-test", metadata[:producer_name]
     assert_equal 9223372036854775807, metadata[:version]
   end

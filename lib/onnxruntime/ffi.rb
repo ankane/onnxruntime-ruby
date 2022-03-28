@@ -179,7 +179,7 @@ module OnnxRuntime
         :SetGlobalDenormalAsZero, callback(%i[], :pointer),
         :CreateArenaCfg, callback(%i[], :pointer),
         :ReleaseArenaCfg, callback(%i[], :pointer),
-        :ModelMetadataGetGraphDescription, callback(%i[], :pointer),
+        :ModelMetadataGetGraphDescription, callback(%i[pointer pointer pointer], :pointer),
         :SessionOptionsAppendExecutionProvider_TensorRT, callback(%i[], :pointer),
         :SetCurrentGpuDeviceId, callback(%i[], :pointer),
         :GetCurrentGpuDeviceId, callback(%i[], :pointer),
