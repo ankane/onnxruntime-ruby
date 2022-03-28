@@ -11,7 +11,7 @@ Check out [an example](https://ankane.org/tensorflow-ruby)
 Add this line to your application’s Gemfile:
 
 ```ruby
-gem 'onnxruntime'
+gem "onnxruntime"
 ```
 
 ## Getting Started
