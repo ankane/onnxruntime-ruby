@@ -6,9 +6,21 @@ module OnnxRuntime
       # session options
       session_options = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:CreateSessionOptions].call(session_options)
-      check_status api[:EnableCpuMemArena].call(session_options.read_pointer) if enable_cpu_mem_arena
-      check_status api[:EnableMemPattern].call(session_options.read_pointer) if enable_mem_pattern
-      check_status api[:EnableProfiling].call(session_options.read_pointer, ort_string("onnxruntime_profile_")) if enable_profiling
+      if enable_cpu_mem_arena
+        check_status api[:EnableCpuMemArena].call(session_options.read_pointer)
+      else
+        check_status api[:DisableCpuMemArena].call(session_options.read_pointer)
+      end
+      if enable_mem_pattern
+        check_status api[:EnableMemPattern].call(session_options.read_pointer)
+      else
+        check_status api[:DisableMemPattern].call(session_options.read_pointer)
+      end
+      if enable_profiling
+        check_status api[:EnableProfiling].call(session_options.read_pointer, ort_string("onnxruntime_profile_"))
+      else
+        check_status api[:DisableProfiling].call(session_options.read_pointer)
+      end
       if execution_mode
         execution_modes = {sequential: 0, parallel: 1}
         mode = execution_modes[execution_mode]

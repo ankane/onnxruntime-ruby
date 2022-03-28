@@ -1,6 +1,7 @@
 ## 0.7.1 (unreleased)
 
 - Fixed memory leaks
+- Fixed `enable_cpu_mem_arena: false`
 
 ## 0.7.0 (2022-03-27)
 
