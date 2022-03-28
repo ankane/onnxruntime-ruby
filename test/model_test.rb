@@ -188,6 +188,22 @@ class ModelTest < Minitest::Test
     assert_match "onnx", File.binread(optimized_path)
   end
 
+  def test_free_dimension_overrides_by_denotation
+    session_options = {
+      free_dimension_overrides_by_denotation: {"DATA_BATCH" => 3, "DATA_CHANNEL" => 5}
+    }
+    model = OnnxRuntime::Model.new("test/support/abs_free_dimensions.onnx", **session_options)
+    assert_equal [3, 5, 5], model.inputs.first[:shape]
+  end
+
+  def test_free_dimension_overrides_by_name
+    session_options = {
+      free_dimension_overrides_by_name: {"Dim1" => 4, "Dim2" => 6}
+    }
+    model = OnnxRuntime::Model.new("test/support/abs_free_dimensions.onnx", **session_options)
+    assert_equal [4, 6, 5], model.inputs.first[:shape]
+  end
+
   def test_run_options
     run_options = {
       log_severity_level: 4,

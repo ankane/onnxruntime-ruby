@@ -2,6 +2,7 @@
 
 - Added `graph_description` to metadata
 - Added `profile_file_prefix` option
+- Added `free_dimension_overrides_by_denotation` and `free_dimension_overrides_by_name` options
 - Fixed memory leaks
 - Fixed `enable_cpu_mem_arena: false`
 

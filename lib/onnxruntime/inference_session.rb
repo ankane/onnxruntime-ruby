@@ -2,7 +2,7 @@ module OnnxRuntime
   class InferenceSession
     attr_reader :inputs, :outputs
 
-    def initialize(path_or_bytes, enable_cpu_mem_arena: true, enable_mem_pattern: true, enable_profiling: false, execution_mode: nil, graph_optimization_level: nil, inter_op_num_threads: nil, intra_op_num_threads: nil, log_severity_level: nil, log_verbosity_level: nil, logid: nil, optimized_model_filepath: nil, profile_file_prefix: nil)
+    def initialize(path_or_bytes, enable_cpu_mem_arena: true, enable_mem_pattern: true, enable_profiling: false, execution_mode: nil, free_dimension_overrides_by_denotation: nil, free_dimension_overrides_by_name: nil, graph_optimization_level: nil, inter_op_num_threads: nil, intra_op_num_threads: nil, log_severity_level: nil, log_verbosity_level: nil, logid: nil, optimized_model_filepath: nil, profile_file_prefix: nil)
       # session options
       session_options = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:CreateSessionOptions].call(session_options)
@@ -26,6 +26,16 @@ module OnnxRuntime
         mode = execution_modes[execution_mode]
         raise ArgumentError, "Invalid execution mode" unless mode
         check_status api[:SetSessionExecutionMode].call(session_options.read_pointer, mode)
+      end
+      if free_dimension_overrides_by_denotation
+        free_dimension_overrides_by_denotation.each do |k, v|
+          check_status api[:AddFreeDimensionOverride].call(session_options.read_pointer, k.to_s, v)
+        end
+      end
+      if free_dimension_overrides_by_name
+        free_dimension_overrides_by_name.each do |k, v|
+          check_status api[:AddFreeDimensionOverrideByName].call(session_options.read_pointer, k.to_s, v)
+        end
       end
       if graph_optimization_level
         optimization_levels = {none: 0, basic: 1, extended: 2, all: 99}

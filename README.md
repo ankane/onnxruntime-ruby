@@ -64,6 +64,8 @@ OnnxRuntime::Model.new(path_or_bytes, {
   enable_mem_pattern: true,
   enable_profiling: false,
   execution_mode: :sequential,    # :sequential or :parallel
+  free_dimension_overrides_by_denotation: nil,
+  free_dimension_overrides_by_name: nil,
   graph_optimization_level: nil,  # :none, :basic, :extended, or :all
   inter_op_num_threads: nil,
   intra_op_num_threads: nil,
