@@ -77,7 +77,7 @@ module OnnxRuntime
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetInputTypeInfo].call(read_pointer, i, typeinfo)
         @inputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
-        api[:AllocatorFree].call(allocator.read_pointer, name_ptr.read_pointer)
+        allocator_free name_ptr
       end
 
       # output
@@ -90,7 +90,7 @@ module OnnxRuntime
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetOutputTypeInfo].call(read_pointer, i, typeinfo)
         @outputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
-        api[:AllocatorFree].call(allocator.read_pointer, name_ptr.read_pointer)
+        allocator_free name_ptr
       end
     ensure
       release :SessionOptions, session_options
@@ -147,11 +147,16 @@ module OnnxRuntime
       custom_metadata_map = {}
       check_status api[:ModelMetadataGetCustomMetadataMapKeys].call(metadata.read_pointer, @allocator.read_pointer, keys, num_keys)
       num_keys.read(:int64_t).times do |i|
-        key = keys.read_pointer[i * ::FFI::Pointer.size].read_pointer.read_string
+        key_ptr = keys.read_pointer[i * ::FFI::Pointer.size]
+        key = key_ptr.read_pointer.read_string
         value = ::FFI::MemoryPointer.new(:string)
         check_status api[:ModelMetadataLookupCustomMetadataMap].call(metadata.read_pointer, @allocator.read_pointer, key, value)
         custom_metadata_map[key] = value.read_pointer.read_string
+
+        allocator_free key_ptr
+        allocator_free value
       end
+      allocator_free keys
 
       check_status api[:ModelMetadataGetDescription].call(metadata.read_pointer, @allocator.read_pointer, description)
       check_status api[:ModelMetadataGetDomain].call(metadata.read_pointer, @allocator.read_pointer, domain)
@@ -169,6 +174,10 @@ module OnnxRuntime
       }
     ensure
       release :ModelMetadata, metadata
+      allocator_free description
+      allocator_free domain
+      allocator_free graph_name
+      allocator_free producer_name
     end
 
     # return value has double underscore like Python
@@ -505,6 +514,10 @@ module OnnxRuntime
 
     def release(*args)
       self.class.release(*args)
+    end
+
+    def allocator_free(ptr)
+      api[:AllocatorFree].call(@allocator.read_pointer, ptr.read_pointer)
     end
 
     def self.api
