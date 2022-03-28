@@ -2,7 +2,7 @@ module OnnxRuntime
   class InferenceSession
     attr_reader :inputs, :outputs
 
-    def initialize(path_or_bytes, enable_cpu_mem_arena: true, enable_mem_pattern: true, enable_profiling: false, execution_mode: nil, free_dimension_overrides_by_denotation: nil, free_dimension_overrides_by_name: nil, graph_optimization_level: nil, inter_op_num_threads: nil, intra_op_num_threads: nil, log_severity_level: nil, log_verbosity_level: nil, logid: nil, optimized_model_filepath: nil, profile_file_prefix: nil)
+    def initialize(path_or_bytes, enable_cpu_mem_arena: true, enable_mem_pattern: true, enable_profiling: false, execution_mode: nil, free_dimension_overrides_by_denotation: nil, free_dimension_overrides_by_name: nil, graph_optimization_level: nil, inter_op_num_threads: nil, intra_op_num_threads: nil, log_severity_level: nil, log_verbosity_level: nil, logid: nil, optimized_model_filepath: nil, profile_file_prefix: nil, session_config_entries: nil)
       # session options
       session_options = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:CreateSessionOptions].call(session_options)
@@ -49,6 +49,11 @@ module OnnxRuntime
       check_status api[:SetSessionLogVerbosityLevel].call(session_options.read_pointer, log_verbosity_level) if log_verbosity_level
       check_status api[:SetSessionLogId].call(session_options.read_pointer, logid) if logid
       check_status api[:SetOptimizedModelFilePath].call(session_options.read_pointer, ort_string(optimized_model_filepath)) if optimized_model_filepath
+      if session_config_entries
+        session_config_entries.each do |k, v|
+          check_status api[:AddSessionConfigEntry].call(session_options.read_pointer, k.to_s, v.to_s)
+        end
+      end
 
       # session
       @session = ::FFI::MemoryPointer.new(:pointer)

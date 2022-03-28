@@ -204,6 +204,14 @@ class ModelTest < Minitest::Test
     assert_equal [4, 6, 5], model.inputs.first[:shape]
   end
 
+  # TODO improve test
+  def test_session_config_entries
+    session_options = {
+      session_config_entries: {"key" => "value"}
+    }
+    OnnxRuntime::Model.new("test/support/lightgbm.onnx", **session_options)
+  end
+
   def test_run_options
     run_options = {
       log_severity_level: 4,

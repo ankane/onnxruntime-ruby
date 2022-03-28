@@ -145,7 +145,7 @@ module OnnxRuntime
         :GetStringTensorElementLength, callback(%i[], :pointer),
         :GetStringTensorElement, callback(%i[], :pointer),
         :FillStringTensorElement, callback(%i[], :pointer),
-        :AddSessionConfigEntry, callback(%i[], :pointer),
+        :AddSessionConfigEntry, callback(%i[pointer string string], :pointer),
         :CreateAllocator, callback(%i[], :pointer),
         :ReleaseAllocator, callback(%i[], :pointer),
         :RunWithBinding, callback(%i[], :pointer),

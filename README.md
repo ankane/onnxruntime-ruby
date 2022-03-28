@@ -73,7 +73,8 @@ OnnxRuntime::Model.new(path_or_bytes, {
   log_verbosity_level: 0,
   logid: nil,
   optimized_model_filepath: nil,
-  profile_file_prefix: "onnxruntime_profile_"
+  profile_file_prefix: "onnxruntime_profile_",
+  session_config_entries: nil
 })
 ```
 
