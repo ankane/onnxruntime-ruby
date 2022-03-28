@@ -5,6 +5,14 @@ require "minitest/pride"
 require "tmpdir"
 
 class Minitest::Test
+  def setup
+    GC.stress = true if stress?
+  end
+
+  def teardown
+    GC.stress = false if stress?
+  end
+
   private
 
   def assert_elements_in_delta(expected, actual)
@@ -13,6 +21,8 @@ class Minitest::Test
       assert_in_delta exp, act
     end
   end
-end
 
-GC.stress = ENV["STRESS"]
+  def stress?
+    ENV["STRESS"]
+  end
+end
