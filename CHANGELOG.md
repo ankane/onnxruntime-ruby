@@ -1,5 +1,6 @@
-## 0.6.7 (unreleased)
+## 0.7.0 (unreleased)
 
+- Added platform-specific gems
 - Added ARM shared library for Linux
 
 ## 0.6.6 (2022-03-27)

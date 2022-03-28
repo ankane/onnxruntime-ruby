@@ -18,6 +18,29 @@ end
 
 Rake::Task["build"].enhance [:ensure_vendor]
 
+platforms = ["x86_64-linux", "aarch64-linux", "x86_64-darwin", "arm64-darwin", "x64-mingw"]
+
+task :build_platform do
+  require "fileutils"
+
+  platforms.each do |platform|
+    sh "gem", "build", "--platform", platform
+  end
+
+  FileUtils.mkdir_p("pkg")
+  Dir["*.gem"].each do |file|
+    FileUtils.move(file, "pkg")
+  end
+end
+
+task :release_platform do
+  require_relative "lib/onnxruntime/version"
+
+  Dir["pkg/onnxruntime-#{OnnxRuntime::VERSION}-*.gem"].each do |file|
+    sh "gem", "push", file
+  end
+end
+
 def version
   "1.11.0"
 end
