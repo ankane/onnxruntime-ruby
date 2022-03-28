@@ -1,4 +1,4 @@
-## 0.7.1 (unreleased)
+## 0.7.1 (2022-03-28)
 
 - Added `graph_description` to metadata
 - Added `free_dimension_overrides_by_denotation` and `free_dimension_overrides_by_name` options
