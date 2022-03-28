@@ -70,7 +70,8 @@ OnnxRuntime::Model.new(path_or_bytes, {
   log_severity_level: 2,
   log_verbosity_level: 0,
   logid: nil,
-  optimized_model_filepath: nil
+  optimized_model_filepath: nil,
+  profile_file_prefix: "onnxruntime_profile_"
 })
 ```
 

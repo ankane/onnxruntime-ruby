@@ -1,6 +1,7 @@
 ## 0.7.1 (unreleased)
 
 - Added `graph_description` to metadata
+- Added `profile_file_prefix` option
 - Fixed memory leaks
 - Fixed `enable_cpu_mem_arena: false`
 
