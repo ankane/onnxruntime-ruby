@@ -112,11 +112,7 @@ module OnnxRuntime
           release :Value, input_tensor[i]
         end
       end
-      if output_tensor
-        output_names.size.times do |i|
-          release :Value, output_tensor[i]
-        end
-      end
+      # output values released in create_from_onnx_value
     end
 
     def modelmeta
@@ -357,6 +353,8 @@ module OnnxRuntime
       else
         unsupported_type("ONNX", type)
       end
+    ensure
+      api[:ReleaseValue].call(out_ptr) unless out_ptr.null?
     end
 
     def create_strings_from_onnx_value(out_ptr, output_tensor_size, result)
