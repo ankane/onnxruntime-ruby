@@ -268,6 +268,8 @@ module OnnxRuntime
       refs << allocator_info
 
       input_tensor
+    ensure
+      release :MemoryInfo, allocator_info
     end
 
     def create_node_names(names, refs)
