@@ -78,7 +78,7 @@ module OnnxRuntime
         :GetTensorElementType, callback(%i[pointer pointer], :pointer),
         :GetDimensionsCount, callback(%i[pointer pointer], :pointer),
         :GetDimensions, callback(%i[pointer pointer size_t], :pointer),
-        :GetSymbolicDimensions, callback(%i[], :pointer),
+        :GetSymbolicDimensions, callback(%i[pointer pointer size_t], :pointer),
         :GetTensorShapeElementCount, callback(%i[pointer pointer], :pointer),
         :GetTensorTypeAndShape, callback(%i[pointer pointer], :pointer),
         :GetTypeInfo, callback(%i[pointer pointer], :pointer),
