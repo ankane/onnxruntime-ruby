@@ -525,7 +525,7 @@ module OnnxRuntime
     end
 
     def self.api
-      @api ||= FFI.OrtGetApiBase[:GetApi].call(4)
+      @api ||= FFI.OrtGetApiBase[:GetApi].call(11)
     end
 
     def self.release(type, pointer)
