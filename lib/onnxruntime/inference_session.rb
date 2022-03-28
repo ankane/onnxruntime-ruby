@@ -63,6 +63,7 @@ module OnnxRuntime
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetInputTypeInfo].call(read_pointer, i, typeinfo)
         @inputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
+        api[:AllocatorFree].call(allocator.read_pointer, name_ptr.read_pointer)
       end
 
       # output
@@ -74,6 +75,7 @@ module OnnxRuntime
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetOutputTypeInfo].call(read_pointer, i, typeinfo)
         @outputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
+        api[:AllocatorFree].call(allocator.read_pointer, name_ptr.read_pointer)
       end
     ensure
       release :SessionOptions, session_options

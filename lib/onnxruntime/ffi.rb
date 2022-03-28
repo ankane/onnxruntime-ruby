@@ -97,7 +97,7 @@ module OnnxRuntime
         :MemoryInfoGetMemType, callback(%i[], :pointer),
         :MemoryInfoGetType, callback(%i[], :pointer),
         :AllocatorAlloc, callback(%i[], :pointer),
-        :AllocatorFree, callback(%i[], :pointer),
+        :AllocatorFree, callback(%i[pointer pointer], :pointer),
         :AllocatorGetInfo, callback(%i[], :pointer),
         :GetAllocatorWithDefaultOptions, callback(%i[pointer], :pointer),
         :AddFreeDimensionOverride, callback(%i[], :pointer),
