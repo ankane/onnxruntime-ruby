@@ -295,6 +295,13 @@ class ModelTest < Minitest::Test
     File.unlink(file)
   end
 
+  def test_profile_file_prefix
+    sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx", enable_profiling: true, profile_file_prefix: "hello")
+    file = sess.end_profiling
+    assert_match "hello", file
+    File.unlink(file)
+  end
+
   def test_lib_version
     assert OnnxRuntime.lib_version
   end
