@@ -76,7 +76,7 @@ module OnnxRuntime
         @outputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
       end
     ensure
-      # release :SessionOptions, session_options
+      release :SessionOptions, session_options
     end
 
     # TODO support logid
@@ -110,6 +110,11 @@ module OnnxRuntime
       if input_tensor
         input_feed.size.times do |i|
           release :Value, input_tensor[i]
+        end
+      end
+      if output_tensor
+        output_names.size.times do |i|
+          release :Value, output_tensor[i]
         end
       end
     end

@@ -1,3 +1,7 @@
+## 0.7.1 (unreleased)
+
+- Fixed memory leaks
+
 ## 0.7.0 (2022-03-27)
 
 - Added platform-specific gems
