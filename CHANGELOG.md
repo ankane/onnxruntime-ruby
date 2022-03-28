@@ -1,8 +1,8 @@
 ## 0.7.1 (unreleased)
 
 - Added `graph_description` to metadata
-- Added `profile_file_prefix` option
 - Added `free_dimension_overrides_by_denotation` and `free_dimension_overrides_by_name` options
+- Added `profile_file_prefix` option
 - Added `session_config_entries` option
 - Fixed memory leaks
 - Fixed `enable_cpu_mem_arena: false`
