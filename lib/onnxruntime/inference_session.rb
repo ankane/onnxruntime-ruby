@@ -59,6 +59,7 @@ module OnnxRuntime
       ObjectSpace.define_finalizer(self, self.class.finalize(@session))
 
       # input info
+      # don't free allocator
       allocator = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:GetAllocatorWithDefaultOptions].call(allocator)
       @allocator = allocator
@@ -72,6 +73,7 @@ module OnnxRuntime
       num_input_nodes.read(:size_t).times do |i|
         name_ptr = ::FFI::MemoryPointer.new(:string)
         check_status api[:SessionGetInputName].call(read_pointer, i, @allocator.read_pointer, name_ptr)
+        # freed in node_info
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetInputTypeInfo].call(read_pointer, i, typeinfo)
         @inputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
@@ -84,6 +86,7 @@ module OnnxRuntime
       num_output_nodes.read(:size_t).times do |i|
         name_ptr = ::FFI::MemoryPointer.new(:string)
         check_status api[:SessionGetOutputName].call(read_pointer, i, allocator.read_pointer, name_ptr)
+        # freed in node_info
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetOutputTypeInfo].call(read_pointer, i, typeinfo)
         @outputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
