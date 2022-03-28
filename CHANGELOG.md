@@ -2,6 +2,7 @@
 
 - Added platform-specific gems
 - Added ARM shared library for Linux
+- Dropped support for Ruby < 2.7
 
 ## 0.6.6 (2022-03-27)
 
