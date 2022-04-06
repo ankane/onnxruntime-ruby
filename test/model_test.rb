@@ -303,6 +303,6 @@ class ModelTest < Minitest::Test
   end
 
   def test_lib_version
-    assert OnnxRuntime.lib_version
+    assert_match(/\A\d+\.\d+\.\d+\z/, OnnxRuntime.lib_version)
   end
 end
