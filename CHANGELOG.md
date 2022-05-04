@@ -1,3 +1,7 @@
+## 0.7.2 (unreleased)
+
+- Updated ONNX Runtime to 1.11.1
+
 ## 0.7.1 (2022-03-28)
 
 - Added `graph_description` to metadata
