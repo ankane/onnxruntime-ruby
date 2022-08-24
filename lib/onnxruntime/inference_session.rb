@@ -325,7 +325,7 @@ module OnnxRuntime
         check_status api[:GetTensorMutableData].call(out_ptr, tensor_data)
 
         out_size = ::FFI::MemoryPointer.new(:size_t)
-        output_tensor_size = api[:GetTensorShapeElementCount].call(typeinfo.read_pointer, out_size)
+        check_status api[:GetTensorShapeElementCount].call(typeinfo.read_pointer, out_size)
         output_tensor_size = out_size.read(:size_t)
 
         release :TensorTypeAndShapeInfo, typeinfo
