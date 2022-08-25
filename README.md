@@ -43,11 +43,11 @@ Get metadata
 model.metadata
 ```
 
-Load a model from a string
+Load a model from a string or other `IO` object
 
 ```ruby
-byte_str = StringIO.new("...")
-model = OnnxRuntime::Model.new(byte_str)
+io = StringIO.new("...")
+model = OnnxRuntime::Model.new(io)
 ```
 
 Get specific outputs
@@ -59,7 +59,7 @@ model.predict({x: [1, 2, 3]}, output_names: ["label"])
 ## Session Options
 
 ```ruby
-OnnxRuntime::Model.new(path_or_bytes, {
+OnnxRuntime::Model.new(path_or_io, {
   enable_cpu_mem_arena: true,
   enable_mem_pattern: true,
   enable_profiling: false,
