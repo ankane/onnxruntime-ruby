@@ -55,59 +55,12 @@ module OnnxRuntime
         end
       end
 
-      # session
-      @session = ::FFI::MemoryPointer.new(:pointer)
-      from_memory =
-        if path_or_bytes.respond_to?(:read)
-          path_or_bytes = path_or_bytes.read
-          true
-        else
-          path_or_bytes = path_or_bytes.to_str
-          # TODO remove ability to load byte string directly in 0.8.0
-          path_or_bytes.encoding == Encoding::BINARY
-        end
-
-      if from_memory
-        check_status api[:CreateSessionFromArray].call(env.read_pointer, path_or_bytes, path_or_bytes.bytesize, session_options.read_pointer, @session)
-      else
-        check_status api[:CreateSession].call(env.read_pointer, ort_string(path_or_bytes), session_options.read_pointer, @session)
-      end
+      @session = load_session(path_or_bytes, session_options)
       ObjectSpace.define_finalizer(self, self.class.finalize(@session))
 
-      # input info
-      # don't free allocator
-      allocator = ::FFI::MemoryPointer.new(:pointer)
-      check_status api[:GetAllocatorWithDefaultOptions].call(allocator)
-      @allocator = allocator
-
-      @inputs = []
-      @outputs = []
-
-      # input
-      num_input_nodes = ::FFI::MemoryPointer.new(:size_t)
-      check_status api[:SessionGetInputCount].call(read_pointer, num_input_nodes)
-      num_input_nodes.read(:size_t).times do |i|
-        name_ptr = ::FFI::MemoryPointer.new(:string)
-        check_status api[:SessionGetInputName].call(read_pointer, i, @allocator.read_pointer, name_ptr)
-        # freed in node_info
-        typeinfo = ::FFI::MemoryPointer.new(:pointer)
-        check_status api[:SessionGetInputTypeInfo].call(read_pointer, i, typeinfo)
-        @inputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
-        allocator_free name_ptr
-      end
-
-      # output
-      num_output_nodes = ::FFI::MemoryPointer.new(:size_t)
-      check_status api[:SessionGetOutputCount].call(read_pointer, num_output_nodes)
-      num_output_nodes.read(:size_t).times do |i|
-        name_ptr = ::FFI::MemoryPointer.new(:string)
-        check_status api[:SessionGetOutputName].call(read_pointer, i, allocator.read_pointer, name_ptr)
-        # freed in node_info
-        typeinfo = ::FFI::MemoryPointer.new(:pointer)
-        check_status api[:SessionGetOutputTypeInfo].call(read_pointer, i, typeinfo)
-        @outputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
-        allocator_free name_ptr
-      end
+      @allocator = load_allocator
+      @inputs = load_inputs
+      @outputs = load_outputs
     ensure
       release :SessionOptions, session_options
     end
@@ -223,6 +176,64 @@ module OnnxRuntime
     end
 
     private
+
+    def load_session(path_or_bytes, session_options)
+      session = ::FFI::MemoryPointer.new(:pointer)
+      from_memory =
+        if path_or_bytes.respond_to?(:read)
+          path_or_bytes = path_or_bytes.read
+          true
+        else
+          path_or_bytes = path_or_bytes.to_str
+          # TODO remove ability to load byte string directly in 0.8.0
+          path_or_bytes.encoding == Encoding::BINARY
+        end
+
+      if from_memory
+        check_status api[:CreateSessionFromArray].call(env.read_pointer, path_or_bytes, path_or_bytes.bytesize, session_options.read_pointer, session)
+      else
+        check_status api[:CreateSession].call(env.read_pointer, ort_string(path_or_bytes), session_options.read_pointer, session)
+      end
+      session
+    end
+
+    def load_allocator
+      allocator = ::FFI::MemoryPointer.new(:pointer)
+      check_status api[:GetAllocatorWithDefaultOptions].call(allocator)
+      allocator
+    end
+
+    def load_inputs
+      inputs = []
+      num_input_nodes = ::FFI::MemoryPointer.new(:size_t)
+      check_status api[:SessionGetInputCount].call(read_pointer, num_input_nodes)
+      num_input_nodes.read(:size_t).times do |i|
+        name_ptr = ::FFI::MemoryPointer.new(:string)
+        check_status api[:SessionGetInputName].call(read_pointer, i, @allocator.read_pointer, name_ptr)
+        # freed in node_info
+        typeinfo = ::FFI::MemoryPointer.new(:pointer)
+        check_status api[:SessionGetInputTypeInfo].call(read_pointer, i, typeinfo)
+        inputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
+        allocator_free name_ptr
+      end
+      inputs
+    end
+
+    def load_outputs
+      outputs = []
+      num_output_nodes = ::FFI::MemoryPointer.new(:size_t)
+      check_status api[:SessionGetOutputCount].call(read_pointer, num_output_nodes)
+      num_output_nodes.read(:size_t).times do |i|
+        name_ptr = ::FFI::MemoryPointer.new(:string)
+        check_status api[:SessionGetOutputName].call(read_pointer, i, @allocator.read_pointer, name_ptr)
+        # freed in node_info
+        typeinfo = ::FFI::MemoryPointer.new(:pointer)
+        check_status api[:SessionGetOutputTypeInfo].call(read_pointer, i, typeinfo)
+        outputs << {name: name_ptr.read_pointer.read_string}.merge(node_info(typeinfo))
+        allocator_free name_ptr
+      end
+      outputs
+    end
 
     def create_input_tensor(input_feed, refs)
       allocator_info = ::FFI::MemoryPointer.new(:pointer)
