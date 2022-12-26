@@ -6,18 +6,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - ruby: 3.1
-          os: ubuntu-latest
-        - ruby: "3.0"
-          os: macos-latest
-        - ruby: 2.7
-          os: windows-latest
+          - ruby: 3.2
+            os: ubuntu-latest
+          - ruby: 3.1
+            os: ubuntu-latest
+          - ruby: "3.0"
+            os: macos-latest
+          - ruby: 2.7
+            os: windows-latest
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
-    - uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: ${{ matrix.ruby }}
-        bundler-cache: true
-    - run: bundle exec rake vendor:platform
-    - run: bundle exec rake test
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - run: bundle exec rake vendor:platform
+      - run: bundle exec rake test
