@@ -52,7 +52,7 @@ def download_official(library, remote_lib, file, sha256)
 
   url = "https://github.com/microsoft/onnxruntime/releases/download/v#{version}/#{file}"
   puts "Downloading #{file}..."
-  contents = URI.open(url).read
+  contents = URI.parse(url).read
 
   computed_sha256 = Digest::SHA256.hexdigest(contents)
   raise "Bad hash: #{computed_sha256}" if computed_sha256 != sha256
