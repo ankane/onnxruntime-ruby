@@ -1,7 +1,7 @@
 import numpy
-import onnxruntime as rt
+import onnxruntime as ort
 
-sess = rt.InferenceSession("test/support/model.onnx")
+sess = ort.InferenceSession("test/support/model.onnx")
 input_name = sess.get_inputs()[0].name
 numpy.random.seed(0)
 X = numpy.random.random((3, 4, 5)).astype(numpy.float32)
