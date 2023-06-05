@@ -2,11 +2,11 @@
 require "ffi"
 
 # modules
-require "onnxruntime/datasets"
-require "onnxruntime/inference_session"
-require "onnxruntime/model"
-require "onnxruntime/utils"
-require "onnxruntime/version"
+require_relative "onnxruntime/datasets"
+require_relative "onnxruntime/inference_session"
+require_relative "onnxruntime/model"
+require_relative "onnxruntime/utils"
+require_relative "onnxruntime/version"
 
 module OnnxRuntime
   class Error < StandardError; end
