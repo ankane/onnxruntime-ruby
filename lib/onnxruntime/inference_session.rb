@@ -56,7 +56,7 @@ module OnnxRuntime
       end
 
       @session = load_session(path_or_bytes, session_options)
-      ObjectSpace.define_finalizer(self, self.class.finalize(@session))
+      ObjectSpace.define_finalizer(@session, self.class.finalize(@session.to_i))
 
       @allocator = load_allocator
       @inputs = load_inputs
@@ -566,9 +566,9 @@ module OnnxRuntime
       api[:"Release#{type}"].call(pointer.read_pointer) if pointer && !pointer.null?
     end
 
-    def self.finalize(session)
+    def self.finalize(addr)
       # must use proc instead of stabby lambda
-      proc { release :Session, session }
+      proc { release :Session, ::FFI::Pointer.new(:pointer, addr) }
     end
 
     # wide string on Windows

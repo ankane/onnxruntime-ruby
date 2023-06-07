@@ -302,6 +302,12 @@ class ModelTest < Minitest::Test
     File.unlink(file)
   end
 
+  def test_copy
+    sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx")
+    sess.dup
+    sess.clone
+  end
+
   def test_lib_version
     assert_match(/\A\d+\.\d+\.\d+\z/, OnnxRuntime.lib_version)
   end
