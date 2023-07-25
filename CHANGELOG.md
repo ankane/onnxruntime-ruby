@@ -1,4 +1,4 @@
-## 0.7.7 (unreleased)
+## 0.7.7 (2023-07-24)
 
 - Updated ONNX Runtime to 1.15.1
 - Fixed error with `dup` and `clone`
