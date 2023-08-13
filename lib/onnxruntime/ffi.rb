@@ -199,6 +199,7 @@ module OnnxRuntime
         :FillSparseTensorCsr, callback(%i[], :pointer),
         :FillSparseTensorBlockSparse, callback(%i[], :pointer),
         :CreateSparseTensorWithValuesAsOrtValue, callback(%i[], :pointer),
+        :UseCooIndices, callback(%i[], :pointer),
         :UseCsrIndices, callback(%i[], :pointer),
         :UseBlockSparseIndices, callback(%i[], :pointer),
         :GetSparseTensorFormat, callback(%i[], :pointer),
