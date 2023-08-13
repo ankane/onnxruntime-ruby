@@ -289,11 +289,9 @@ class ModelTest < Minitest::Test
   end
 
   def test_providers_cuda
-    # TODO fallback to CPU without error
-    error = assert_raises(OnnxRuntime::Error) do
-      OnnxRuntime::InferenceSession.new("test/support/model.onnx", providers: ["CUDAExecutionProvider"])
+    assert_output nil, /Provider not available: CUDAExecutionProvider/ do
+      OnnxRuntime::InferenceSession.new("test/support/model.onnx", providers: ["CUDAExecutionProvider", "CPUExecutionProvider"])
     end
-    assert_equal "CUDA execution provider is not enabled in this build.", error.message
   end
 
   def test_profiling

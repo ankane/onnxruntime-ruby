@@ -55,6 +55,11 @@ module OnnxRuntime
         end
       end
       providers.each do |provider|
+        unless self.providers.include?(provider)
+          warn "Provider not available: #{provider}"
+          next
+        end
+
         case provider
         when "CUDAExecutionProvider"
           cuda_options = ::FFI::MemoryPointer.new(:pointer)
