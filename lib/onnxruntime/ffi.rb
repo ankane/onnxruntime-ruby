@@ -219,11 +219,11 @@ module OnnxRuntime
         :SetGlobalCustomJoinThreadFn, callback(%i[], :pointer),
         :SynchronizeBoundInputs, callback(%i[], :pointer),
         :SynchronizeBoundOutputs, callback(%i[], :pointer),
-        :SessionOptionsAppendExecutionProvider_CUDA_V2, callback(%i[], :pointer),
-        :CreateCUDAProviderOptions, callback(%i[], :pointer),
-        :UpdateCUDAProviderOptions, callback(%i[], :pointer),
-        :GetCUDAProviderOptionsAsString, callback(%i[], :pointer),
-        :ReleaseCUDAProviderOptions, callback(%i[], :pointer),
+        :SessionOptionsAppendExecutionProvider_CUDA_V2, callback(%i[pointer pointer], :pointer),
+        :CreateCUDAProviderOptions, callback(%i[pointer], :pointer),
+        :UpdateCUDAProviderOptions, callback(%i[pointer pointer pointer size_t], :pointer),
+        :GetCUDAProviderOptionsAsString, callback(%i[pointer pointer pointer], :pointer),
+        :ReleaseCUDAProviderOptions, callback(%i[pointer], :void),
         :SessionOptionsAppendExecutionProvider_MIGraphX, callback(%i[], :pointer)
     end
 

@@ -2,7 +2,7 @@ module OnnxRuntime
   class InferenceSession
     attr_reader :inputs, :outputs
 
-    def initialize(path_or_bytes, enable_cpu_mem_arena: true, enable_mem_pattern: true, enable_profiling: false, execution_mode: nil, free_dimension_overrides_by_denotation: nil, free_dimension_overrides_by_name: nil, graph_optimization_level: nil, inter_op_num_threads: nil, intra_op_num_threads: nil, log_severity_level: nil, log_verbosity_level: nil, logid: nil, optimized_model_filepath: nil, profile_file_prefix: nil, session_config_entries: nil)
+    def initialize(path_or_bytes, enable_cpu_mem_arena: true, enable_mem_pattern: true, enable_profiling: false, execution_mode: nil, free_dimension_overrides_by_denotation: nil, free_dimension_overrides_by_name: nil, graph_optimization_level: nil, inter_op_num_threads: nil, intra_op_num_threads: nil, log_severity_level: nil, log_verbosity_level: nil, logid: nil, optimized_model_filepath: nil, profile_file_prefix: nil, session_config_entries: nil, providers: [])
       # session options
       session_options = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:CreateSessionOptions].call(session_options)
@@ -52,6 +52,16 @@ module OnnxRuntime
       if session_config_entries
         session_config_entries.each do |k, v|
           check_status api[:AddSessionConfigEntry].call(session_options.read_pointer, k.to_s, v.to_s)
+        end
+      end
+      providers.each do |provider|
+        if provider == "CUDAExecutionProvider"
+          cuda_options = ::FFI::MemoryPointer.new(:pointer)
+          check_status api[:CreateCUDAProviderOptions].call(cuda_options)
+          check_status api[:SessionOptionsAppendExecutionProvider_CUDA_V2].call(session_options.read_pointer, cuda_options.read_pointer)
+          release :CUDAProviderOptions, cuda_options
+        else
+          raise ArgumentError, "Provider not supported: #{provider}"
         end
       end
 

@@ -1,3 +1,7 @@
+## 0.7.8 (unreleased)
+
+- Fixed GPU support
+
 ## 0.7.7 (2023-07-24)
 
 - Updated ONNX Runtime to 1.15.1
