@@ -55,11 +55,14 @@ module OnnxRuntime
         end
       end
       providers.each do |provider|
-        if provider == "CUDAExecutionProvider"
+        case provider
+        when "CUDAExecutionProvider"
           cuda_options = ::FFI::MemoryPointer.new(:pointer)
           check_status api[:CreateCUDAProviderOptions].call(cuda_options)
           check_status api[:SessionOptionsAppendExecutionProvider_CUDA_V2].call(session_options.read_pointer, cuda_options.read_pointer)
           release :CUDAProviderOptions, cuda_options
+        when "CPUExecutionProvider"
+          break
         else
           raise ArgumentError, "Provider not supported: #{provider}"
         end
