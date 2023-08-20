@@ -68,6 +68,11 @@ module OnnxRuntime
           release :CUDAProviderOptions, cuda_options
         when "CPUExecutionProvider"
           break
+        when "TensorrtExecutionProvider"
+          tensor_rt_options = ::FFI::MemoryPointer.new(:pointer)
+          check_status api[:CreateTensorRTProviderOptions].call(tensor_rt_options)
+          check_status api[:SessionOptionsAppendExecutionProvider_TensorRT_V2].call(session_options.read_pointer, tensor_rt_options.read_pointer)
+          release :TensorRTProviderOptions, tensor_rt_options
         else
           raise ArgumentError, "Provider not supported: #{provider}"
         end
