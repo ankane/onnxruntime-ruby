@@ -2,6 +2,7 @@
 
 - Updated ONNX Runtime to 1.16.0
 - Fixed GPU support
+- Dropped support for Ruby < 3
 
 ## 0.7.7 (2023-07-24)
 
