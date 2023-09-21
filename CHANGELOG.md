@@ -1,6 +1,7 @@
 ## 0.8.0 (unreleased)
 
 - Updated ONNX Runtime to 1.16.0
+- Changed inputs and outputs to return symbolic dimension names
 - Fixed GPU support
 - Dropped support for Ruby < 3
 

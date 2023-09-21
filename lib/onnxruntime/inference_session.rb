@@ -527,11 +527,10 @@ module OnnxRuntime
       check_status api[:GetDimensions].call(tensor_info.read_pointer, node_dims, num_dims)
       dims = node_dims.read_array_of_int64(num_dims)
 
-      # TODO uncomment in 0.8.0
-      # symbolic_dims = ::FFI::MemoryPointer.new(:pointer, num_dims)
-      # check_status api[:GetSymbolicDimensions].call(tensor_info.read_pointer, symbolic_dims, num_dims)
-      # named_dims = num_dims.times.map { |i| symbolic_dims[i].read_pointer.read_string }
-      # dims = named_dims.zip(dims).map { |n, d| n.empty? ? d : n }
+      symbolic_dims = ::FFI::MemoryPointer.new(:pointer, num_dims)
+      check_status api[:GetSymbolicDimensions].call(tensor_info.read_pointer, symbolic_dims, num_dims)
+      named_dims = num_dims.times.map { |i| symbolic_dims[i].read_pointer.read_string }
+      dims = named_dims.zip(dims).map { |n, d| n.empty? ? d : n }
 
       [type.read_int, dims]
     end

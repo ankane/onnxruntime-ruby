@@ -204,10 +204,9 @@ class ModelTest < Minitest::Test
     assert_equal [4, 6, 5], model.inputs.first[:shape]
   end
 
-  # TODO change to ["Dim1", "Dim2", 5] to match Python in 0.8.0
   def test_input_shape_names
     model = OnnxRuntime::Model.new("test/support/abs_free_dimensions.onnx")
-    assert_equal [-1, -1, 5], model.inputs.first[:shape]
+    assert_equal ["Dim1", "Dim2", 5], model.inputs.first[:shape]
   end
 
   # TODO improve test
