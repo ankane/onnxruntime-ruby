@@ -1,4 +1,4 @@
-## 0.8.0 (unreleased)
+## 0.8.0 (2023-09-20)
 
 - Updated ONNX Runtime to 1.16.0
 - Changed inputs and outputs to return symbolic dimension names

@@ -114,7 +114,7 @@ To enable GPU support on Linux and Windows, download the appropriate [GPU releas
 OnnxRuntime.ffi_lib = "path/to/lib/libonnxruntime.so" # onnxruntime.dll for Windows
 ```
 
-and use: [unreleased]
+and use:
 
 ```ruby
 model = OnnxRuntime::Model.new("model.onnx", providers: ["CUDAExecutionProvider"])
