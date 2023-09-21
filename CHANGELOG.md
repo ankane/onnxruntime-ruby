@@ -4,6 +4,7 @@
 - Changed inputs and outputs to return symbolic dimension names
 - Fixed GPU support
 - Dropped support for Ruby < 3
+- Dropped support for loading models from binary string (use `StringIO` instead)
 
 ## 0.7.7 (2023-07-24)
 

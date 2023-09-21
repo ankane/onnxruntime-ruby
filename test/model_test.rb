@@ -90,13 +90,6 @@ class ModelTest < Minitest::Test
     assert_equal [[0, 0], [1, 0]], output["output:0"].to_a
   end
 
-  def test_string
-    contents = File.binread("test/support/model.onnx")
-    model = OnnxRuntime::Model.new(contents)
-    expected = [{name: "x", type: "tensor(float)", shape: [3, 4, 5]}]
-    assert_equal expected, model.inputs
-  end
-
   def test_io
     model = File.open("test/support/model.onnx", "rb") { |f| OnnxRuntime::Model.new(f) }
     expected = [{name: "x", type: "tensor(float)", shape: [3, 4, 5]}]

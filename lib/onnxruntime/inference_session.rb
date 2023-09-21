@@ -203,8 +203,7 @@ module OnnxRuntime
           true
         else
           path_or_bytes = path_or_bytes.to_str
-          # TODO remove ability to load byte string directly in 0.8.0
-          path_or_bytes.encoding == Encoding::BINARY
+          false
         end
 
       if from_memory
