@@ -7,7 +7,7 @@ module OnnxRuntime
     # https://github.com/microsoft/onnxruntime/blob/master/include/onnxruntime/core/session/onnxruntime_c_api.h
     # keep same order
 
-    ORT_API_VERSION = 11
+    ORT_API_VERSION = 16
 
     # enums
     TensorElementDataType = enum(:undefined, :float, :uint8, :int8, :uint16, :int16, :int32, :int64, :string, :bool, :float16, :double, :uint32, :uint64, :complex64, :complex128, :bfloat16)
