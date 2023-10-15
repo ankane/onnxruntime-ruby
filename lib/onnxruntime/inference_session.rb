@@ -614,8 +614,11 @@ module OnnxRuntime
       Utils.mutex.synchronize do
         @@env ||= begin
           env = ::FFI::MemoryPointer.new(:pointer)
-          check_status api[:CreateEnv].call(3, "Default", env)
-          at_exit { release :Env, env }
+          logging_function = ::FFI::Function.new(:void, [:pointer, :int, :pointer, :pointer, :pointer, :pointer]) do |param, severity, category, logid, code_location, message|
+            puts message.read_string
+          end
+          env.instance_variable_set(:@logging_function, logging_function)
+          check_status api[:CreateEnvWithCustomLogger].call(logging_function, nil, 0, "Default", env)
           # disable telemetry
           # https://github.com/microsoft/onnxruntime/blob/master/docs/Privacy.md
           check_status api[:DisableTelemetryEvents].call(env)

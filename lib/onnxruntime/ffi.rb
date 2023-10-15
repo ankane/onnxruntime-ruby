@@ -19,7 +19,7 @@ module OnnxRuntime
         :GetErrorCode, callback(%i[pointer], :pointer),
         :GetErrorMessage, callback(%i[pointer], :pointer),
         :CreateEnv, callback(%i[int string pointer], :pointer),
-        :CreateEnvWithCustomLogger, callback(%i[], :pointer),
+        :CreateEnvWithCustomLogger, callback(%i[pointer pointer int string pointer], :pointer),
         :EnableTelemetryEvents, callback(%i[pointer], :pointer),
         :DisableTelemetryEvents, callback(%i[pointer], :pointer),
         :CreateSession, callback(%i[pointer pointer pointer pointer], :pointer),
