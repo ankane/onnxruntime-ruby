@@ -260,7 +260,7 @@ class ModelTest < Minitest::Test
     error = assert_raises(OnnxRuntime::Error) do
       model.predict({input: x}, output_names: ["bad"])
     end
-    assert_match "Invalid Output Name:bad", error.message
+    assert_match "Invalid output name: bad", error.message
   end
 
   def test_metadata
