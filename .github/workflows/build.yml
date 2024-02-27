@@ -6,8 +6,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # sometimes hangs with Ruby 3.3 on ubuntu-22.04
           - ruby: 3.3
-            os: ubuntu-22.04
+            os: ubuntu-20.04
           - ruby: 3.2
             os: ubuntu-20.04
           - ruby: 3.1
