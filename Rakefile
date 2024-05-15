@@ -42,7 +42,7 @@ task :release_platform do
 end
 
 def version
-  "1.17.1"
+  "1.17.3"
 end
 
 def download_official(library, remote_lib, file, sha256)
@@ -79,17 +79,17 @@ end
 # https://github.com/microsoft/onnxruntime/releases
 namespace :vendor do
   task :linux do
-    download_official("libonnxruntime.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-x64-#{version}.tgz", "89b153af88746665909c758a06797175ae366280cbf25502c41eb5955f9a555e")
-    download_official("libonnxruntime.arm64.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-aarch64-#{version}.tgz", "70b6f536bb7ab5961d128e9dbd192368ac1513bffb74fe92f97aac342fbd0ac1")
+    download_official("libonnxruntime.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-x64-#{version}.tgz", "f2f11f9da1e3e19b22a8b378b9af57a58433f40e3db6a803e75c0ec0eba97a20")
+    download_official("libonnxruntime.arm64.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-aarch64-#{version}.tgz", "9f801577bd99676d1d821022e52b1f4554f56339ae3606c7b5ff3155f443c921")
   end
 
   task :mac do
-    download_official("libonnxruntime.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-x86_64-#{version}.tgz", "86c6b6896434084ff5086eebc4e9ea90be1ed4d46743f92864f46ee43e7b5059")
-    download_official("libonnxruntime.arm64.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-arm64-#{version}.tgz", "89566f424624a7ad9a7d9d5e413c44b9639a994d7171cf409901d125b16e2bb3")
+    download_official("libonnxruntime.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-x86_64-#{version}.tgz", "6292ad3d2e095b54b012a9fce7361f39fbac0b75fb6e9b1d9c320874515182e8")
+    download_official("libonnxruntime.arm64.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-arm64-#{version}.tgz", "236c49c9065213b0ec9dec874e3619da3d01cbc8b984bb24291247293454d0f4")
   end
 
   task :windows do
-    download_official("onnxruntime.dll", "onnxruntime.dll", "onnxruntime-win-x64-#{version}.zip", "4802af9598db02153d7da39432a48823ff69b2fb4b59155461937f20782aa91c")
+    download_official("onnxruntime.dll", "onnxruntime.dll", "onnxruntime-win-x64-#{version}.zip", "356a33d024f2709786bebd5d4ca06cd5392875da95daa0455aae72edc8993256")
   end
 
   task all: [:linux, :mac, :windows]
