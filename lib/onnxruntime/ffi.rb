@@ -224,7 +224,16 @@ module OnnxRuntime
         :UpdateCUDAProviderOptions, callback(%i[pointer pointer pointer size_t], :pointer),
         :GetCUDAProviderOptionsAsString, callback(%i[pointer pointer pointer], :pointer),
         :ReleaseCUDAProviderOptions, callback(%i[pointer], :void),
-        :SessionOptionsAppendExecutionProvider_MIGraphX, callback(%i[], :pointer)
+        :SessionOptionsAppendExecutionProvider_MIGraphX, callback(%i[], :pointer),
+        :AddExternalInitializers, callback(%i[], :pointer),
+        :CreateOpAttr, callback(%i[], :pointer),
+        :ReleaseOpAddr, callback(%i[pointer], :void),
+        :CreateOp, callback(%i[], :pointer),
+        :InvokeOp, callback(%i[], :pointer),
+        :ReleaseOp, callback(%i[pointer], :void),
+        :SessionOptionsAppendExecutionProvider, callback(%i[pointer pointer pointer pointer size_t], :pointer),
+        :CopyKernelInfo, callback(%i[], :pointer),
+        :ReleaseKernelInfo, callback(%i[pointer], :void)
     end
 
     class ApiBase < ::FFI::Struct
