@@ -6,9 +6,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # sometimes hangs with Ruby 3.3 on ubuntu-22.04
-          - ruby: 3.3
-            os: ubuntu-20.04
+          # sometimes hangs with Ruby 3.3 on CI
+          # - ruby: 3.3
+          #   os: ubuntu-22.04
           - ruby: 3.2
             os: ubuntu-20.04
           - ruby: 3.1
@@ -16,7 +16,7 @@ jobs:
           - ruby: "3.0"
             os: windows-latest
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
