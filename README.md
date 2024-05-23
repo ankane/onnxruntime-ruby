@@ -4,7 +4,7 @@
 
 Check out [an example](https://ankane.org/tensorflow-ruby)
 
-[![Build Status](https://github.com/ankane/onnxruntime-ruby/workflows/build/badge.svg?branch=master)](https://github.com/ankane/onnxruntime-ruby/actions)
+[![Build Status](https://github.com/ankane/onnxruntime-ruby/actions/workflows/build.yml/badge.svg)](https://github.com/ankane/onnxruntime-ruby/actions)
 
 ## Installation
 
