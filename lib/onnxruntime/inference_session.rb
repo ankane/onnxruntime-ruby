@@ -282,16 +282,9 @@ module OnnxRuntime
           type_enum = FFI::TensorElementDataType[:string]
           check_status api[:CreateTensorAsOrtValue].call(@allocator.read_pointer, input_node_dims, shape.size, type_enum, input_tensor[idx])
 
-          str_ptrs =
-            if numo_array?(input)
-              input.size.times.map { |i| ::FFI::MemoryPointer.from_string(input[i]) }
-            else
-              input.flatten.map { |v| ::FFI::MemoryPointer.from_string(v) }
-            end
-
-          input_tensor_values = ::FFI::MemoryPointer.new(:pointer, str_ptrs.size)
-          input_tensor_values.write_array_of_pointer(str_ptrs)
-          check_status api[:FillStringTensor].call(input_tensor[idx].read_pointer, input_tensor_values, str_ptrs.size)
+          # keep reference to _str_ptrs until FillStringTensor call
+          input_tensor_values, _str_ptrs = create_input_strings(input)
+          check_status api[:FillStringTensor].call(input_tensor[idx].read_pointer, input_tensor_values, input_tensor_values.size / input_tensor_values.type_size)
         elsif (tensor_type = tensor_types[inp[:type]])
           input_tensor_values = create_input_data(input, tensor_type)
           type_enum = FFI::TensorElementDataType[tensor_type]
@@ -306,6 +299,19 @@ module OnnxRuntime
       input_tensor
     ensure
       release :MemoryInfo, allocator_info
+    end
+
+    def create_input_strings(input)
+      str_ptrs =
+        if numo_array?(input)
+          input.size.times.map { |i| ::FFI::MemoryPointer.from_string(input[i]) }
+        else
+          input.flatten.map { |v| ::FFI::MemoryPointer.from_string(v) }
+        end
+
+      input_tensor_values = ::FFI::MemoryPointer.new(:pointer, str_ptrs.size)
+      input_tensor_values.write_array_of_pointer(str_ptrs)
+      [input_tensor_values, str_ptrs]
     end
 
     def create_input_data(input, tensor_type)
