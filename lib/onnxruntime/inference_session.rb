@@ -292,30 +292,25 @@ module OnnxRuntime
           type_enum = FFI::TensorElementDataType[:string]
           check_status api[:CreateTensorAsOrtValue].call(@allocator.read_pointer, input_node_dims, shape.size, type_enum, input_tensor[idx])
           check_status api[:FillStringTensor].call(input_tensor[idx].read_pointer, input_tensor_values, str_ptrs.size)
-        else
-          tensor_type = tensor_types[inp[:type]]
-
-          if tensor_type
-            if numo_array?(input)
-              input_tensor_values = input.cast_to(numo_types[tensor_type]).to_binary
-            else
-              flat_input = input.flatten.to_a
-              input_tensor_values = ::FFI::MemoryPointer.new(tensor_type, flat_input.size)
-              if tensor_type == :bool
-                input_tensor_values.write_array_of_uint8(flat_input.map { |v| v ? 1 : 0 })
-              else
-                input_tensor_values.send("write_array_of_#{tensor_type}", flat_input)
-              end
-            end
-
-            type_enum = FFI::TensorElementDataType[tensor_type]
+        elsif (tensor_type = tensor_types[inp[:type]])
+          if numo_array?(input)
+            input_tensor_values = input.cast_to(numo_types[tensor_type]).to_binary
           else
-            unsupported_type("input", inp[:type])
+            flat_input = input.flatten.to_a
+            input_tensor_values = ::FFI::MemoryPointer.new(tensor_type, flat_input.size)
+            if tensor_type == :bool
+              input_tensor_values.write_array_of_uint8(flat_input.map { |v| v ? 1 : 0 })
+            else
+              input_tensor_values.send("write_array_of_#{tensor_type}", flat_input)
+            end
           end
 
+          type_enum = FFI::TensorElementDataType[tensor_type]
           check_status api[:CreateTensorWithDataAsOrtValue].call(allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, input_tensor[idx])
 
           refs << input_tensor_values
+        else
+          unsupported_type("input", inp[:type])
         end
       end
 
