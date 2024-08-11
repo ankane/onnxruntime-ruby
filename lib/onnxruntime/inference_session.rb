@@ -293,8 +293,8 @@ module OnnxRuntime
           input_tensor_values.write_array_of_pointer(str_ptrs)
           check_status api[:FillStringTensor].call(input_tensor[idx].read_pointer, input_tensor_values, str_ptrs.size)
         elsif (tensor_type = tensor_types[inp[:type]])
-          type_enum = FFI::TensorElementDataType[tensor_type]
           input_tensor_values = create_input_data(input, tensor_type)
+          type_enum = FFI::TensorElementDataType[tensor_type]
           check_status api[:CreateTensorWithDataAsOrtValue].call(allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, input_tensor[idx])
 
           refs << input_tensor_values
