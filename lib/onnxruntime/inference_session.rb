@@ -258,6 +258,10 @@ module OnnxRuntime
       input_tensor = ::FFI::MemoryPointer.new(:pointer, input_feed.size)
 
       input_feed.each_with_index do |(input_name, input), idx|
+        # TODO support more types
+        inp = @inputs.find { |i| i[:name] == input_name.to_s }
+        raise Error, "Unknown input: #{input_name}" unless inp
+
         if numo_array?(input)
           shape = input.shape
         else
@@ -270,10 +274,6 @@ module OnnxRuntime
             s = s.first
           end
         end
-
-        # TODO support more types
-        inp = @inputs.find { |i| i[:name] == input_name.to_s }
-        raise Error, "Unknown input: #{input_name}" unless inp
 
         input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
         input_node_dims.write_array_of_int64(shape)
