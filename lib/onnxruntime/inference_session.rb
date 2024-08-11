@@ -579,7 +579,7 @@ module OnnxRuntime
     end
 
     def self.api
-      @api ||= FFI.OrtGetApiBase[:GetApi].call(FFI::ORT_API_VERSION)
+      FFI.api
     end
 
     def self.release(type, pointer)

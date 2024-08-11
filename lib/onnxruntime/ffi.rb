@@ -246,6 +246,10 @@ module OnnxRuntime
 
     attach_function :OrtGetApiBase, %i[], ApiBase.by_ref
 
+    def self.api
+      @api ||= self.OrtGetApiBase[:GetApi].call(ORT_API_VERSION)
+    end
+
     if Gem.win_platform?
       class Libc
         extend ::FFI::Library
