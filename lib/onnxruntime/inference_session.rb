@@ -262,18 +262,8 @@ module OnnxRuntime
         inp = @inputs.find { |i| i[:name] == input_name.to_s }
         raise Error, "Unknown input: #{input_name}" unless inp
 
-        if numo_array?(input)
-          shape = input.shape
-        else
-          input = input.to_a unless input.is_a?(Array)
-
-          shape = []
-          s = input
-          while s.is_a?(Array)
-            shape << s.size
-            s = s.first
-          end
-        end
+        input = input.to_a unless input.is_a?(Array) || numo_array?(input)
+        shape = input_shape(input)
 
         input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
         input_node_dims.write_array_of_int64(shape)
@@ -299,6 +289,20 @@ module OnnxRuntime
       input_tensor
     ensure
       release :MemoryInfo, allocator_info
+    end
+
+    def input_shape(input)
+      if numo_array?(input)
+        input.shape
+      else
+        shape = []
+        s = input
+        while s.is_a?(Array)
+          shape << s.size
+          s = s.first
+        end
+        shape
+      end
     end
 
     def create_input_strings(input)
