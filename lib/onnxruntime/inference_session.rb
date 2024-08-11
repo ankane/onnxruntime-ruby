@@ -292,8 +292,6 @@ module OnnxRuntime
           type_enum = FFI::TensorElementDataType[:string]
           check_status api[:CreateTensorAsOrtValue].call(@allocator.read_pointer, input_node_dims, shape.size, type_enum, input_tensor[idx])
           check_status api[:FillStringTensor].call(input_tensor[idx].read_pointer, input_tensor_values, str_ptrs.size)
-
-          refs << str_ptrs
         else
           tensor_type = tensor_types[inp[:type]]
 
