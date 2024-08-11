@@ -317,12 +317,9 @@ module OnnxRuntime
 
           check_status api[:CreateTensorWithDataAsOrtValue].call(allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, input_tensor[idx])
 
-          refs << input_node_dims
           refs << input_tensor_values
         end
       end
-
-      refs << allocator_info
 
       input_tensor
     ensure
