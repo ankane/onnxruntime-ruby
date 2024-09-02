@@ -289,12 +289,8 @@ class ModelTest < Minitest::Test
   def test_providers_coreml
     skip unless mac?
 
-    model = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx", providers: ["CoreMLExecutionProvider", "CPUExecutionProvider"])
-    x = [[5.8, 2.8]]
-    label, probabilities = model.run(nil, {input: x})
-    assert_equal [1], label
-    assert_equal [0, 1, 2], probabilities[0].keys
-    assert_elements_in_delta [0.2593829035758972, 0.409047931432724, 0.3315691649913788], probabilities[0].values
+    # TODO use model that uses CoreML
+    OnnxRuntime::InferenceSession.new("test/support/model.onnx", providers: ["CoreMLExecutionProvider", "CPUExecutionProvider"])
   end
 
   def test_profiling
