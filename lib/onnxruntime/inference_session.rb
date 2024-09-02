@@ -71,7 +71,7 @@ module OnnxRuntime
             raise ArgumentError, "Provider not supported: #{provider}"
           end
 
-          coreml_flags = 0x010 # COREML_FLAG_CREATE_MLPROGRAM
+          coreml_flags = 0
           check_status FFI.OrtSessionOptionsAppendExecutionProvider_CoreML(session_options.read_pointer, coreml_flags)
         when "CPUExecutionProvider"
           break
