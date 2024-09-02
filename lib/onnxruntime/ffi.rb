@@ -257,5 +257,11 @@ module OnnxRuntime
         attach_function :mbstowcs, %i[pointer string size_t], :size_t
       end
     end
+
+    # https://github.com/microsoft/onnxruntime/blob/main/include/onnxruntime/core/providers/coreml/coreml_provider_factory.h
+    begin
+      attach_function :OrtSessionOptionsAppendExecutionProvider_CoreML, %i[pointer uint32], :pointer
+    rescue FFI::NotFoundError
+    end
   end
 end

@@ -66,6 +66,13 @@ module OnnxRuntime
           check_status api[:CreateCUDAProviderOptions].call(cuda_options)
           check_status api[:SessionOptionsAppendExecutionProvider_CUDA_V2].call(session_options.read_pointer, cuda_options.read_pointer)
           release :CUDAProviderOptions, cuda_options
+        when "CoreMLExecutionProvider"
+          unless FFI.respond_to?(:OrtSessionOptionsAppendExecutionProvider_CoreML)
+            raise ArgumentError, "Provider not supported: #{provider}"
+          end
+
+          coreml_flags = 0x010 # COREML_FLAG_CREATE_MLPROGRAM
+          check_status FFI.OrtSessionOptionsAppendExecutionProvider_CoreML(session_options.read_pointer, coreml_flags)
         when "CPUExecutionProvider"
           break
         else

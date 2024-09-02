@@ -22,6 +22,10 @@ class Minitest::Test
     end
   end
 
+  def mac?
+    RbConfig::CONFIG["host_os"] =~ /darwin/i
+  end
+
   def stress?
     ENV["STRESS"]
   end
