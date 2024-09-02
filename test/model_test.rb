@@ -289,8 +289,13 @@ class ModelTest < Minitest::Test
   def test_providers_coreml
     skip unless mac?
 
-    # TODO use model that uses CoreML
-    OnnxRuntime::InferenceSession.new("test/support/model.onnx", providers: ["CoreMLExecutionProvider", "CPUExecutionProvider"])
+    options = {providers: ["CoreMLExecutionProvider", "CPUExecutionProvider"]}
+    options[:log_severity_level] = 1 if ENV["VERBOSE"]
+    model = OnnxRuntime::InferenceSession.new("datasets/mul_1.onnx", **options)
+    output, _ = model.run(nil, {"X" => [[1, 2], [3, 4], [5, 6]]})
+    assert_elements_in_delta [1, 4], output[0]
+    assert_elements_in_delta [9, 16], output[1]
+    assert_elements_in_delta [25, 36], output[2]
   end
 
   def test_profiling
