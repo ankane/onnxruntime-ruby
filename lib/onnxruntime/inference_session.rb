@@ -68,7 +68,7 @@ module OnnxRuntime
           release :CUDAProviderOptions, cuda_options
         when "CoreMLExecutionProvider"
           unless FFI.respond_to?(:OrtSessionOptionsAppendExecutionProvider_CoreML)
-            raise ArgumentError, "Provider not supported: #{provider}"
+            raise ArgumentError, "Provider not available: #{provider}"
           end
 
           coreml_flags = 0
