@@ -108,7 +108,9 @@ OnnxRuntime::Datasets.example("sigmoid.onnx")
 
 ## GPU Support
 
-To enable GPU support on Linux and Windows, download the appropriate [GPU release](https://github.com/microsoft/onnxruntime/releases) and set:
+### Linux and Windows
+
+Download the appropriate [GPU release](https://github.com/microsoft/onnxruntime/releases) and set:
 
 ```ruby
 OnnxRuntime.ffi_lib = "path/to/lib/libonnxruntime.so" # onnxruntime.dll for Windows
@@ -118,6 +120,14 @@ and use:
 
 ```ruby
 model = OnnxRuntime::Model.new("model.onnx", providers: ["CUDAExecutionProvider"])
+```
+
+### Mac
+
+Use:
+
+```ruby
+model = OnnxRuntime::Model.new("model.onnx", providers: ["CoreMLExecutionProvider"])
 ```
 
 ## History
