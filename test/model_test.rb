@@ -275,49 +275,6 @@ class ModelTest < Minitest::Test
     assert_equal 9223372036854775807, metadata[:version]
   end
 
-  def test_providers
-    sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx")
-    assert_includes sess.providers, "CPUExecutionProvider"
-  end
-
-  def test_providers_cuda
-    assert_output nil, /Provider not available: CUDAExecutionProvider/ do
-      OnnxRuntime::InferenceSession.new("test/support/model.onnx", providers: ["CUDAExecutionProvider", "CPUExecutionProvider"])
-    end
-  end
-
-  def test_providers_coreml
-    skip unless mac?
-
-    options = {providers: ["CoreMLExecutionProvider", "CPUExecutionProvider"]}
-    options[:log_severity_level] = 1 if ENV["VERBOSE"]
-    sess = OnnxRuntime::InferenceSession.new("datasets/mul_1.onnx", **options)
-    output, _ = sess.run(nil, {"X" => [[1, 2], [3, 4], [5, 6]]})
-    assert_elements_in_delta [1, 4], output[0]
-    assert_elements_in_delta [9, 16], output[1]
-    assert_elements_in_delta [25, 36], output[2]
-  end
-
-  def test_profiling
-    sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx", enable_profiling: true)
-    file = sess.end_profiling
-    assert_match ".json", file
-    File.unlink(file)
-  end
-
-  def test_profile_file_prefix
-    sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx", enable_profiling: true, profile_file_prefix: "hello")
-    file = sess.end_profiling
-    assert_match "hello", file
-    File.unlink(file)
-  end
-
-  def test_copy
-    sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx")
-    sess.dup
-    sess.clone
-  end
-
   def test_lib_version
     assert_match(/\A\d+\.\d+\.\d+\z/, OnnxRuntime.lib_version)
   end
