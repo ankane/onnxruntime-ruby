@@ -234,7 +234,7 @@ class ModelTest < Minitest::Test
     assert_equal "seq(map(int64,tensor(float)))", output[1].data_type
   end
 
-  def test_run_with_ort_values_invalid
+  def test_run_with_ort_values_invalid_type
     sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx")
     x = OnnxRuntime::OrtValue.ortvalue_from_numo(Numo::DFloat.cast([[5.8, 2.8]]))
     error = assert_raises(OnnxRuntime::Error) do
