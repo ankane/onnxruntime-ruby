@@ -83,7 +83,7 @@ module OnnxRuntime
       @session = load_session(path_or_bytes, session_options)
       ObjectSpace.define_finalizer(@session, self.class.finalize(read_pointer.to_i))
 
-      @allocator = load_allocator
+      @allocator = Utils.allocator
       @inputs = load_inputs
       @outputs = load_outputs
     ensure
@@ -98,7 +98,7 @@ module OnnxRuntime
 
       outputs = run_with_ort_values(output_names, ort_values, log_severity_level: log_severity_level, log_verbosity_level: log_verbosity_level, logid: logid, terminate: terminate)
 
-      outputs.map { |v| create_from_onnx_value(v.send(:out_ptr), output_type) }
+      outputs.map { |v| Utils.create_from_onnx_value(v.send(:out_ptr), output_type) }
     ensure
       if ort_values
         ort_values.each do |_, v|
@@ -234,12 +234,6 @@ module OnnxRuntime
       session
     end
 
-    def load_allocator
-      allocator = ::FFI::MemoryPointer.new(:pointer)
-      check_status api[:GetAllocatorWithDefaultOptions].call(allocator)
-      allocator
-    end
-
     def load_inputs
       inputs = []
       num_input_nodes = ::FFI::MemoryPointer.new(:size_t)
@@ -340,7 +334,7 @@ module OnnxRuntime
 
     def create_input_data(input, tensor_type)
       if numo_array?(input)
-        input.cast_to(numo_types[tensor_type]).to_binary
+        input.cast_to(Utils.numo_types[tensor_type]).to_binary
       else
         flat_input = input.flatten.to_a
         input_tensor_values = ::FFI::MemoryPointer.new(tensor_type, flat_input.size)
@@ -362,118 +356,6 @@ module OnnxRuntime
       ptr
     end
 
-    def create_from_onnx_value(out_ptr, output_type)
-      out_type = ::FFI::MemoryPointer.new(:int)
-      check_status api[:GetValueType].call(out_ptr, out_type)
-      type = FFI::OnnxType[out_type.read_int]
-
-      case type
-      when :tensor
-        typeinfo = ::FFI::MemoryPointer.new(:pointer)
-        check_status api[:GetTensorTypeAndShape].call(out_ptr, typeinfo)
-
-        type, shape = Utils.tensor_type_and_shape(typeinfo)
-
-        tensor_data = ::FFI::MemoryPointer.new(:pointer)
-        check_status api[:GetTensorMutableData].call(out_ptr, tensor_data)
-
-        out_size = ::FFI::MemoryPointer.new(:size_t)
-        check_status api[:GetTensorShapeElementCount].call(typeinfo.read_pointer, out_size)
-        output_tensor_size = out_size.read(:size_t)
-
-        release :TensorTypeAndShapeInfo, typeinfo
-
-        # TODO support more types
-        type = FFI::TensorElementDataType[type]
-
-        case output_type
-        when :numo
-          case type
-          when :string
-            result = Numo::RObject.new(shape)
-            result.allocate
-            create_strings_from_onnx_value(out_ptr, output_tensor_size, result)
-          else
-            numo_type = numo_types[type]
-            Utils.unsupported_type("element", type) unless numo_type
-            numo_type.from_binary(tensor_data.read_pointer.read_bytes(output_tensor_size * numo_type::ELEMENT_BYTE_SIZE), shape)
-          end
-        when :ruby
-          arr =
-            case type
-            when :float, :uint8, :int8, :uint16, :int16, :int32, :int64, :double, :uint32, :uint64
-              tensor_data.read_pointer.send("read_array_of_#{type}", output_tensor_size)
-            when :bool
-              tensor_data.read_pointer.read_array_of_uint8(output_tensor_size).map { |v| v == 1 }
-            when :string
-              create_strings_from_onnx_value(out_ptr, output_tensor_size, [])
-            else
-              Utils.unsupported_type("element", type)
-            end
-
-          Utils.reshape(arr, shape)
-        else
-          raise ArgumentError, "Invalid output type: #{output_type}"
-        end
-      when :sequence
-        out = ::FFI::MemoryPointer.new(:size_t)
-        check_status api[:GetValueCount].call(out_ptr, out)
-
-        out.read(:size_t).times.map do |i|
-          seq = ::FFI::MemoryPointer.new(:pointer)
-          check_status api[:GetValue].call(out_ptr, i, @allocator.read_pointer, seq)
-          create_from_onnx_value(seq.read_pointer, output_type)
-        end
-      when :map
-        type_shape = ::FFI::MemoryPointer.new(:pointer)
-        map_keys = ::FFI::MemoryPointer.new(:pointer)
-        map_values = ::FFI::MemoryPointer.new(:pointer)
-        elem_type = ::FFI::MemoryPointer.new(:int)
-
-        check_status api[:GetValue].call(out_ptr, 0, @allocator.read_pointer, map_keys)
-        check_status api[:GetValue].call(out_ptr, 1, @allocator.read_pointer, map_values)
-        check_status api[:GetTensorTypeAndShape].call(map_keys.read_pointer, type_shape)
-        check_status api[:GetTensorElementType].call(type_shape.read_pointer, elem_type)
-        release :TensorTypeAndShapeInfo, type_shape
-
-        # TODO support more types
-        elem_type = FFI::TensorElementDataType[elem_type.read_int]
-        case elem_type
-        when :int64
-          ret = {}
-          keys = create_from_onnx_value(map_keys.read_pointer, output_type)
-          values = create_from_onnx_value(map_values.read_pointer, output_type)
-          keys.zip(values).each do |k, v|
-            ret[k] = v
-          end
-          ret
-        else
-          Utils.unsupported_type("element", elem_type)
-        end
-      else
-        Utils.unsupported_type("ONNX", type)
-      end
-    ensure
-      api[:ReleaseValue].call(out_ptr) unless out_ptr.null?
-    end
-
-    def create_strings_from_onnx_value(out_ptr, output_tensor_size, result)
-      len = ::FFI::MemoryPointer.new(:size_t)
-      check_status api[:GetStringTensorDataLength].call(out_ptr, len)
-
-      s_len = len.read(:size_t)
-      s = ::FFI::MemoryPointer.new(:uchar, s_len)
-      offsets = ::FFI::MemoryPointer.new(:size_t, output_tensor_size)
-      check_status api[:GetStringTensorContent].call(out_ptr, s, s_len, offsets, output_tensor_size)
-
-      offsets = output_tensor_size.times.map { |i| offsets[i].read(:size_t) }
-      offsets << s_len
-      output_tensor_size.times do |i|
-        result[i] = s.get_bytes(offsets[i], offsets[i + 1] - offsets[i])
-      end
-      result
-    end
-
     def read_pointer
       @session.read_pointer
     end
@@ -488,22 +370,6 @@ module OnnxRuntime
 
     def numo_array?(obj)
       defined?(Numo::NArray) && obj.is_a?(Numo::NArray)
-    end
-
-    def numo_types
-      @numo_types ||= {
-        float: Numo::SFloat,
-        uint8: Numo::UInt8,
-        int8: Numo::Int8,
-        uint16: Numo::UInt16,
-        int16: Numo::Int16,
-        int32: Numo::Int32,
-        int64: Numo::Int64,
-        bool: Numo::UInt8,
-        double: Numo::DFloat,
-        uint32: Numo::UInt32,
-        uint64: Numo::UInt64
-      }
     end
 
     def api

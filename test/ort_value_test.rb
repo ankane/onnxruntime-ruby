@@ -9,5 +9,6 @@ class OrtValueTest < Minitest::Test
     assert_equal 1, value.element_type
     assert_equal [1, 2], value.shape
     assert_equal "cpu", value.device_name
+    assert_equal x, value.numo
   end
 end

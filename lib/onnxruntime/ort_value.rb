@@ -48,6 +48,10 @@ module OnnxRuntime
       "cpu"
     end
 
+    def numo
+      Utils.create_from_onnx_value(out_ptr, :numo)
+    end
+
     private
 
     def out_ptr
