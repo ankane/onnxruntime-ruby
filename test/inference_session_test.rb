@@ -22,6 +22,13 @@ class InferenceSessionTest < Minitest::Test
     assert_equal "Unexpected input data type. Actual: (tensor(double)) , expected: (tensor(float))", error.message
   end
 
+  def test_run_ort_value_input
+    sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx")
+    x = OnnxRuntime::OrtValue.ortvalue_from_numo(Numo::SFloat.cast([[5.8, 2.8]]))
+    output = sess.run(nil, {input: x})
+    assert_equal [1], output[0]
+  end
+
   def test_providers
     sess = OnnxRuntime::InferenceSession.new("test/support/model.onnx")
     assert_includes sess.providers, "CPUExecutionProvider"
