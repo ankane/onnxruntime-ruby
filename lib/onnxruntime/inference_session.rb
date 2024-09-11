@@ -264,11 +264,9 @@ module OnnxRuntime
     end
 
     def create_input_tensor(input_feed, refs)
-      allocator_info = ::FFI::MemoryPointer.new(:pointer)
-      check_status api[:CreateCpuMemoryInfo].call(1, 0, allocator_info)
-      input_tensor = input_feed.map { ::FFI::MemoryPointer.new(:pointer) }
+      input_feed.map.with_index do |(input_name, input), idx|
+        ptr = ::FFI::MemoryPointer.new(:pointer)
 
-      input_feed.each_with_index do |(input_name, input), idx|
         # TODO support more types
         inp = @inputs.find { |i| i[:name] == input_name.to_s }
         raise Error, "Unknown input: #{input_name}" unless inp
@@ -281,25 +279,22 @@ module OnnxRuntime
 
         if inp[:type] == "tensor(string)"
           type_enum = FFI::TensorElementDataType[:string]
-          check_status api[:CreateTensorAsOrtValue].call(@allocator.read_pointer, input_node_dims, shape.size, type_enum, input_tensor[idx])
+          check_status api[:CreateTensorAsOrtValue].call(@allocator.read_pointer, input_node_dims, shape.size, type_enum, ptr)
 
           # keep reference to _str_ptrs until FillStringTensor call
           input_tensor_values, _str_ptrs = create_input_strings(input)
-          check_status api[:FillStringTensor].call(input_tensor[idx].read_pointer, input_tensor_values, input_tensor_values.size / input_tensor_values.type_size)
+          check_status api[:FillStringTensor].call(ptr.read_pointer, input_tensor_values, input_tensor_values.size / input_tensor_values.type_size)
+          OrtValue.new(ptr)
         elsif (tensor_type = tensor_types[inp[:type]])
           input_tensor_values = create_input_data(input, tensor_type)
-          type_enum = FFI::TensorElementDataType[tensor_type]
-          check_status api[:CreateTensorWithDataAsOrtValue].call(allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, input_tensor[idx])
-
           refs << input_tensor_values
+          type_enum = FFI::TensorElementDataType[tensor_type]
+          check_status api[:CreateTensorWithDataAsOrtValue].call(OrtValue.allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr)
+          OrtValue.new(ptr)
         else
           Utils.unsupported_type("input", inp[:type])
         end
       end
-
-      input_tensor.map { |v| OrtValue.new(v) }
-    ensure
-      release :MemoryInfo, allocator_info
     end
 
     def input_shape(input)
