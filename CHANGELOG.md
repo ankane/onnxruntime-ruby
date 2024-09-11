@@ -1,3 +1,7 @@
+## 0.9.3 (unreleased)
+
+- Added experimental `run_with_ort_values` method
+
 ## 0.9.2 (2024-09-04)
 
 - Updated ONNX Runtime to 1.19.2
