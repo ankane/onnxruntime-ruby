@@ -359,7 +359,7 @@ module OnnxRuntime
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:GetTensorTypeAndShape].call(out_ptr, typeinfo)
 
-        type, shape = tensor_type_and_shape(typeinfo)
+        type, shape = Utils.tensor_type_and_shape(typeinfo)
 
         tensor_data = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:GetTensorMutableData].call(out_ptr, tensor_data)
@@ -466,11 +466,7 @@ module OnnxRuntime
     end
 
     def check_status(status)
-      unless status.null?
-        message = api[:GetErrorMessage].call(status).read_string
-        api[:ReleaseStatus].call(status)
-        raise Error, message
-      end
+      Utils.check_status(status)
     end
 
     def node_info(typeinfo)
@@ -484,7 +480,7 @@ module OnnxRuntime
         # don't free tensor_info
         check_status api[:CastTypeInfoToTensorInfo].call(typeinfo.read_pointer, tensor_info)
 
-        type, shape = tensor_type_and_shape(tensor_info)
+        type, shape = Utils.tensor_type_and_shape(tensor_info)
         {
           type: "tensor(#{FFI::TensorElementDataType[type]})",
           shape: shape
@@ -523,26 +519,6 @@ module OnnxRuntime
       end
     ensure
       release :TypeInfo, typeinfo
-    end
-
-    def tensor_type_and_shape(tensor_info)
-      type = ::FFI::MemoryPointer.new(:int)
-      check_status api[:GetTensorElementType].call(tensor_info.read_pointer, type)
-
-      num_dims_ptr = ::FFI::MemoryPointer.new(:size_t)
-      check_status api[:GetDimensionsCount].call(tensor_info.read_pointer, num_dims_ptr)
-      num_dims = num_dims_ptr.read(:size_t)
-
-      node_dims = ::FFI::MemoryPointer.new(:int64, num_dims)
-      check_status api[:GetDimensions].call(tensor_info.read_pointer, node_dims, num_dims)
-      dims = node_dims.read_array_of_int64(num_dims)
-
-      symbolic_dims = ::FFI::MemoryPointer.new(:pointer, num_dims)
-      check_status api[:GetSymbolicDimensions].call(tensor_info.read_pointer, symbolic_dims, num_dims)
-      named_dims = num_dims.times.map { |i| symbolic_dims[i].read_pointer.read_string }
-      dims = named_dims.zip(dims).map { |n, d| n.empty? ? d : n }
-
-      [type.read_int, dims]
     end
 
     def unsupported_type(name, type)
@@ -590,7 +566,7 @@ module OnnxRuntime
     end
 
     def self.release(type, pointer)
-      api[:"Release#{type}"].call(pointer.read_pointer) if pointer && !pointer.null?
+      Utils.release(type, pointer)
     end
 
     def self.finalize(addr)
