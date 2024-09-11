@@ -269,12 +269,12 @@ module OnnxRuntime
         raise Error, "Unknown input: #{input_name}" unless inp
 
         input = input.to_a unless input.is_a?(Array) || Utils.numo_array?(input)
-        shape = Utils.input_shape(input)
-
-        input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
-        input_node_dims.write_array_of_int64(shape)
 
         if inp[:type] == "tensor(string)"
+          shape = Utils.input_shape(input)
+          input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
+          input_node_dims.write_array_of_int64(shape)
+
           type_enum = FFI::TensorElementDataType[:string]
           check_status api[:CreateTensorAsOrtValue].call(@allocator.read_pointer, input_node_dims, shape.size, type_enum, ptr)
 
