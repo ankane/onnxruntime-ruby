@@ -95,10 +95,7 @@ module OnnxRuntime
         raise ArgumentError, "Invalid output type: #{output_type}"
       end
 
-      # pointer references
-      refs = []
-
-      ort_values = input_feed.keys.zip(create_input_tensor(input_feed, refs)).to_h
+      ort_values = input_feed.keys.zip(create_input_tensor(input_feed)).to_h
 
       outputs = run_with_ort_values(output_names, ort_values, log_severity_level: log_severity_level, log_verbosity_level: log_verbosity_level, logid: logid, terminate: terminate)
 
@@ -263,7 +260,7 @@ module OnnxRuntime
       outputs
     end
 
-    def create_input_tensor(input_feed, refs)
+    def create_input_tensor(input_feed)
       input_feed.map.with_index do |(input_name, input), idx|
         ptr = ::FFI::MemoryPointer.new(:pointer)
 
@@ -287,10 +284,9 @@ module OnnxRuntime
           OrtValue.new(ptr)
         elsif (tensor_type = tensor_types[inp[:type]])
           input_tensor_values = create_input_data(input, tensor_type)
-          refs << input_tensor_values
           type_enum = FFI::TensorElementDataType[tensor_type]
           check_status api[:CreateTensorWithDataAsOrtValue].call(OrtValue.allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr)
-          OrtValue.new(ptr)
+          OrtValue.new(ptr, input_tensor_values)
         else
           Utils.unsupported_type("input", inp[:type])
         end
