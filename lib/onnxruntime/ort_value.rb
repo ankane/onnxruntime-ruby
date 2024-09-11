@@ -17,6 +17,8 @@ module OnnxRuntime
       type_enum = FFI::TensorElementDataType[element_type]
       Utils.unsupported_type("element", element_type) unless type_enum
 
+      input = input.to_a unless input.is_a?(Array) || Utils.numo_array?(input)
+
       shape = Utils.input_shape(input)
       input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
       input_node_dims.write_array_of_int64(shape)

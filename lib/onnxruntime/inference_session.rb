@@ -266,8 +266,6 @@ module OnnxRuntime
         inp = @inputs.find { |i| i[:name] == input_name.to_s }
         raise Error, "Unknown input: #{input_name}" unless inp
 
-        input = input.to_a unless input.is_a?(Array) || Utils.numo_array?(input)
-
         if inp[:type] == "tensor(string)"
           OrtValue.ortvalue_from_array(input, element_type: :string)
         elsif (tensor_type = tensor_types[inp[:type]])
