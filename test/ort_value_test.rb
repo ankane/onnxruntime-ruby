@@ -10,6 +10,6 @@ class OrtValueTest < Minitest::Test
     assert_equal [1, 2], value.shape
     assert_equal "cpu", value.device_name
     assert_equal x, value.numo
-    assert_elements_in_delta [5.8, 2.8], value.to_a[0]
+    assert_elements_in_delta [5.8, 2.8], value.to_ruby[0]
   end
 end

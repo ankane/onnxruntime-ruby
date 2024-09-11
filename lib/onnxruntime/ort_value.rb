@@ -95,7 +95,7 @@ module OnnxRuntime
       create_from_onnx_value(out_ptr, :numo)
     end
 
-    def to_a
+    def to_ruby
       create_from_onnx_value(out_ptr, :ruby)
     end
 

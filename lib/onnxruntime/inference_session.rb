@@ -99,7 +99,7 @@ module OnnxRuntime
 
       outputs = run_with_ort_values(output_names, ort_values, log_severity_level: log_severity_level, log_verbosity_level: log_verbosity_level, logid: logid, terminate: terminate)
 
-      outputs.map { |v| output_type == :numo ? v.numo : v.to_a }
+      outputs.map { |v| output_type == :numo ? v.numo : v.to_ruby }
     end
 
     # TODO support logid
