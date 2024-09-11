@@ -90,12 +90,14 @@ module OnnxRuntime
       release :SessionOptions, session_options
     end
 
-    # TODO support logid
     def run(output_names, input_feed, log_severity_level: nil, log_verbosity_level: nil, logid: nil, terminate: nil, output_type: :ruby)
       # pointer references
       refs = []
+
       ort_values = input_feed.keys.zip(create_input_tensor(input_feed, refs)).to_h
+
       outputs = run_with_ort_values(output_names, ort_values, log_severity_level: log_severity_level, log_verbosity_level: log_verbosity_level, logid: logid, terminate: terminate)
+
       outputs.map { |v| create_from_onnx_value(v.send(:out_ptr), output_type) }
     ensure
       if ort_values
@@ -106,6 +108,7 @@ module OnnxRuntime
       # output values released in create_from_onnx_value
     end
 
+    # TODO support logid
     def run_with_ort_values(output_names, input_feed, log_severity_level: nil, log_verbosity_level: nil, logid: nil, terminate: nil)
       # pointer references
       refs = []
