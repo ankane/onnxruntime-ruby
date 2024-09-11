@@ -7,13 +7,9 @@ module OnnxRuntime
     end
 
     def self.ortvalue_from_numo(numo_obj)
-      type_enum =
-        case numo_obj
-        when Numo::SFloat
-          1
-        else
-          Utils.unsupported_type("Numo", numo_obj.class.name)
-        end
+      type = Utils.numo_types.invert[numo_obj.class]
+      Utils.unsupported_type("Numo", numo_obj.class.name) unless type
+      type_enum = FFI::TensorElementDataType[type]
 
       shape = numo_obj.shape
       input_tensor_values = numo_obj.to_binary

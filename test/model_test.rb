@@ -234,6 +234,15 @@ class ModelTest < Minitest::Test
     assert_equal "seq(map(int64,tensor(float)))", output[1].data_type
   end
 
+  def test_run_with_ort_values_invalid
+    sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx")
+    x = OnnxRuntime::OrtValue.ortvalue_from_numo(Numo::DFloat.cast([[5.8, 2.8]]))
+    error = assert_raises(OnnxRuntime::Error) do
+      sess.run_with_ort_values(nil, {input: x})
+    end
+    assert_equal "Unexpected input data type. Actual: (tensor(double)) , expected: (tensor(float))", error.message
+  end
+
   def test_invalid_rank
     model = OnnxRuntime::Model.new("test/support/model.onnx")
     error = assert_raises(OnnxRuntime::Error) do
