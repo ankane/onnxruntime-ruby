@@ -103,17 +103,6 @@ module OnnxRuntime
       outputs = run_with_ort_values(output_names, ort_values, log_severity_level: log_severity_level, log_verbosity_level: log_verbosity_level, logid: logid, terminate: terminate)
 
       outputs.map { |v| output_type == :numo ? v.numo : v.to_a }
-    ensure
-      if ort_values
-        ort_values.each do |_, v|
-          release :Value, v.instance_variable_get(:@ortvalue)
-        end
-      end
-      if outputs
-        outputs.each do |v|
-          release :Value, v.instance_variable_get(:@ortvalue)
-        end
-      end
     end
 
     # TODO support logid

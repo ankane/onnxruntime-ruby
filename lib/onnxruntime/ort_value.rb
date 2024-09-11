@@ -1,8 +1,9 @@
 module OnnxRuntime
   class OrtValue
     def initialize(ortvalue, binary_data = nil)
-      @ortvalue = ortvalue
+      @ortvalue = ortvalue.read_pointer
       @binary_data = binary_data
+      ObjectSpace.define_finalizer(@ortvalue, self.class.finalize(@ortvalue.to_i))
     end
 
     def self.ortvalue_from_numo(numo_obj)
@@ -59,7 +60,7 @@ module OnnxRuntime
     private
 
     def out_ptr
-      @ortvalue.read_pointer
+      @ortvalue
     end
 
     def value_type
@@ -198,6 +199,11 @@ module OnnxRuntime
         arr = arr.each_slice(dim)
       end
       arr.to_a
+    end
+
+    def self.finalize(addr)
+      # must use proc instead of stabby lambda
+      proc { FFI.api[:ReleaseValue].call(::FFI::Pointer.new(:pointer, addr)) }
     end
 
     def self.allocator_info
