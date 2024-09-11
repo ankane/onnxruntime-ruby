@@ -94,8 +94,26 @@ module OnnxRuntime
     def run(output_names, input_feed, log_severity_level: nil, log_verbosity_level: nil, logid: nil, terminate: nil, output_type: :ruby)
       # pointer references
       refs = []
+      ort_values = input_feed.keys.zip(create_input_tensor(input_feed, refs)).to_h
+      outputs = run_with_ort_values(output_names, ort_values, log_severity_level: log_severity_level, log_verbosity_level: log_verbosity_level, logid: logid, terminate: terminate)
+      outputs.map { |v| create_from_onnx_value(v.send(:out_ptr), output_type) }
+    ensure
+      if ort_values
+        ort_values.each do |_, v|
+          release :Value, v.instance_variable_get(:@ortvalue)
+        end
+      end
+      # output values released in create_from_onnx_value
+    end
 
-      input_tensor = create_input_tensor(input_feed, refs)
+    def run_with_ort_values(output_names, input_feed, log_severity_level: nil, log_verbosity_level: nil, logid: nil, terminate: nil)
+      # pointer references
+      refs = []
+
+      input_tensor = ::FFI::MemoryPointer.new(:pointer, input_feed.size)
+      input_feed.each_with_index do |(_, input), i|
+        input_tensor[i].write_pointer(input.send(:out_ptr))
+      end
 
       output_names ||= @outputs.map { |v| v[:name] }
 
@@ -113,17 +131,9 @@ module OnnxRuntime
 
       check_status api[:Run].call(read_pointer, run_options.read_pointer, input_node_names, input_tensor, input_feed.size, output_node_names, output_names.size, output_tensor)
 
-      output_names.size.times.map do |i|
-        create_from_onnx_value(output_tensor[i].read_pointer, output_type)
-      end
+      output_names.size.times.map { |i| OrtValue.new(output_tensor[i]) }
     ensure
       release :RunOptions, run_options
-      if input_tensor
-        input_feed.size.times do |i|
-          release :Value, input_tensor[i]
-        end
-      end
-      # output values released in create_from_onnx_value
     end
 
     def modelmeta
@@ -262,7 +272,7 @@ module OnnxRuntime
     def create_input_tensor(input_feed, refs)
       allocator_info = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:CreateCpuMemoryInfo].call(1, 0, allocator_info)
-      input_tensor = ::FFI::MemoryPointer.new(:pointer, input_feed.size)
+      input_tensor = input_feed.map { ::FFI::MemoryPointer.new(:pointer) }
 
       input_feed.each_with_index do |(input_name, input), idx|
         # TODO support more types
@@ -293,7 +303,7 @@ module OnnxRuntime
         end
       end
 
-      input_tensor
+      input_tensor.map { |v| OrtValue.new(v) }
     ensure
       release :MemoryInfo, allocator_info
     end
