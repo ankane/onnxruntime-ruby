@@ -97,6 +97,10 @@ module OnnxRuntime
       release :TypeInfo, typeinfo
     end
 
+    def self.numo_array?(obj)
+      defined?(Numo::NArray) && obj.is_a?(Numo::NArray)
+    end
+
     def self.numo_types
       @numo_types ||= {
         float: Numo::SFloat,
@@ -111,6 +115,20 @@ module OnnxRuntime
         uint32: Numo::UInt32,
         uint64: Numo::UInt64
       }
+    end
+
+    def self.input_shape(input)
+      if numo_array?(input)
+        input.shape
+      else
+        shape = []
+        s = input
+        while s.is_a?(Array)
+          shape << s.size
+          s = s.first
+        end
+        shape
+      end
     end
 
     def self.allocator

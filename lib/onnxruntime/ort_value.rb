@@ -7,22 +7,39 @@ module OnnxRuntime
     end
 
     def self.ortvalue_from_numo(numo_obj)
-      if numo_obj.is_a?(Numo::Bit)
-        numo_obj = numo_obj.cast_to(Numo::UInt8)
-        type = :bool
-      else
-        type = Utils.numo_types.invert[numo_obj.class]
-      end
+      type = numo_obj.is_a?(Numo::Bit) ? :bool : Utils.numo_types.invert[numo_obj.class]
       Utils.unsupported_type("Numo", numo_obj.class.name) unless type
       type_enum = FFI::TensorElementDataType[type]
 
+      input_tensor_values = (numo_obj.is_a?(Numo::Bit) ? numo_obj.cast_to(Numo::UInt8) : numo_obj).to_binary
+
       shape = numo_obj.shape
-      input_tensor_values = numo_obj.to_binary
       input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
       input_node_dims.write_array_of_int64(shape)
+
       ptr = ::FFI::MemoryPointer.new(:pointer)
       Utils.check_status FFI.api[:CreateTensorWithDataAsOrtValue].call(allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr)
+      new(ptr, input_tensor_values)
+    end
 
+    def self.ortvalue_from_array(input, element_type:)
+      type_enum = FFI::TensorElementDataType[element_type]
+      Utils.unsupported_type("element", element_type) unless type_enum
+
+      flat_input = input.flatten.to_a
+      input_tensor_values = ::FFI::MemoryPointer.new(element_type, flat_input.size)
+      if element_type == :bool
+        input_tensor_values.write_array_of_uint8(flat_input.map { |v| v ? 1 : 0 })
+      else
+        input_tensor_values.send("write_array_of_#{element_type}", flat_input)
+      end
+
+      shape = Utils.input_shape(input)
+      input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
+      input_node_dims.write_array_of_int64(shape)
+
+      ptr = ::FFI::MemoryPointer.new(:pointer)
+      Utils.check_status FFI.api[:CreateTensorWithDataAsOrtValue].call(OrtValue.allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr)
       new(ptr, input_tensor_values)
     end
 

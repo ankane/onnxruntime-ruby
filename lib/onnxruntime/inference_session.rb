@@ -268,8 +268,8 @@ module OnnxRuntime
         inp = @inputs.find { |i| i[:name] == input_name.to_s }
         raise Error, "Unknown input: #{input_name}" unless inp
 
-        input = input.to_a unless input.is_a?(Array) || numo_array?(input)
-        shape = input_shape(input)
+        input = input.to_a unless input.is_a?(Array) || Utils.numo_array?(input)
+        shape = Utils.input_shape(input)
 
         input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
         input_node_dims.write_array_of_int64(shape)
@@ -283,33 +283,20 @@ module OnnxRuntime
           check_status api[:FillStringTensor].call(ptr.read_pointer, input_tensor_values, input_tensor_values.size / input_tensor_values.type_size)
           OrtValue.new(ptr)
         elsif (tensor_type = tensor_types[inp[:type]])
-          input_tensor_values = create_input_data(input, tensor_type)
-          type_enum = FFI::TensorElementDataType[tensor_type]
-          check_status api[:CreateTensorWithDataAsOrtValue].call(OrtValue.allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr)
-          OrtValue.new(ptr, input_tensor_values)
+          if Utils.numo_array?(input)
+            OrtValue.ortvalue_from_numo(input.cast_to(Utils.numo_types[tensor_type]))
+          else
+            OrtValue.ortvalue_from_array(input, element_type: tensor_type)
+          end
         else
           Utils.unsupported_type("input", inp[:type])
         end
       end
     end
 
-    def input_shape(input)
-      if numo_array?(input)
-        input.shape
-      else
-        shape = []
-        s = input
-        while s.is_a?(Array)
-          shape << s.size
-          s = s.first
-        end
-        shape
-      end
-    end
-
     def create_input_strings(input)
       str_ptrs =
-        if numo_array?(input)
+        if Utils.numo_array?(input)
           input.size.times.map { |i| ::FFI::MemoryPointer.from_string(input[i]) }
         else
           input.flatten.map { |v| ::FFI::MemoryPointer.from_string(v) }
@@ -318,21 +305,6 @@ module OnnxRuntime
       input_tensor_values = ::FFI::MemoryPointer.new(:pointer, str_ptrs.size)
       input_tensor_values.write_array_of_pointer(str_ptrs)
       [input_tensor_values, str_ptrs]
-    end
-
-    def create_input_data(input, tensor_type)
-      if numo_array?(input)
-        input.cast_to(Utils.numo_types[tensor_type]).to_binary
-      else
-        flat_input = input.flatten.to_a
-        input_tensor_values = ::FFI::MemoryPointer.new(tensor_type, flat_input.size)
-        if tensor_type == :bool
-          input_tensor_values.write_array_of_uint8(flat_input.map { |v| v ? 1 : 0 })
-        else
-          input_tensor_values.send("write_array_of_#{tensor_type}", flat_input)
-        end
-        input_tensor_values
-      end
     end
 
     def create_node_names(names, refs)
@@ -354,10 +326,6 @@ module OnnxRuntime
 
     def tensor_types
       @tensor_types ||= [:float, :uint8, :int8, :uint16, :int16, :int32, :int64, :bool, :double, :uint32, :uint64].map { |v| ["tensor(#{v})", v] }.to_h
-    end
-
-    def numo_array?(obj)
-      defined?(Numo::NArray) && obj.is_a?(Numo::NArray)
     end
 
     def api
