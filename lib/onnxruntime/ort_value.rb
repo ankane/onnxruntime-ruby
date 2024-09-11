@@ -80,7 +80,7 @@ module OnnxRuntime
     end
 
     def element_type
-      type_and_shape_info[0]
+      FFI::TensorElementDataType[type_and_shape_info[0]]
     end
 
     def shape
