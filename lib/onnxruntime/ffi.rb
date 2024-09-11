@@ -247,7 +247,11 @@ module OnnxRuntime
     attach_function :OrtGetApiBase, %i[], ApiBase.by_ref
 
     def self.api
-      @api ||= self.OrtGetApiBase[:GetApi].call(ORT_API_VERSION)
+      @api ||= begin
+        api = self.OrtGetApiBase[:GetApi].call(ORT_API_VERSION)
+        api = Api.by_ref.from_native(api, nil) if RUBY_PLATFORM == "java"
+        api
+      end
     end
 
     if Gem.win_platform?

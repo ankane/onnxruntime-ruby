@@ -26,7 +26,11 @@ class Minitest::Test
   end
 
   def numo?
-    RUBY_PLATFORM != "java"
+    !jruby?
+  end
+
+  def jruby?
+    RUBY_PLATFORM == "java"
   end
 
   def linux?
