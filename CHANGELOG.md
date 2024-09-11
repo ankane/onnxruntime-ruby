@@ -1,5 +1,6 @@
 ## 0.9.3 (unreleased)
 
+- Added experimental `OrtValue` class
 - Added experimental `run_with_ort_values` method
 
 ## 0.9.2 (2024-09-04)
