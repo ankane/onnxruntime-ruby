@@ -103,6 +103,12 @@ module OnnxRuntime
       @ptr
     end
 
+    def data_ptr
+      tensor_data = ::FFI::MemoryPointer.new(:pointer)
+      FFI.api[:GetTensorMutableData].call(@ptr, tensor_data)
+      tensor_data.read_pointer
+    end
+
     private
 
     def value_type
