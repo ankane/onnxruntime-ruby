@@ -91,6 +91,10 @@ module OnnxRuntime
     end
 
     def run(output_names, input_feed, log_severity_level: nil, log_verbosity_level: nil, logid: nil, terminate: nil, output_type: :ruby)
+      if ![:ruby, :numo].include?(output_type)
+        raise ArgumentError, "Invalid output type: #{output_type}"
+      end
+
       # pointer references
       refs = []
 
@@ -98,7 +102,7 @@ module OnnxRuntime
 
       outputs = run_with_ort_values(output_names, ort_values, log_severity_level: log_severity_level, log_verbosity_level: log_verbosity_level, logid: logid, terminate: terminate)
 
-      outputs.map { |v| Utils.create_from_onnx_value(v.send(:out_ptr), output_type) }
+      outputs.map { |v| output_type == :numo ? v.numo : v.to_a }
     ensure
       if ort_values
         ort_values.each do |_, v|
