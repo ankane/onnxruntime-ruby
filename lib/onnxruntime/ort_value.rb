@@ -52,6 +52,10 @@ module OnnxRuntime
       Utils.create_from_onnx_value(out_ptr, :numo)
     end
 
+    def to_a
+      Utils.create_from_onnx_value(out_ptr, :ruby)
+    end
+
     private
 
     def out_ptr

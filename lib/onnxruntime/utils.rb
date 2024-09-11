@@ -196,8 +196,6 @@ module OnnxRuntime
       else
         Utils.unsupported_type("ONNX", type)
       end
-    ensure
-      api[:ReleaseValue].call(out_ptr) unless out_ptr.null?
     end
 
     def self.create_strings_from_onnx_value(out_ptr, output_tensor_size, result)

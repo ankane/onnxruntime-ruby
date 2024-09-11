@@ -105,7 +105,11 @@ module OnnxRuntime
           release :Value, v.instance_variable_get(:@ortvalue)
         end
       end
-      # output values released in create_from_onnx_value
+      if outputs
+        outputs.each do |v|
+          release :Value, v.instance_variable_get(:@ortvalue)
+        end
+      end
     end
 
     # TODO support logid

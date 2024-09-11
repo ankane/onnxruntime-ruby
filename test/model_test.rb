@@ -229,6 +229,7 @@ class ModelTest < Minitest::Test
     assert_equal true, output[0].tensor?
     assert_equal "tensor(int64)", output[0].data_type
     assert_equal Numo::Int64.cast([1]), output[0].numo
+    assert_equal [1], output[0].to_a
     assert_equal false, output[1].tensor?
     assert_equal "seq(map(int64,tensor(float)))", output[1].data_type
   end
