@@ -1,8 +1,8 @@
 module OnnxRuntime
   class OrtValue
-    def initialize(ortvalue, numo_obj = nil)
+    def initialize(ortvalue, binary_data = nil)
       @ortvalue = ortvalue
-      @numo_obj = numo_obj
+      @binary_data = binary_data
     end
 
     def self.ortvalue_from_numo(numo_obj)
@@ -21,7 +21,7 @@ module OnnxRuntime
       ptr = ::FFI::MemoryPointer.new(:pointer)
       Utils.check_status FFI.api[:CreateTensorWithDataAsOrtValue].call(allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr)
 
-      new(ptr, numo_obj)
+      new(ptr, input_tensor_values)
     end
 
     def tensor?
