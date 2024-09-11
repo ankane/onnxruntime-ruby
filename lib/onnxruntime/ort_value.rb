@@ -29,13 +29,10 @@ module OnnxRuntime
     end
 
     def data_type
-      type = FFI::OnnxType[value_type]
-
-      if type == :tensor
-        elem_type = FFI::TensorElementDataType[element_type]
-        "tensor(#{elem_type})"
-      else
-        Utils.unsupported_type("ONNX", type)
+      @data_type ||= begin
+        typeinfo = ::FFI::MemoryPointer.new(:pointer)
+        Utils.check_status FFI.api[:GetTypeInfo].call(out_ptr, typeinfo)
+        Utils.node_info(typeinfo)[:type]
       end
     end
 

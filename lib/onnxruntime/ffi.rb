@@ -11,7 +11,7 @@ module OnnxRuntime
 
     # enums
     TensorElementDataType = enum(:undefined, :float, :uint8, :int8, :uint16, :int16, :int32, :int64, :string, :bool, :float16, :double, :uint32, :uint64, :complex64, :complex128, :bfloat16)
-    OnnxType = enum(:unknown, :tensor, :sequence, :map, :opaque, :sparsetensor)
+    OnnxType = enum(:unknown, :tensor, :sequence, :map, :opaque, :sparsetensor, :optional)
 
     class Api < ::FFI::Struct
       layout \

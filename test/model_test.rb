@@ -226,7 +226,10 @@ class ModelTest < Minitest::Test
     sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx")
     x = OnnxRuntime::OrtValue.ortvalue_from_numo(Numo::SFloat.cast([[5.8, 2.8]]))
     output = sess.run_with_ort_values(nil, {input: x})
+    assert_equal true, output[0].tensor?
     assert_equal "tensor(int64)", output[0].data_type
+    assert_equal false, output[1].tensor?
+    assert_equal "seq(map(int64,tensor(float)))", output[1].data_type
   end
 
   def test_invalid_rank
