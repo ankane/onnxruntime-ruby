@@ -91,7 +91,7 @@ module OnnxRuntime
     end
 
     def run(output_names, input_feed, log_severity_level: nil, log_verbosity_level: nil, logid: nil, terminate: nil, output_type: :ruby)
-      if ![:ruby, :numo].include?(output_type)
+      if ![:ruby, :numo, :ort_value].include?(output_type)
         raise ArgumentError, "Invalid output type: #{output_type}"
       end
 
@@ -99,7 +99,7 @@ module OnnxRuntime
 
       outputs = run_with_ort_values(output_names, ort_values, log_severity_level: log_severity_level, log_verbosity_level: log_verbosity_level, logid: logid, terminate: terminate)
 
-      outputs.map { |v| output_type == :numo ? v.numo : v.to_ruby }
+      outputs.map { |v| output_type == :numo ? v.numo : (output_type == :ort_value ? v : v.to_ruby) }
     end
 
     # TODO support logid
