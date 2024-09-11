@@ -2,6 +2,8 @@ require_relative "test_helper"
 
 class OrtValueTest < Minitest::Test
   def test_from_numo
+    skip unless numo?
+
     x = Numo::SFloat.cast([[5.8, 2.8]])
     value = OnnxRuntime::OrtValue.from_numo(x)
     assert_equal true, value.tensor?

@@ -22,6 +22,10 @@ class Minitest::Test
     end
   end
 
+  def numo?
+    RUBY_PLATFORM != "java"
+  end
+
   def mac?
     RbConfig::CONFIG["host_os"] =~ /darwin/i
   end

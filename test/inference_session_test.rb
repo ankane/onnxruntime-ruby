@@ -2,6 +2,8 @@ require_relative "test_helper"
 
 class InferenceSessionTest < Minitest::Test
   def test_run_with_ort_values
+    skip unless numo?
+
     sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx")
     x = OnnxRuntime::OrtValue.from_numo(Numo::SFloat.cast([[5.8, 2.8]]))
     output = sess.run_with_ort_values(nil, {input: x})
@@ -14,6 +16,8 @@ class InferenceSessionTest < Minitest::Test
   end
 
   def test_run_with_ort_values_invalid_type
+    skip unless numo?
+
     sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx")
     x = OnnxRuntime::OrtValue.from_numo(Numo::DFloat.cast([[5.8, 2.8]]))
     error = assert_raises(OnnxRuntime::Error) do
@@ -23,6 +27,8 @@ class InferenceSessionTest < Minitest::Test
   end
 
   def test_run_ort_value_input
+    skip unless numo?
+
     sess = OnnxRuntime::InferenceSession.new("test/support/lightgbm.onnx")
     x = OnnxRuntime::OrtValue.from_numo(Numo::SFloat.cast([[5.8, 2.8]]))
     output = sess.run(nil, {input: x})

@@ -45,7 +45,7 @@ class ModelTest < Minitest::Test
   end
 
   def test_numo
-    skip if RUBY_PLATFORM == "java"
+    skip unless numo?
 
     model = OnnxRuntime::Model.new("test/support/model.onnx")
 
@@ -71,7 +71,7 @@ class ModelTest < Minitest::Test
   end
 
   def test_numo_string
-    skip if RUBY_PLATFORM == "java"
+    skip unless numo?
 
     model = OnnxRuntime::Model.new("test/support/identity_string.onnx")
     x = Numo::NArray.cast([["one", "two"], ["three", "four"]])
@@ -81,7 +81,7 @@ class ModelTest < Minitest::Test
   end
 
   def test_numo_bool
-    skip if RUBY_PLATFORM == "java"
+    skip unless numo?
 
     model = OnnxRuntime::Model.new("test/support/logical_and.onnx")
     x = Numo::NArray.cast([[false, false], [true, true]])
