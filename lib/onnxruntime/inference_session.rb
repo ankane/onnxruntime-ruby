@@ -267,9 +267,9 @@ module OnnxRuntime
         if input.is_a?(OrtValue)
           input
         elsif inp[:type] == "tensor(string)"
-          OrtValue.ortvalue_from_array(input, element_type: :string)
+          OrtValue.from_array(input, element_type: :string)
         elsif (tensor_type = tensor_types[inp[:type]])
-          OrtValue.ortvalue_from_array(input, element_type: tensor_type)
+          OrtValue.from_array(input, element_type: tensor_type)
         else
           Utils.unsupported_type("input", inp[:type])
         end

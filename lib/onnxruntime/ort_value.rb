@@ -6,14 +6,14 @@ module OnnxRuntime
       ObjectSpace.define_finalizer(@ptr, self.class.finalize(@ptr.to_i))
     end
 
-    def self.ortvalue_from_numo(numo_obj)
+    def self.from_numo(numo_obj)
       element_type = numo_obj.is_a?(Numo::Bit) ? :bool : Utils.numo_types.invert[numo_obj.class]
       Utils.unsupported_type("Numo", numo_obj.class.name) unless element_type
 
-      ortvalue_from_array(numo_obj, element_type: element_type)
+      from_array(numo_obj, element_type: element_type)
     end
 
-    def self.ortvalue_from_array(input, element_type:)
+    def self.from_array(input, element_type:)
       type_enum = FFI::TensorElementDataType[element_type]
       Utils.unsupported_type("element", element_type) unless type_enum
 
