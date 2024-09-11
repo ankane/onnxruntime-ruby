@@ -7,7 +7,12 @@ module OnnxRuntime
     end
 
     def self.ortvalue_from_numo(numo_obj)
-      type = Utils.numo_types.invert[numo_obj.class]
+      if numo_obj.is_a?(Numo::Bit)
+        numo_obj = numo_obj.cast_to(Numo::UInt8)
+        type = :bool
+      else
+        type = Utils.numo_types.invert[numo_obj.class]
+      end
       Utils.unsupported_type("Numo", numo_obj.class.name) unless type
       type_enum = FFI::TensorElementDataType[type]
 
