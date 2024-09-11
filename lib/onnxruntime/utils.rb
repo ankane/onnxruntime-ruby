@@ -29,6 +29,10 @@ module OnnxRuntime
       FFI.api[:"Release#{type}"].call(pointer.read_pointer) if pointer && !pointer.null?
     end
 
+    def self.unsupported_type(name, type)
+      raise Error, "Unsupported #{name} type: #{type}"
+    end
+
     def self.tensor_type_and_shape(tensor_info)
       type = ::FFI::MemoryPointer.new(:int)
       check_status api[:GetTensorElementType].call(tensor_info.read_pointer, type)

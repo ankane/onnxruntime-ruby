@@ -289,7 +289,7 @@ module OnnxRuntime
 
           refs << input_tensor_values
         else
-          unsupported_type("input", inp[:type])
+          Utils.unsupported_type("input", inp[:type])
         end
       end
 
@@ -382,7 +382,7 @@ module OnnxRuntime
             create_strings_from_onnx_value(out_ptr, output_tensor_size, result)
           else
             numo_type = numo_types[type]
-            unsupported_type("element", type) unless numo_type
+            Utils.unsupported_type("element", type) unless numo_type
             numo_type.from_binary(tensor_data.read_pointer.read_bytes(output_tensor_size * numo_type::ELEMENT_BYTE_SIZE), shape)
           end
         when :ruby
@@ -395,7 +395,7 @@ module OnnxRuntime
             when :string
               create_strings_from_onnx_value(out_ptr, output_tensor_size, [])
             else
-              unsupported_type("element", type)
+              Utils.unsupported_type("element", type)
             end
 
           Utils.reshape(arr, shape)
@@ -435,10 +435,10 @@ module OnnxRuntime
           end
           ret
         else
-          unsupported_type("element", elem_type)
+          Utils.unsupported_type("element", elem_type)
         end
       else
-        unsupported_type("ONNX", type)
+        Utils.unsupported_type("ONNX", type)
       end
     ensure
       api[:ReleaseValue].call(out_ptr) unless out_ptr.null?
@@ -515,14 +515,10 @@ module OnnxRuntime
           shape: []
         }
       else
-        unsupported_type("ONNX", type)
+        Utils.unsupported_type("ONNX", type)
       end
     ensure
       release :TypeInfo, typeinfo
-    end
-
-    def unsupported_type(name, type)
-      raise Error, "Unsupported #{name} type: #{type}"
     end
 
     def tensor_types

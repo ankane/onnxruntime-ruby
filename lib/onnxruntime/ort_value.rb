@@ -1,6 +1,6 @@
 module OnnxRuntime
   class OrtValue
-    def initialize(ortvalue, numo_obj)
+    def initialize(ortvalue, numo_obj = nil)
       @ortvalue = ortvalue
       @numo_obj = numo_obj
     end
@@ -11,7 +11,7 @@ module OnnxRuntime
         when Numo::SFloat
           1
         else
-          raise ArgumentError, "Unsupported type"
+          Utils.unsupported_type("Numo", numo_obj.class.name)
         end
 
       shape = numo_obj.shape
@@ -25,9 +25,18 @@ module OnnxRuntime
     end
 
     def tensor?
-      out_type = ::FFI::MemoryPointer.new(:int)
-      Utils.check_status FFI.api[:GetValueType].call(out_ptr, out_type)
-      FFI::OnnxType[out_type.read_int] == :tensor
+      FFI::OnnxType[value_type] == :tensor
+    end
+
+    def data_type
+      type = FFI::OnnxType[value_type]
+
+      if type == :tensor
+        elem_type = FFI::TensorElementDataType[element_type]
+        "tensor(#{elem_type})"
+      else
+        Utils.unsupported_type("ONNX", type)
+      end
     end
 
     def element_type
@@ -46,6 +55,14 @@ module OnnxRuntime
 
     def out_ptr
       @ortvalue.read_pointer
+    end
+
+    def value_type
+      @value_type ||= begin
+        out_type = ::FFI::MemoryPointer.new(:int)
+        Utils.check_status FFI.api[:GetValueType].call(out_ptr, out_type)
+        out_type.read_int
+      end
     end
 
     def type_and_shape_info
