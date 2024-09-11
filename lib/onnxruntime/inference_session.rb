@@ -109,7 +109,7 @@ module OnnxRuntime
 
       input_tensor = ::FFI::MemoryPointer.new(:pointer, input_feed.size)
       input_feed.each_with_index do |(_, input), i|
-        input_tensor[i].write_pointer(input.send(:out_ptr))
+        input_tensor[i].write_pointer(input.to_ptr)
       end
 
       output_names ||= @outputs.map { |v| v[:name] }

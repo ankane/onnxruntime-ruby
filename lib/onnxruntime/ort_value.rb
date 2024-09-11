@@ -1,9 +1,9 @@
 module OnnxRuntime
   class OrtValue
-    def initialize(ortvalue, binary_data = nil)
-      @ortvalue = ortvalue.read_pointer
-      @binary_data = binary_data
-      ObjectSpace.define_finalizer(@ortvalue, self.class.finalize(@ortvalue.to_i))
+    def initialize(ptr, ref = nil)
+      @ptr = ptr.read_pointer
+      @ref = ref # keep reference to data
+      ObjectSpace.define_finalizer(@ptr, self.class.finalize(@ptr.to_i))
     end
 
     def self.ortvalue_from_numo(numo_obj)
@@ -74,7 +74,7 @@ module OnnxRuntime
     def data_type
       @data_type ||= begin
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
-        Utils.check_status FFI.api[:GetTypeInfo].call(out_ptr, typeinfo)
+        Utils.check_status FFI.api[:GetTypeInfo].call(@ptr, typeinfo)
         Utils.node_info(typeinfo)[:type]
       end
     end
@@ -92,23 +92,23 @@ module OnnxRuntime
     end
 
     def numo
-      create_from_onnx_value(out_ptr, :numo)
+      create_from_onnx_value(@ptr, :numo)
     end
 
     def to_ruby
-      create_from_onnx_value(out_ptr, :ruby)
+      create_from_onnx_value(@ptr, :ruby)
+    end
+
+    def to_ptr
+      @ptr
     end
 
     private
 
-    def out_ptr
-      @ortvalue
-    end
-
     def value_type
       @value_type ||= begin
         out_type = ::FFI::MemoryPointer.new(:int)
-        Utils.check_status FFI.api[:GetValueType].call(out_ptr, out_type)
+        Utils.check_status FFI.api[:GetValueType].call(@ptr, out_type)
         out_type.read_int
       end
     end
@@ -117,7 +117,7 @@ module OnnxRuntime
       @type_and_shape_info ||= begin
         begin
           typeinfo = ::FFI::MemoryPointer.new(:pointer)
-          Utils.check_status FFI.api[:GetTensorTypeAndShape].call(out_ptr, typeinfo)
+          Utils.check_status FFI.api[:GetTensorTypeAndShape].call(@ptr, typeinfo)
           Utils.tensor_type_and_shape(typeinfo)
         ensure
           Utils.release :TensorTypeAndShapeInfo, typeinfo
