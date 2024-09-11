@@ -37,6 +37,19 @@ module OnnxRuntime
       new(ptr, input_tensor_values)
     end
 
+    def self.from_shape_and_type(shape, element_type)
+      type_enum = FFI::TensorElementDataType[element_type]
+      Utils.unsupported_type("element", element_type) unless type_enum
+
+      input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
+      input_node_dims.write_array_of_int64(shape)
+
+      ptr = ::FFI::MemoryPointer.new(:pointer)
+      Utils.check_status FFI.api[:CreateTensorAsOrtValue].call(Utils.allocator.read_pointer, input_node_dims, shape.size, type_enum, ptr)
+
+      new(ptr)
+    end
+
     def self.create_input_data(input, tensor_type)
       if Utils.numo_array?(input)
         input.cast_to(Utils.numo_types[tensor_type]).to_binary

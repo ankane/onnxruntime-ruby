@@ -24,4 +24,17 @@ class OrtValueTest < Minitest::Test
     assert_elements_in_delta [5.8, 2.8], value.to_ruby[0]
     assert_elements_in_delta [5.8, 2.8], value.data_ptr.read_array_of_double(2)
   end
+
+  def test_from_shape_and_type
+    value = OnnxRuntime::OrtValue.from_shape_and_type([1, 2], :double)
+    data_ptr = value.data_ptr
+    data_ptr.write_array_of_double([5.8, 2.8])
+    assert_equal true, value.tensor?
+    assert_equal "tensor(double)", value.data_type
+    assert_equal :double, value.element_type
+    assert_equal [1, 2], value.shape
+    assert_equal "cpu", value.device_name
+    assert_elements_in_delta [5.8, 2.8], value.to_ruby[0]
+    assert_elements_in_delta [5.8, 2.8], value.data_ptr.read_array_of_double(2)
+  end
 end
