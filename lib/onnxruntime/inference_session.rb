@@ -261,7 +261,7 @@ module OnnxRuntime
     end
 
     def create_input_tensor(input_feed)
-      input_feed.map.with_index do |(input_name, input), idx|
+      input_feed.map do |input_name, input|
         # TODO support more types
         inp = @inputs.find { |i| i[:name] == input_name.to_s }
         raise Error, "Unknown input: #{input_name}" unless inp
