@@ -7,41 +7,63 @@ module OnnxRuntime
     end
 
     def self.ortvalue_from_numo(numo_obj)
-      type = numo_obj.is_a?(Numo::Bit) ? :bool : Utils.numo_types.invert[numo_obj.class]
-      Utils.unsupported_type("Numo", numo_obj.class.name) unless type
-      type_enum = FFI::TensorElementDataType[type]
+      element_type = numo_obj.is_a?(Numo::Bit) ? :bool : Utils.numo_types.invert[numo_obj.class]
+      Utils.unsupported_type("Numo", numo_obj.class.name) unless element_type
 
-      input_tensor_values = (numo_obj.is_a?(Numo::Bit) ? numo_obj.cast_to(Numo::UInt8) : numo_obj).to_binary
-
-      shape = numo_obj.shape
-      input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
-      input_node_dims.write_array_of_int64(shape)
-
-      ptr = ::FFI::MemoryPointer.new(:pointer)
-      Utils.check_status FFI.api[:CreateTensorWithDataAsOrtValue].call(allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr)
-      new(ptr, input_tensor_values)
+      ortvalue_from_array(numo_obj, element_type: element_type)
     end
 
     def self.ortvalue_from_array(input, element_type:)
       type_enum = FFI::TensorElementDataType[element_type]
       Utils.unsupported_type("element", element_type) unless type_enum
 
-      flat_input = input.flatten.to_a
-      input_tensor_values = ::FFI::MemoryPointer.new(element_type, flat_input.size)
-      if element_type == :bool
-        input_tensor_values.write_array_of_uint8(flat_input.map { |v| v ? 1 : 0 })
-      else
-        input_tensor_values.send("write_array_of_#{element_type}", flat_input)
-      end
-
       shape = Utils.input_shape(input)
       input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
       input_node_dims.write_array_of_int64(shape)
 
       ptr = ::FFI::MemoryPointer.new(:pointer)
-      Utils.check_status FFI.api[:CreateTensorWithDataAsOrtValue].call(OrtValue.allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr)
+      if element_type == :string
+        # keep reference to _str_ptrs until FillStringTensor call
+        input_tensor_values, _str_ptrs = create_input_strings(input)
+        Utils.check_status FFI.api[:CreateTensorAsOrtValue].call(Utils.allocator.read_pointer, input_node_dims, shape.size, type_enum, ptr)
+        Utils.check_status FFI.api[:FillStringTensor].call(ptr.read_pointer, input_tensor_values, input_tensor_values.size / input_tensor_values.type_size)
+      else
+        input_tensor_values = create_input_data(input, element_type)
+        Utils.check_status FFI.api[:CreateTensorWithDataAsOrtValue].call(allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr)
+      end
+
       new(ptr, input_tensor_values)
     end
+
+    def self.create_input_data(input, tensor_type)
+      if Utils.numo_array?(input)
+        input.cast_to(Utils.numo_types[tensor_type]).to_binary
+      else
+        flat_input = input.flatten.to_a
+        input_tensor_values = ::FFI::MemoryPointer.new(tensor_type, flat_input.size)
+        if tensor_type == :bool
+          input_tensor_values.write_array_of_uint8(flat_input.map { |v| v ? 1 : 0 })
+        else
+          input_tensor_values.send("write_array_of_#{tensor_type}", flat_input)
+        end
+        input_tensor_values
+      end
+    end
+    private_class_method :create_input_data
+
+    def self.create_input_strings(input)
+      str_ptrs =
+        if Utils.numo_array?(input)
+          input.size.times.map { |i| ::FFI::MemoryPointer.from_string(input[i]) }
+        else
+          input.flatten.map { |v| ::FFI::MemoryPointer.from_string(v) }
+        end
+
+      input_tensor_values = ::FFI::MemoryPointer.new(:pointer, str_ptrs.size)
+      input_tensor_values.write_array_of_pointer(str_ptrs)
+      [input_tensor_values, str_ptrs]
+    end
+    private_class_method :create_input_strings
 
     def tensor?
       FFI::OnnxType[value_type] == :tensor

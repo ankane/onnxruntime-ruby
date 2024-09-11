@@ -262,8 +262,6 @@ module OnnxRuntime
 
     def create_input_tensor(input_feed)
       input_feed.map.with_index do |(input_name, input), idx|
-        ptr = ::FFI::MemoryPointer.new(:pointer)
-
         # TODO support more types
         inp = @inputs.find { |i| i[:name] == input_name.to_s }
         raise Error, "Unknown input: #{input_name}" unless inp
@@ -271,40 +269,13 @@ module OnnxRuntime
         input = input.to_a unless input.is_a?(Array) || Utils.numo_array?(input)
 
         if inp[:type] == "tensor(string)"
-          shape = Utils.input_shape(input)
-          input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
-          input_node_dims.write_array_of_int64(shape)
-
-          type_enum = FFI::TensorElementDataType[:string]
-          check_status api[:CreateTensorAsOrtValue].call(@allocator.read_pointer, input_node_dims, shape.size, type_enum, ptr)
-
-          # keep reference to _str_ptrs until FillStringTensor call
-          input_tensor_values, _str_ptrs = create_input_strings(input)
-          check_status api[:FillStringTensor].call(ptr.read_pointer, input_tensor_values, input_tensor_values.size / input_tensor_values.type_size)
-          OrtValue.new(ptr)
+          OrtValue.ortvalue_from_array(input, element_type: :string)
         elsif (tensor_type = tensor_types[inp[:type]])
-          if Utils.numo_array?(input)
-            OrtValue.ortvalue_from_numo(input.cast_to(Utils.numo_types[tensor_type]))
-          else
-            OrtValue.ortvalue_from_array(input, element_type: tensor_type)
-          end
+          OrtValue.ortvalue_from_array(input, element_type: tensor_type)
         else
           Utils.unsupported_type("input", inp[:type])
         end
       end
-    end
-
-    def create_input_strings(input)
-      str_ptrs =
-        if Utils.numo_array?(input)
-          input.size.times.map { |i| ::FFI::MemoryPointer.from_string(input[i]) }
-        else
-          input.flatten.map { |v| ::FFI::MemoryPointer.from_string(v) }
-        end
-
-      input_tensor_values = ::FFI::MemoryPointer.new(:pointer, str_ptrs.size)
-      input_tensor_values.write_array_of_pointer(str_ptrs)
-      [input_tensor_values, str_ptrs]
     end
 
     def create_node_names(names, refs)
