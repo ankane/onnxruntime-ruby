@@ -1,5 +1,6 @@
-## 0.9.3 (unreleased)
+## 0.10.0 (unreleased)
 
+- Updated ONNX Runtime to 1.20.0
 - Added experimental `OrtValue` class
 - Added experimental `run_with_ort_values` method
 
