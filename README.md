@@ -4,7 +4,7 @@
 
 Check out [an example](https://ankane.org/tensorflow-ruby)
 
-For fast transformer inference, check out [Informers](https://github.com/ankane/informers)
+For transformer models, check out [Informers](https://github.com/ankane/informers)
 
 [![Build Status](https://github.com/ankane/onnxruntime-ruby/actions/workflows/build.yml/badge.svg)](https://github.com/ankane/onnxruntime-ruby/actions)
 
