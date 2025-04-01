@@ -28,7 +28,7 @@ Gem::Specification.new do |spec|
     spec.files.concat(Dir["vendor/*.{dll,dylib,so}"])
   end
 
-  spec.required_ruby_version = ">= 3"
+  spec.required_ruby_version = ">= 3.2"
 
   spec.add_dependency "ffi"
 end

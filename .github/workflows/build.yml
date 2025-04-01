@@ -8,9 +8,9 @@ jobs:
         include:
           - ruby: 3.4
             os: ubuntu-24.04
-          - ruby: 3.2
+          - ruby: 3.3
             os: macos-latest
-          - ruby: "3.0"
+          - ruby: 3.2
             os: windows-latest
     runs-on: ${{ matrix.os }}
     timeout-minutes: 5
