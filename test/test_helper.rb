@@ -26,7 +26,7 @@ class Minitest::Test
   end
 
   def numo?
-    !jruby?
+    !jruby? && RUBY_ENGINE != "truffleruby"
   end
 
   def jruby?
