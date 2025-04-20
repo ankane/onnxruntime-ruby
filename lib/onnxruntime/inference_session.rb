@@ -147,13 +147,13 @@ module OnnxRuntime
       custom_metadata_map = {}
       check_status api[:ModelMetadataGetCustomMetadataMapKeys].call(metadata.read_pointer, @allocator.read_pointer, keys, num_keys)
       num_keys.read(:int64_t).times do |i|
-        key_ptr = keys.read_pointer[i * ::FFI::Pointer.size]
-        key = key_ptr.read_pointer.read_string
+        key_ptr = keys.read_pointer.get_pointer(i * ::FFI::Pointer.size)
+        key = key_ptr.read_string
         value = ::FFI::MemoryPointer.new(:string)
         check_status api[:ModelMetadataLookupCustomMetadataMap].call(metadata.read_pointer, @allocator.read_pointer, key, value)
         custom_metadata_map[key] = value.read_pointer.read_string
 
-        allocator_free key_ptr
+        allocator_free key_ptr, direct: true
         allocator_free value
       end
       allocator_free keys
@@ -302,8 +302,8 @@ module OnnxRuntime
       self.class.release(*args)
     end
 
-    def allocator_free(ptr)
-      api[:AllocatorFree].call(@allocator.read_pointer, ptr.read_pointer)
+    def allocator_free(ptr, direct: false)
+      api[:AllocatorFree].call(@allocator.read_pointer, direct ? ptr : ptr.read_pointer)
     end
 
     def self.api
