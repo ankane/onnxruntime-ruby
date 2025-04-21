@@ -330,7 +330,7 @@ module OnnxRuntime
         raise Error, "Expected mbstowcs to return #{str.size}, got #{ret}" if ret != str.size
         dest
       else
-        str
+        ::FFI::MemoryPointer.from_string(str)
       end
     end
 
