@@ -249,7 +249,7 @@ module OnnxRuntime
     def self.api
       @api ||= begin
         api = self.OrtGetApiBase[:GetApi].call(ORT_API_VERSION)
-        api = Api.by_ref.from_native(api, nil) if RUBY_PLATFORM == "java"
+        api = Api.by_ref.from_native(api, nil) if RUBY_ENGINE == "jruby"
         api
       end
     end

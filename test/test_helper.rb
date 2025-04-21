@@ -26,11 +26,7 @@ class Minitest::Test
   end
 
   def numo?
-    !jruby? && RUBY_ENGINE != "truffleruby"
-  end
-
-  def jruby?
-    RUBY_PLATFORM == "java"
+    !["jruby", "truffleruby"].include?(RUBY_ENGINE)
   end
 
   def linux?
