@@ -6,52 +6,54 @@ module OnnxRuntime
       # session options
       session_options = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:CreateSessionOptions].call(session_options)
+      session_options = ::FFI::AutoPointer.new(session_options.read_pointer, api[:ReleaseSessionOptions])
+
       if enable_cpu_mem_arena
-        check_status api[:EnableCpuMemArena].call(session_options.read_pointer)
+        check_status api[:EnableCpuMemArena].call(session_options)
       else
-        check_status api[:DisableCpuMemArena].call(session_options.read_pointer)
+        check_status api[:DisableCpuMemArena].call(session_options)
       end
       if enable_mem_pattern
-        check_status api[:EnableMemPattern].call(session_options.read_pointer)
+        check_status api[:EnableMemPattern].call(session_options)
       else
-        check_status api[:DisableMemPattern].call(session_options.read_pointer)
+        check_status api[:DisableMemPattern].call(session_options)
       end
       if enable_profiling
-        check_status api[:EnableProfiling].call(session_options.read_pointer, ort_string(profile_file_prefix || "onnxruntime_profile_"))
+        check_status api[:EnableProfiling].call(session_options, ort_string(profile_file_prefix || "onnxruntime_profile_"))
       else
-        check_status api[:DisableProfiling].call(session_options.read_pointer)
+        check_status api[:DisableProfiling].call(session_options)
       end
       if execution_mode
         execution_modes = {sequential: 0, parallel: 1}
         mode = execution_modes[execution_mode]
         raise ArgumentError, "Invalid execution mode" unless mode
-        check_status api[:SetSessionExecutionMode].call(session_options.read_pointer, mode)
+        check_status api[:SetSessionExecutionMode].call(session_options, mode)
       end
       if free_dimension_overrides_by_denotation
         free_dimension_overrides_by_denotation.each do |k, v|
-          check_status api[:AddFreeDimensionOverride].call(session_options.read_pointer, k.to_s, v)
+          check_status api[:AddFreeDimensionOverride].call(session_options, k.to_s, v)
         end
       end
       if free_dimension_overrides_by_name
         free_dimension_overrides_by_name.each do |k, v|
-          check_status api[:AddFreeDimensionOverrideByName].call(session_options.read_pointer, k.to_s, v)
+          check_status api[:AddFreeDimensionOverrideByName].call(session_options, k.to_s, v)
         end
       end
       if graph_optimization_level
         optimization_levels = {none: 0, basic: 1, extended: 2, all: 99}
         level = optimization_levels[graph_optimization_level]
         raise ArgumentError, "Invalid graph optimization level" unless level
-        check_status api[:SetSessionGraphOptimizationLevel].call(session_options.read_pointer, level)
+        check_status api[:SetSessionGraphOptimizationLevel].call(session_options, level)
       end
-      check_status api[:SetInterOpNumThreads].call(session_options.read_pointer, inter_op_num_threads) if inter_op_num_threads
-      check_status api[:SetIntraOpNumThreads].call(session_options.read_pointer, intra_op_num_threads) if intra_op_num_threads
-      check_status api[:SetSessionLogSeverityLevel].call(session_options.read_pointer, log_severity_level) if log_severity_level
-      check_status api[:SetSessionLogVerbosityLevel].call(session_options.read_pointer, log_verbosity_level) if log_verbosity_level
-      check_status api[:SetSessionLogId].call(session_options.read_pointer, logid) if logid
-      check_status api[:SetOptimizedModelFilePath].call(session_options.read_pointer, ort_string(optimized_model_filepath)) if optimized_model_filepath
+      check_status api[:SetInterOpNumThreads].call(session_options, inter_op_num_threads) if inter_op_num_threads
+      check_status api[:SetIntraOpNumThreads].call(session_options, intra_op_num_threads) if intra_op_num_threads
+      check_status api[:SetSessionLogSeverityLevel].call(session_options, log_severity_level) if log_severity_level
+      check_status api[:SetSessionLogVerbosityLevel].call(session_options, log_verbosity_level) if log_verbosity_level
+      check_status api[:SetSessionLogId].call(session_options, logid) if logid
+      check_status api[:SetOptimizedModelFilePath].call(session_options, ort_string(optimized_model_filepath)) if optimized_model_filepath
       if session_config_entries
         session_config_entries.each do |k, v|
-          check_status api[:AddSessionConfigEntry].call(session_options.read_pointer, k.to_s, v.to_s)
+          check_status api[:AddSessionConfigEntry].call(session_options, k.to_s, v.to_s)
         end
       end
       providers.each do |provider|
@@ -64,15 +66,15 @@ module OnnxRuntime
         when "CUDAExecutionProvider"
           cuda_options = ::FFI::MemoryPointer.new(:pointer)
           check_status api[:CreateCUDAProviderOptions].call(cuda_options)
-          check_status api[:SessionOptionsAppendExecutionProvider_CUDA_V2].call(session_options.read_pointer, cuda_options.read_pointer)
-          release :CUDAProviderOptions, cuda_options
+          cuda_options = ::FFI::AutoPointer.new(cuda_options.read_pointer, api[:ReleaseCUDAProviderOptions])
+          check_status api[:SessionOptionsAppendExecutionProvider_CUDA_V2].call(session_options, cuda_options)
         when "CoreMLExecutionProvider"
           unless FFI.respond_to?(:OrtSessionOptionsAppendExecutionProvider_CoreML)
             raise ArgumentError, "Provider not available: #{provider}"
           end
 
           coreml_flags = 0
-          check_status FFI.OrtSessionOptionsAppendExecutionProvider_CoreML(session_options.read_pointer, coreml_flags)
+          check_status FFI.OrtSessionOptionsAppendExecutionProvider_CoreML(session_options, coreml_flags)
         when "CPUExecutionProvider"
           break
         else
@@ -81,13 +83,9 @@ module OnnxRuntime
       end
 
       @session = load_session(path_or_bytes, session_options)
-      ObjectSpace.define_finalizer(@session, self.class.finalize(read_pointer.to_i))
-
       @allocator = Utils.allocator
       @inputs = load_inputs
       @outputs = load_outputs
-    ensure
-      release :SessionOptions, session_options
     end
 
     def run(output_names, input_feed, log_severity_level: nil, log_verbosity_level: nil, logid: nil, terminate: nil, output_type: :ruby)
@@ -119,16 +117,15 @@ module OnnxRuntime
       # run options
       run_options = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:CreateRunOptions].call(run_options)
-      check_status api[:RunOptionsSetRunLogSeverityLevel].call(run_options.read_pointer, log_severity_level) if log_severity_level
-      check_status api[:RunOptionsSetRunLogVerbosityLevel].call(run_options.read_pointer, log_verbosity_level) if log_verbosity_level
-      check_status api[:RunOptionsSetRunTag].call(run_options.read_pointer, logid) if logid
-      check_status api[:RunOptionsSetTerminate].call(run_options.read_pointer) if terminate
+      run_options = ::FFI::AutoPointer.new(run_options.read_pointer, api[:ReleaseRunOptions])
+      check_status api[:RunOptionsSetRunLogSeverityLevel].call(run_options, log_severity_level) if log_severity_level
+      check_status api[:RunOptionsSetRunLogVerbosityLevel].call(run_options, log_verbosity_level) if log_verbosity_level
+      check_status api[:RunOptionsSetRunTag].call(run_options, logid) if logid
+      check_status api[:RunOptionsSetTerminate].call(run_options) if terminate
 
-      check_status api[:Run].call(read_pointer, run_options.read_pointer, input_node_names, input_tensor, input_feed.size, output_node_names, output_names.size, output_tensor)
+      check_status api[:Run].call(@session, run_options, input_node_names, input_tensor, input_feed.size, output_node_names, output_names.size, output_tensor)
 
       output_names.size.times.map { |i| OrtValue.new(output_tensor[i]) }
-    ensure
-      release :RunOptions, run_options
     end
 
     def modelmeta
@@ -142,28 +139,31 @@ module OnnxRuntime
       version = ::FFI::MemoryPointer.new(:int64_t)
 
       metadata = ::FFI::MemoryPointer.new(:pointer)
-      check_status api[:SessionGetModelMetadata].call(read_pointer, metadata)
+      check_status api[:SessionGetModelMetadata].call(@session, metadata)
+      metadata = ::FFI::AutoPointer.new(metadata.read_pointer, api[:ReleaseModelMetadata])
 
       custom_metadata_map = {}
-      check_status api[:ModelMetadataGetCustomMetadataMapKeys].call(metadata.read_pointer, @allocator.read_pointer, keys, num_keys)
+      check_status api[:ModelMetadataGetCustomMetadataMapKeys].call(metadata, @allocator, keys, num_keys)
+      keys = keys.read_pointer
+
       num_keys.read(:int64_t).times do |i|
-        key_ptr = keys.read_pointer.get_pointer(i * ::FFI::Pointer.size)
+        key_ptr = keys.get_pointer(i * ::FFI::Pointer.size)
         key = key_ptr.read_string
         value = ::FFI::MemoryPointer.new(:string)
-        check_status api[:ModelMetadataLookupCustomMetadataMap].call(metadata.read_pointer, @allocator.read_pointer, key, value)
+        check_status api[:ModelMetadataLookupCustomMetadataMap].call(metadata, @allocator, key, value)
         custom_metadata_map[key] = value.read_pointer.read_string
 
-        allocator_free key_ptr, direct: true
-        allocator_free value
+        allocator_free key_ptr
+        allocator_free value.read_pointer
       end
       allocator_free keys
 
-      check_status api[:ModelMetadataGetDescription].call(metadata.read_pointer, @allocator.read_pointer, description)
-      check_status api[:ModelMetadataGetDomain].call(metadata.read_pointer, @allocator.read_pointer, domain)
-      check_status api[:ModelMetadataGetGraphName].call(metadata.read_pointer, @allocator.read_pointer, graph_name)
-      check_status api[:ModelMetadataGetGraphDescription].call(metadata.read_pointer, @allocator.read_pointer, graph_description)
-      check_status api[:ModelMetadataGetProducerName].call(metadata.read_pointer, @allocator.read_pointer, producer_name)
-      check_status api[:ModelMetadataGetVersion].call(metadata.read_pointer, version)
+      check_status api[:ModelMetadataGetDescription].call(metadata, @allocator, description)
+      check_status api[:ModelMetadataGetDomain].call(metadata, @allocator, domain)
+      check_status api[:ModelMetadataGetGraphName].call(metadata, @allocator, graph_name)
+      check_status api[:ModelMetadataGetGraphDescription].call(metadata, @allocator, graph_description)
+      check_status api[:ModelMetadataGetProducerName].call(metadata, @allocator, producer_name)
+      check_status api[:ModelMetadataGetVersion].call(metadata, version)
 
       {
         custom_metadata_map: custom_metadata_map,
@@ -175,18 +175,17 @@ module OnnxRuntime
         version: version.read(:int64_t)
       }
     ensure
-      release :ModelMetadata, metadata
-      allocator_free description
-      allocator_free domain
-      allocator_free graph_name
-      allocator_free graph_description
-      allocator_free producer_name
+      allocator_free description.read_pointer
+      allocator_free domain.read_pointer
+      allocator_free graph_name.read_pointer
+      allocator_free graph_description.read_pointer
+      allocator_free producer_name.read_pointer
     end
 
     # return value has double underscore like Python
     def end_profiling
       out = ::FFI::MemoryPointer.new(:string)
-      check_status api[:SessionEndProfiling].call(read_pointer, @allocator.read_pointer, out)
+      check_status api[:SessionEndProfiling].call(@session, @allocator, out)
       out.read_pointer.read_string
     end
 
@@ -216,25 +215,25 @@ module OnnxRuntime
         end
 
       if from_memory
-        check_status api[:CreateSessionFromArray].call(env.read_pointer, path_or_bytes, path_or_bytes.bytesize, session_options.read_pointer, session)
+        check_status api[:CreateSessionFromArray].call(env, path_or_bytes, path_or_bytes.bytesize, session_options, session)
       else
-        check_status api[:CreateSession].call(env.read_pointer, ort_string(path_or_bytes), session_options.read_pointer, session)
+        check_status api[:CreateSession].call(env, ort_string(path_or_bytes), session_options, session)
       end
-      session
+      ::FFI::AutoPointer.new(session.read_pointer, api[:ReleaseSession])
     end
 
     def load_inputs
       inputs = []
       num_input_nodes = ::FFI::MemoryPointer.new(:size_t)
-      check_status api[:SessionGetInputCount].call(read_pointer, num_input_nodes)
+      check_status api[:SessionGetInputCount].call(@session, num_input_nodes)
       num_input_nodes.read(:size_t).times do |i|
         name_ptr = ::FFI::MemoryPointer.new(:string)
-        check_status api[:SessionGetInputName].call(read_pointer, i, @allocator.read_pointer, name_ptr)
+        check_status api[:SessionGetInputName].call(@session, i, @allocator, name_ptr)
         # freed in node_info
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
-        check_status api[:SessionGetInputTypeInfo].call(read_pointer, i, typeinfo)
-        inputs << {name: name_ptr.read_pointer.read_string}.merge(Utils.node_info(typeinfo))
-        allocator_free name_ptr
+        check_status api[:SessionGetInputTypeInfo].call(@session, i, typeinfo)
+        inputs << {name: name_ptr.read_pointer.read_string}.merge(Utils.node_info(typeinfo.read_pointer))
+        allocator_free name_ptr.read_pointer
       end
       inputs
     end
@@ -242,15 +241,15 @@ module OnnxRuntime
     def load_outputs
       outputs = []
       num_output_nodes = ::FFI::MemoryPointer.new(:size_t)
-      check_status api[:SessionGetOutputCount].call(read_pointer, num_output_nodes)
+      check_status api[:SessionGetOutputCount].call(@session, num_output_nodes)
       num_output_nodes.read(:size_t).times do |i|
         name_ptr = ::FFI::MemoryPointer.new(:string)
-        check_status api[:SessionGetOutputName].call(read_pointer, i, @allocator.read_pointer, name_ptr)
+        check_status api[:SessionGetOutputName].call(@session, i, @allocator, name_ptr)
         # freed in node_info
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
-        check_status api[:SessionGetOutputTypeInfo].call(read_pointer, i, typeinfo)
-        outputs << {name: name_ptr.read_pointer.read_string}.merge(Utils.node_info(typeinfo))
-        allocator_free name_ptr
+        check_status api[:SessionGetOutputTypeInfo].call(@session, i, typeinfo)
+        outputs << {name: name_ptr.read_pointer.read_string}.merge(Utils.node_info(typeinfo.read_pointer))
+        allocator_free name_ptr.read_pointer
       end
       outputs
     end
@@ -282,10 +281,6 @@ module OnnxRuntime
       ptr
     end
 
-    def read_pointer
-      @session.read_pointer
-    end
-
     def check_status(status)
       Utils.check_status(status)
     end
@@ -302,8 +297,8 @@ module OnnxRuntime
       self.class.release(*args)
     end
 
-    def allocator_free(ptr, direct: false)
-      api[:AllocatorFree].call(@allocator.read_pointer, direct ? ptr : ptr.read_pointer)
+    def allocator_free(ptr)
+      api[:AllocatorFree].call(@allocator, ptr)
     end
 
     def self.api
@@ -312,11 +307,6 @@ module OnnxRuntime
 
     def self.release(type, pointer)
       Utils.release(type, pointer)
-    end
-
-    def self.finalize(addr)
-      # must use proc instead of stabby lambda
-      proc { api[:ReleaseSession].call(::FFI::Pointer.new(:pointer, addr)) }
     end
 
     # wide string on Windows
@@ -341,7 +331,7 @@ module OnnxRuntime
         @@env ||= begin
           env = ::FFI::MemoryPointer.new(:pointer)
           check_status api[:CreateEnv].call(3, "Default", env)
-          at_exit { release :Env, env }
+          env = ::FFI::AutoPointer.new(env.read_pointer, api[:ReleaseEnv])
           # disable telemetry
           # https://github.com/microsoft/onnxruntime/blob/master/docs/Privacy.md
           check_status api[:DisableTelemetryEvents].call(env)

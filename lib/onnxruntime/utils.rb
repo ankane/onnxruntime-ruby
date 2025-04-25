@@ -47,14 +47,14 @@ module OnnxRuntime
 
     def self.node_info(typeinfo)
       onnx_type = ::FFI::MemoryPointer.new(:int)
-      check_status api[:GetOnnxTypeFromTypeInfo].call(typeinfo.read_pointer, onnx_type)
+      check_status api[:GetOnnxTypeFromTypeInfo].call(typeinfo, onnx_type)
 
       type = FFI::OnnxType[onnx_type.read_int]
       case type
       when :tensor
         tensor_info = ::FFI::MemoryPointer.new(:pointer)
         # don't free tensor_info
-        check_status api[:CastTypeInfoToTensorInfo].call(typeinfo.read_pointer, tensor_info)
+        check_status api[:CastTypeInfoToTensorInfo].call(typeinfo, tensor_info)
 
         type, shape = Utils.tensor_type_and_shape(tensor_info)
         {
@@ -63,10 +63,10 @@ module OnnxRuntime
         }
       when :sequence
         sequence_type_info = ::FFI::MemoryPointer.new(:pointer)
-        check_status api[:CastTypeInfoToSequenceTypeInfo].call(typeinfo.read_pointer, sequence_type_info)
+        check_status api[:CastTypeInfoToSequenceTypeInfo].call(typeinfo, sequence_type_info)
         nested_type_info = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:GetSequenceElementType].call(sequence_type_info.read_pointer, nested_type_info)
-        v = node_info(nested_type_info)[:type]
+        v = node_info(nested_type_info.read_pointer)[:type]
 
         {
           type: "seq(#{v})",
@@ -74,7 +74,7 @@ module OnnxRuntime
         }
       when :map
         map_type_info = ::FFI::MemoryPointer.new(:pointer)
-        check_status api[:CastTypeInfoToMapTypeInfo].call(typeinfo.read_pointer, map_type_info)
+        check_status api[:CastTypeInfoToMapTypeInfo].call(typeinfo, map_type_info)
 
         # key
         key_type = ::FFI::MemoryPointer.new(:int)
@@ -84,7 +84,7 @@ module OnnxRuntime
         # value
         value_type_info = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:GetMapValueType].call(map_type_info.read_pointer, value_type_info)
-        v = node_info(value_type_info)[:type]
+        v = node_info(value_type_info.read_pointer)[:type]
 
         {
           type: "map(#{k},#{v})",
@@ -94,7 +94,7 @@ module OnnxRuntime
         Utils.unsupported_type("ONNX", type)
       end
     ensure
-      release :TypeInfo, typeinfo
+      api[:ReleaseTypeInfo].call(typeinfo)
     end
 
     def self.numo_array?(obj)
@@ -135,7 +135,7 @@ module OnnxRuntime
       @allocator ||= begin
         allocator = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:GetAllocatorWithDefaultOptions].call(allocator)
-        allocator
+        allocator.read_pointer # do not free default allocator
       end
     end
   end

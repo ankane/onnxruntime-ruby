@@ -27,11 +27,11 @@ module OnnxRuntime
       if element_type == :string
         # keep reference to _str_ptrs until FillStringTensor call
         input_tensor_values, _str_ptrs = create_input_strings(input)
-        Utils.check_status FFI.api[:CreateTensorAsOrtValue].call(Utils.allocator.read_pointer, input_node_dims, shape.size, type_enum, ptr)
+        Utils.check_status FFI.api[:CreateTensorAsOrtValue].call(Utils.allocator, input_node_dims, shape.size, type_enum, ptr)
         Utils.check_status FFI.api[:FillStringTensor].call(ptr.read_pointer, input_tensor_values, input_tensor_values.size / input_tensor_values.type_size)
       else
         input_tensor_values = create_input_data(input, element_type)
-        Utils.check_status FFI.api[:CreateTensorWithDataAsOrtValue].call(allocator_info.read_pointer, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr)
+        Utils.check_status FFI.api[:CreateTensorWithDataAsOrtValue].call(allocator_info, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr)
       end
 
       new(ptr, input_tensor_values)
@@ -45,7 +45,7 @@ module OnnxRuntime
       input_node_dims.write_array_of_int64(shape)
 
       ptr = ::FFI::MemoryPointer.new(:pointer)
-      Utils.check_status FFI.api[:CreateTensorAsOrtValue].call(Utils.allocator.read_pointer, input_node_dims, shape.size, type_enum, ptr)
+      Utils.check_status FFI.api[:CreateTensorAsOrtValue].call(Utils.allocator, input_node_dims, shape.size, type_enum, ptr)
 
       new(ptr)
     end
@@ -88,7 +88,7 @@ module OnnxRuntime
       @data_type ||= begin
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         Utils.check_status FFI.api[:GetTypeInfo].call(@ptr, typeinfo)
-        Utils.node_info(typeinfo)[:type]
+        Utils.node_info(typeinfo.read_pointer)[:type]
       end
     end
 
@@ -203,7 +203,7 @@ module OnnxRuntime
 
         out.read(:size_t).times.map do |i|
           seq = ::FFI::MemoryPointer.new(:pointer)
-          Utils.check_status FFI.api[:GetValue].call(out_ptr, i, Utils.allocator.read_pointer, seq)
+          Utils.check_status FFI.api[:GetValue].call(out_ptr, i, Utils.allocator, seq)
           create_from_onnx_value(seq.read_pointer, output_type)
         end
       when :map
@@ -212,8 +212,8 @@ module OnnxRuntime
         map_values = ::FFI::MemoryPointer.new(:pointer)
         elem_type = ::FFI::MemoryPointer.new(:int)
 
-        Utils.check_status FFI.api[:GetValue].call(out_ptr, 0, Utils.allocator.read_pointer, map_keys)
-        Utils.check_status FFI.api[:GetValue].call(out_ptr, 1, Utils.allocator.read_pointer, map_values)
+        Utils.check_status FFI.api[:GetValue].call(out_ptr, 0, Utils.allocator, map_keys)
+        Utils.check_status FFI.api[:GetValue].call(out_ptr, 1, Utils.allocator, map_values)
         Utils.check_status FFI.api[:GetTensorTypeAndShape].call(map_keys.read_pointer, type_shape)
         Utils.check_status FFI.api[:GetTensorElementType].call(type_shape.read_pointer, elem_type)
         Utils.release :TensorTypeAndShapeInfo, type_shape
@@ -271,7 +271,7 @@ module OnnxRuntime
       @allocator_info ||= begin
         allocator_info = ::FFI::MemoryPointer.new(:pointer)
         Utils.check_status FFI.api[:CreateCpuMemoryInfo].call(1, 0, allocator_info)
-        allocator_info
+        ::FFI::AutoPointer.new(allocator_info.read_pointer, FFI.api[:ReleaseMemoryInfo])
       end
     end
   end
