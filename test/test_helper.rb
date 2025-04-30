@@ -6,6 +6,9 @@ require "tmpdir"
 
 class Minitest::Test
   def setup
+    # autoload before GC.stress
+    OnnxRuntime::FFI if stress?
+
     GC.stress = true if stress?
 
     # avoid hanging from too many threads on CI
