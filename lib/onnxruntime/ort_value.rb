@@ -253,7 +253,6 @@ module OnnxRuntime
     end
 
     def reshape(arr, dims)
-      arr = arr.flatten
       dims[1..-1].reverse_each do |dim|
         arr = arr.each_slice(dim)
       end
