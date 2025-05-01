@@ -231,41 +231,39 @@ module OnnxRuntime
     end
 
     def load_inputs
-      inputs = []
       num_input_nodes = ::FFI::MemoryPointer.new(:size_t)
       check_status api[:SessionGetInputCount].call(@session, num_input_nodes)
-      num_input_nodes.read(:size_t).times do |i|
+
+      num_input_nodes.read(:size_t).times.map do |i|
         name_ptr = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetInputName].call(@session, i, @allocator, name_ptr)
+        name_str = name_ptr.read_pointer.read_string
+        allocator_free name_ptr.read_pointer
 
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetInputTypeInfo].call(@session, i, typeinfo)
         typeinfo = ::FFI::AutoPointer.new(typeinfo.read_pointer, api[:ReleaseTypeInfo])
 
-        inputs << {name: name_ptr.read_pointer.read_string}.merge(Utils.node_info(typeinfo))
-
-        allocator_free name_ptr.read_pointer
+        {name: name_str}.merge(Utils.node_info(typeinfo))
       end
-      inputs
     end
 
     def load_outputs
-      outputs = []
       num_output_nodes = ::FFI::MemoryPointer.new(:size_t)
       check_status api[:SessionGetOutputCount].call(@session, num_output_nodes)
-      num_output_nodes.read(:size_t).times do |i|
+
+      num_output_nodes.read(:size_t).times.map do |i|
         name_ptr = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetOutputName].call(@session, i, @allocator, name_ptr)
+        name_str = name_ptr.read_pointer.read_string
+        allocator_free name_ptr.read_pointer
 
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetOutputTypeInfo].call(@session, i, typeinfo)
         typeinfo = ::FFI::AutoPointer.new(typeinfo.read_pointer, api[:ReleaseTypeInfo])
 
-        outputs << {name: name_ptr.read_pointer.read_string}.merge(Utils.node_info(typeinfo))
-
-        allocator_free name_ptr.read_pointer
+        {name: name_str}.merge(Utils.node_info(typeinfo))
       end
-      outputs
     end
 
     def create_input_tensor(input_feed)
