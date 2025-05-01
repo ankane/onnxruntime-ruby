@@ -184,9 +184,13 @@ module OnnxRuntime
 
     # return value has double underscore like Python
     def end_profiling
-      out = ::FFI::MemoryPointer.new(:string)
+      out = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:SessionEndProfiling].call(@session, @allocator, out)
-      out.read_pointer.read_string
+      begin
+        out.read_pointer.read_string
+      ensure
+        allocator_free out.read_pointer
+      end
     end
 
     # no way to set providers with C API yet
