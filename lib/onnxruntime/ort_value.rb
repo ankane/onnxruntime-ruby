@@ -1,9 +1,8 @@
 module OnnxRuntime
   class OrtValue
     def initialize(ptr, ref = nil)
-      @ptr = ptr.read_pointer
+      @ptr = ::FFI::AutoPointer.new(ptr.read_pointer, FFI.api[:ReleaseValue])
       @ref = ref # keep reference to data
-      ObjectSpace.define_finalizer(@ptr, self.class.finalize(@ptr.to_i))
     end
 
     def self.from_numo(numo_obj)
@@ -260,11 +259,6 @@ module OnnxRuntime
         arr = arr.each_slice(dim)
       end
       arr.to_a
-    end
-
-    def self.finalize(addr)
-      # must use proc instead of stabby lambda
-      proc { FFI.api[:ReleaseValue].call(::FFI::Pointer.new(:pointer, addr)) }
     end
 
     def self.allocator_info
