@@ -212,7 +212,6 @@ module OnnxRuntime
     private
 
     def load_session(path_or_bytes, session_options)
-      session = ::FFI::MemoryPointer.new(:pointer)
       from_memory =
         if path_or_bytes.respond_to?(:read)
           path_or_bytes = path_or_bytes.read
@@ -222,6 +221,7 @@ module OnnxRuntime
           false
         end
 
+      session = ::FFI::MemoryPointer.new(:pointer)
       if from_memory
         check_status api[:CreateSessionFromArray].call(env, path_or_bytes, path_or_bytes.bytesize, session_options, session)
       else
@@ -237,10 +237,13 @@ module OnnxRuntime
       num_input_nodes.read(:size_t).times do |i|
         name_ptr = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetInputName].call(@session, i, @allocator, name_ptr)
+
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetInputTypeInfo].call(@session, i, typeinfo)
         typeinfo = ::FFI::AutoPointer.new(typeinfo.read_pointer, api[:ReleaseTypeInfo])
+
         inputs << {name: name_ptr.read_pointer.read_string}.merge(Utils.node_info(typeinfo))
+
         allocator_free name_ptr.read_pointer
       end
       inputs
@@ -253,10 +256,13 @@ module OnnxRuntime
       num_output_nodes.read(:size_t).times do |i|
         name_ptr = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetOutputName].call(@session, i, @allocator, name_ptr)
+
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetOutputTypeInfo].call(@session, i, typeinfo)
         typeinfo = ::FFI::AutoPointer.new(typeinfo.read_pointer, api[:ReleaseTypeInfo])
+
         outputs << {name: name_ptr.read_pointer.read_string}.merge(Utils.node_info(typeinfo))
+
         allocator_free name_ptr.read_pointer
       end
       outputs
