@@ -48,18 +48,20 @@ module OnnxRuntime
       type = FFI::OnnxType[onnx_type.read_int]
       case type
       when :tensor
-        tensor_info = ::FFI::MemoryPointer.new(:pointer)
         # don't free tensor_info
+        tensor_info = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:CastTypeInfoToTensorInfo].call(typeinfo, tensor_info)
-
         type, shape = Utils.tensor_type_and_shape(tensor_info.read_pointer)
+
         {
           type: "tensor(#{FFI::TensorElementDataType[type]})",
           shape: shape
         }
       when :sequence
+        # don't free sequence_info
         sequence_type_info = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:CastTypeInfoToSequenceTypeInfo].call(typeinfo, sequence_type_info)
+
         nested_type_info = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:GetSequenceElementType].call(sequence_type_info.read_pointer, nested_type_info)
         nested_type_info = ::FFI::AutoPointer.new(nested_type_info.read_pointer, api[:ReleaseTypeInfo])
@@ -70,6 +72,7 @@ module OnnxRuntime
           shape: []
         }
       when :map
+        # don't free map_type_info
         map_type_info = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:CastTypeInfoToMapTypeInfo].call(typeinfo, map_type_info)
 
