@@ -129,23 +129,16 @@ module OnnxRuntime
     end
 
     def modelmeta
-      keys = ::FFI::MemoryPointer.new(:pointer)
-      num_keys = ::FFI::MemoryPointer.new(:int64_t)
-      description = ::FFI::MemoryPointer.new(:pointer)
-      domain = ::FFI::MemoryPointer.new(:pointer)
-      graph_name = ::FFI::MemoryPointer.new(:pointer)
-      graph_description = ::FFI::MemoryPointer.new(:pointer)
-      producer_name = ::FFI::MemoryPointer.new(:pointer)
-      version = ::FFI::MemoryPointer.new(:int64_t)
-
       metadata = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:SessionGetModelMetadata].call(@session, metadata)
       metadata = ::FFI::AutoPointer.new(metadata.read_pointer, api[:ReleaseModelMetadata])
 
-      custom_metadata_map = {}
+      keys = ::FFI::MemoryPointer.new(:pointer)
+      num_keys = ::FFI::MemoryPointer.new(:int64_t)
       check_status api[:ModelMetadataGetCustomMetadataMapKeys].call(metadata, @allocator, keys, num_keys)
       keys = keys.read_pointer
 
+      custom_metadata_map = {}
       num_keys.read(:int64_t).times do |i|
         key_ptr = keys.get_pointer(i * ::FFI::Pointer.size)
         key = key_ptr.read_string
@@ -158,11 +151,22 @@ module OnnxRuntime
       end
       allocator_free keys
 
+      description = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:ModelMetadataGetDescription].call(metadata, @allocator, description)
+
+      domain = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:ModelMetadataGetDomain].call(metadata, @allocator, domain)
+
+      graph_name = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:ModelMetadataGetGraphName].call(metadata, @allocator, graph_name)
+
+      graph_description = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:ModelMetadataGetGraphDescription].call(metadata, @allocator, graph_description)
+
+      producer_name = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:ModelMetadataGetProducerName].call(metadata, @allocator, producer_name)
+
+      version = ::FFI::MemoryPointer.new(:int64_t)
       check_status api[:ModelMetadataGetVersion].call(metadata, version)
 
       {
