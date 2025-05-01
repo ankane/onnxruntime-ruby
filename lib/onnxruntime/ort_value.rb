@@ -203,16 +203,18 @@ module OnnxRuntime
           create_from_onnx_value(seq.read_pointer, output_type)
         end
       when :map
-        type_shape = ::FFI::MemoryPointer.new(:pointer)
         map_keys = ::FFI::MemoryPointer.new(:pointer)
-        map_values = ::FFI::MemoryPointer.new(:pointer)
-        elem_type = ::FFI::MemoryPointer.new(:int)
-
         Utils.check_status FFI.api[:GetValue].call(out_ptr, 0, Utils.allocator, map_keys)
+
+        map_values = ::FFI::MemoryPointer.new(:pointer)
         Utils.check_status FFI.api[:GetValue].call(out_ptr, 1, Utils.allocator, map_values)
+
+        type_shape = ::FFI::MemoryPointer.new(:pointer)
         Utils.check_status FFI.api[:GetTensorTypeAndShape].call(map_keys.read_pointer, type_shape)
-        Utils.check_status FFI.api[:GetTensorElementType].call(type_shape.read_pointer, elem_type)
-        FFI.api[:ReleaseTensorTypeAndShapeInfo].call(type_shape.read_pointer)
+        type_shape = ::FFI::AutoPointer.new(type_shape.read_pointer, FFI.api[:ReleaseTensorTypeAndShapeInfo])
+
+        elem_type = ::FFI::MemoryPointer.new(:int)
+        Utils.check_status FFI.api[:GetTensorElementType].call(type_shape, elem_type)
 
         # TODO support more types
         elem_type = FFI::TensorElementDataType[elem_type.read_int]

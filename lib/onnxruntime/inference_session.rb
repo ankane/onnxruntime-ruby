@@ -118,6 +118,7 @@ module OnnxRuntime
       run_options = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:CreateRunOptions].call(run_options)
       run_options = ::FFI::AutoPointer.new(run_options.read_pointer, api[:ReleaseRunOptions])
+
       check_status api[:RunOptionsSetRunLogSeverityLevel].call(run_options, log_severity_level) if log_severity_level
       check_status api[:RunOptionsSetRunLogVerbosityLevel].call(run_options, log_verbosity_level) if log_verbosity_level
       check_status api[:RunOptionsSetRunTag].call(run_options, logid) if logid
