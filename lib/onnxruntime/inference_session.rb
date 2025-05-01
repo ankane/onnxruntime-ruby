@@ -149,7 +149,6 @@ module OnnxRuntime
         allocator_free key_ptr
         allocator_free value.read_pointer
       end
-      allocator_free keys
 
       description = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:ModelMetadataGetDescription].call(metadata, @allocator, description)
@@ -179,6 +178,7 @@ module OnnxRuntime
         version: version.read(:int64_t)
       }
     ensure
+      allocator_free keys
       allocator_free description.read_pointer
       allocator_free domain.read_pointer
       allocator_free graph_name.read_pointer
