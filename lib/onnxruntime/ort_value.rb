@@ -133,12 +133,12 @@ module OnnxRuntime
 
     def type_and_shape_info
       @type_and_shape_info ||= begin
+        typeinfo = ::FFI::MemoryPointer.new(:pointer)
+        Utils.check_status FFI.api[:GetTensorTypeAndShape].call(@ptr, typeinfo)
         begin
-          typeinfo = ::FFI::MemoryPointer.new(:pointer)
-          Utils.check_status FFI.api[:GetTensorTypeAndShape].call(@ptr, typeinfo)
           Utils.tensor_type_and_shape(typeinfo)
         ensure
-          Utils.release :TensorTypeAndShapeInfo, typeinfo
+          FFI.api[:ReleaseTensorTypeAndShapeInfo].call(typeinfo.read_pointer)
         end
       end
     end
@@ -162,7 +162,7 @@ module OnnxRuntime
         Utils.check_status FFI.api[:GetTensorShapeElementCount].call(typeinfo.read_pointer, out_size)
         output_tensor_size = out_size.read(:size_t)
 
-        Utils.release :TensorTypeAndShapeInfo, typeinfo
+        FFI.api[:ReleaseTensorTypeAndShapeInfo].call(typeinfo.read_pointer)
 
         # TODO support more types
         type = FFI::TensorElementDataType[type]
@@ -215,7 +215,7 @@ module OnnxRuntime
         Utils.check_status FFI.api[:GetValue].call(out_ptr, 1, Utils.allocator, map_values)
         Utils.check_status FFI.api[:GetTensorTypeAndShape].call(map_keys.read_pointer, type_shape)
         Utils.check_status FFI.api[:GetTensorElementType].call(type_shape.read_pointer, elem_type)
-        Utils.release :TensorTypeAndShapeInfo, type_shape
+        FFI.api[:ReleaseTensorTypeAndShapeInfo].call(type_shape.read_pointer)
 
         # TODO support more types
         elem_type = FFI::TensorElementDataType[elem_type.read_int]

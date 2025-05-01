@@ -17,10 +17,6 @@ module OnnxRuntime
       FFI.api
     end
 
-    def self.release(type, pointer)
-      FFI.api[:"Release#{type}"].call(pointer.read_pointer) if pointer && !pointer.null?
-    end
-
     def self.unsupported_type(name, type)
       raise Error, "Unsupported #{name} type: #{type}"
     end
@@ -46,6 +42,7 @@ module OnnxRuntime
     end
 
     def self.node_info(typeinfo)
+      typeinfo = ::FFI::AutoPointer.new(typeinfo, api[:ReleaseTypeInfo])
       onnx_type = ::FFI::MemoryPointer.new(:int)
       check_status api[:GetOnnxTypeFromTypeInfo].call(typeinfo, onnx_type)
 
@@ -93,8 +90,6 @@ module OnnxRuntime
       else
         Utils.unsupported_type("ONNX", type)
       end
-    ensure
-      api[:ReleaseTypeInfo].call(typeinfo)
     end
 
     def self.numo_array?(obj)

@@ -297,20 +297,12 @@ module OnnxRuntime
       self.class.api
     end
 
-    def release(*args)
-      self.class.release(*args)
-    end
-
     def allocator_free(ptr)
       api[:AllocatorFree].call(@allocator, ptr)
     end
 
     def self.api
       FFI.api
-    end
-
-    def self.release(type, pointer)
-      Utils.release(type, pointer)
     end
 
     # wide string on Windows
