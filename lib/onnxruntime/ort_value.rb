@@ -1,7 +1,7 @@
 module OnnxRuntime
   class OrtValue
     def initialize(ptr, ref = nil)
-      @ptr = ::FFI::AutoPointer.new(ptr.read_pointer, FFI.api[:ReleaseValue])
+      @ptr = ::FFI::AutoPointer.new(ptr, FFI.api[:ReleaseValue])
       @ref = ref # keep reference to data
     end
 
@@ -33,7 +33,7 @@ module OnnxRuntime
         Utils.check_status FFI.api[:CreateTensorWithDataAsOrtValue].call(allocator_info, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr)
       end
 
-      new(ptr, input_tensor_values)
+      new(ptr.read_pointer, input_tensor_values)
     end
 
     def self.from_shape_and_type(shape, element_type)
@@ -46,7 +46,7 @@ module OnnxRuntime
       ptr = ::FFI::MemoryPointer.new(:pointer)
       Utils.check_status FFI.api[:CreateTensorAsOrtValue].call(Utils.allocator, input_node_dims, shape.size, type_enum, ptr)
 
-      new(ptr)
+      new(ptr.read_pointer)
     end
 
     def self.create_input_data(input, tensor_type)

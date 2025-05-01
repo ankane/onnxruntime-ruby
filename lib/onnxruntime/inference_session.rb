@@ -125,7 +125,7 @@ module OnnxRuntime
 
       check_status api[:Run].call(@session, run_options, input_node_names, input_tensor, input_feed.size, output_node_names, output_names.size, output_tensor)
 
-      output_names.size.times.map { |i| OrtValue.new(output_tensor[i]) }
+      output_names.size.times.map { |i| OrtValue.new(output_tensor[i].read_pointer) }
     end
 
     def modelmeta
