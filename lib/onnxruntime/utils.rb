@@ -23,18 +23,18 @@ module OnnxRuntime
 
     def self.tensor_type_and_shape(tensor_info)
       type = ::FFI::MemoryPointer.new(:int)
-      check_status api[:GetTensorElementType].call(tensor_info.read_pointer, type)
+      check_status api[:GetTensorElementType].call(tensor_info, type)
 
       num_dims_ptr = ::FFI::MemoryPointer.new(:size_t)
-      check_status api[:GetDimensionsCount].call(tensor_info.read_pointer, num_dims_ptr)
+      check_status api[:GetDimensionsCount].call(tensor_info, num_dims_ptr)
       num_dims = num_dims_ptr.read(:size_t)
 
       node_dims = ::FFI::MemoryPointer.new(:int64, num_dims)
-      check_status api[:GetDimensions].call(tensor_info.read_pointer, node_dims, num_dims)
+      check_status api[:GetDimensions].call(tensor_info, node_dims, num_dims)
       dims = node_dims.read_array_of_int64(num_dims)
 
       symbolic_dims = ::FFI::MemoryPointer.new(:pointer, num_dims)
-      check_status api[:GetSymbolicDimensions].call(tensor_info.read_pointer, symbolic_dims, num_dims)
+      check_status api[:GetSymbolicDimensions].call(tensor_info, symbolic_dims, num_dims)
       named_dims = num_dims.times.map { |i| symbolic_dims[i].read_pointer.read_string }
       dims = named_dims.zip(dims).map { |n, d| n.empty? ? d : n }
 
@@ -52,7 +52,7 @@ module OnnxRuntime
         # don't free tensor_info
         check_status api[:CastTypeInfoToTensorInfo].call(typeinfo, tensor_info)
 
-        type, shape = Utils.tensor_type_and_shape(tensor_info)
+        type, shape = Utils.tensor_type_and_shape(tensor_info.read_pointer)
         {
           type: "tensor(#{FFI::TensorElementDataType[type]})",
           shape: shape
