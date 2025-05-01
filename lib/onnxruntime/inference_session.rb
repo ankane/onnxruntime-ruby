@@ -233,10 +233,10 @@ module OnnxRuntime
       num_input_nodes.read(:size_t).times do |i|
         name_ptr = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetInputName].call(@session, i, @allocator, name_ptr)
-        # freed in node_info
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetInputTypeInfo].call(@session, i, typeinfo)
-        inputs << {name: name_ptr.read_pointer.read_string}.merge(Utils.node_info(typeinfo.read_pointer))
+        typeinfo = ::FFI::AutoPointer.new(typeinfo.read_pointer, api[:ReleaseTypeInfo])
+        inputs << {name: name_ptr.read_pointer.read_string}.merge(Utils.node_info(typeinfo))
         allocator_free name_ptr.read_pointer
       end
       inputs
@@ -249,10 +249,10 @@ module OnnxRuntime
       num_output_nodes.read(:size_t).times do |i|
         name_ptr = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetOutputName].call(@session, i, @allocator, name_ptr)
-        # freed in node_info
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetOutputTypeInfo].call(@session, i, typeinfo)
-        outputs << {name: name_ptr.read_pointer.read_string}.merge(Utils.node_info(typeinfo.read_pointer))
+        typeinfo = ::FFI::AutoPointer.new(typeinfo.read_pointer, api[:ReleaseTypeInfo])
+        outputs << {name: name_ptr.read_pointer.read_string}.merge(Utils.node_info(typeinfo))
         allocator_free name_ptr.read_pointer
       end
       outputs

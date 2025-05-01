@@ -87,7 +87,8 @@ module OnnxRuntime
       @data_type ||= begin
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         Utils.check_status FFI.api[:GetTypeInfo].call(@ptr, typeinfo)
-        Utils.node_info(typeinfo.read_pointer)[:type]
+        typeinfo = ::FFI::AutoPointer.new(typeinfo.read_pointer, FFI.api[:ReleaseTypeInfo])
+        Utils.node_info(typeinfo)[:type]
       end
     end
 

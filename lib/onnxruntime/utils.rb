@@ -42,7 +42,6 @@ module OnnxRuntime
     end
 
     def self.node_info(typeinfo)
-      typeinfo = ::FFI::AutoPointer.new(typeinfo, api[:ReleaseTypeInfo])
       onnx_type = ::FFI::MemoryPointer.new(:int)
       check_status api[:GetOnnxTypeFromTypeInfo].call(typeinfo, onnx_type)
 
@@ -63,7 +62,8 @@ module OnnxRuntime
         check_status api[:CastTypeInfoToSequenceTypeInfo].call(typeinfo, sequence_type_info)
         nested_type_info = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:GetSequenceElementType].call(sequence_type_info.read_pointer, nested_type_info)
-        v = node_info(nested_type_info.read_pointer)[:type]
+        nested_type_info = ::FFI::AutoPointer.new(nested_type_info.read_pointer, api[:ReleaseTypeInfo])
+        v = node_info(nested_type_info)[:type]
 
         {
           type: "seq(#{v})",
@@ -81,7 +81,8 @@ module OnnxRuntime
         # value
         value_type_info = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:GetMapValueType].call(map_type_info.read_pointer, value_type_info)
-        v = node_info(value_type_info.read_pointer)[:type]
+        value_type_info = ::FFI::AutoPointer.new(value_type_info.read_pointer, api[:ReleaseTypeInfo])
+        v = node_info(value_type_info)[:type]
 
         {
           type: "map(#{k},#{v})",
