@@ -131,11 +131,11 @@ module OnnxRuntime
     def modelmeta
       keys = ::FFI::MemoryPointer.new(:pointer)
       num_keys = ::FFI::MemoryPointer.new(:int64_t)
-      description = ::FFI::MemoryPointer.new(:string)
-      domain = ::FFI::MemoryPointer.new(:string)
-      graph_name = ::FFI::MemoryPointer.new(:string)
-      graph_description = ::FFI::MemoryPointer.new(:string)
-      producer_name = ::FFI::MemoryPointer.new(:string)
+      description = ::FFI::MemoryPointer.new(:pointer)
+      domain = ::FFI::MemoryPointer.new(:pointer)
+      graph_name = ::FFI::MemoryPointer.new(:pointer)
+      graph_description = ::FFI::MemoryPointer.new(:pointer)
+      producer_name = ::FFI::MemoryPointer.new(:pointer)
       version = ::FFI::MemoryPointer.new(:int64_t)
 
       metadata = ::FFI::MemoryPointer.new(:pointer)
@@ -149,7 +149,7 @@ module OnnxRuntime
       num_keys.read(:int64_t).times do |i|
         key_ptr = keys.get_pointer(i * ::FFI::Pointer.size)
         key = key_ptr.read_string
-        value = ::FFI::MemoryPointer.new(:string)
+        value = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:ModelMetadataLookupCustomMetadataMap].call(metadata, @allocator, key, value)
         custom_metadata_map[key] = value.read_pointer.read_string
 
@@ -231,7 +231,7 @@ module OnnxRuntime
       num_input_nodes = ::FFI::MemoryPointer.new(:size_t)
       check_status api[:SessionGetInputCount].call(@session, num_input_nodes)
       num_input_nodes.read(:size_t).times do |i|
-        name_ptr = ::FFI::MemoryPointer.new(:string)
+        name_ptr = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetInputName].call(@session, i, @allocator, name_ptr)
         # freed in node_info
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
@@ -247,7 +247,7 @@ module OnnxRuntime
       num_output_nodes = ::FFI::MemoryPointer.new(:size_t)
       check_status api[:SessionGetOutputCount].call(@session, num_output_nodes)
       num_output_nodes.read(:size_t).times do |i|
-        name_ptr = ::FFI::MemoryPointer.new(:string)
+        name_ptr = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetOutputName].call(@session, i, @allocator, name_ptr)
         # freed in node_info
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
