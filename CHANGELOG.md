@@ -1,5 +1,6 @@
 ## 0.10.0 (unreleased)
 
+- Updated ONNX Runtime to 1.22.0
 - Dropped support for Ruby < 3.2
 
 ## 0.9.4 (2025-03-08)
