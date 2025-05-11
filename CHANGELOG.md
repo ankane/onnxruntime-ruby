@@ -1,4 +1,4 @@
-## 0.10.0 (unreleased)
+## 0.10.0 (2025-05-11)
 
 - Updated ONNX Runtime to 1.22.0
 - Dropped support for Ruby < 3.2
