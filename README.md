@@ -61,7 +61,8 @@ model.predict({x: [1, 2, 3]}, output_names: ["label"])
 ## Session Options
 
 ```ruby
-OnnxRuntime::Model.new(path_or_io, {
+OnnxRuntime::Model.new(
+  path_or_io,
   enable_cpu_mem_arena: true,
   enable_mem_pattern: true,
   enable_profiling: false,
@@ -77,20 +78,21 @@ OnnxRuntime::Model.new(path_or_io, {
   optimized_model_filepath: nil,
   profile_file_prefix: "onnxruntime_profile_",
   session_config_entries: nil
-})
+)
 ```
 
 ## Run Options
 
 ```ruby
-model.predict(input_feed, {
+model.predict(
+  input_feed,
   output_names: nil,
   log_severity_level: 2,
   log_verbosity_level: 0,
   logid: nil,
   terminate: false,
   output_type: :ruby       # :ruby or :numo
-})
+)
 ```
 
 ## Inference Session API
