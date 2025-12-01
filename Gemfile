@@ -3,7 +3,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "rake"
-gem "minitest", ">= 5"
+gem "minitest"
 
 # TODO remove when numo-narray > 0.9.2.1 is released
 if Gem.win_platform?

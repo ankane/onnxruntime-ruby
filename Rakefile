@@ -1,11 +1,11 @@
 require "bundler/gem_tasks"
 require "rake/testtask"
 
-task default: :test
 Rake::TestTask.new do |t|
-  t.libs << "test"
   t.pattern = "test/**/*_test.rb"
 end
+
+task default: :test
 
 shared_libraries = %w(libonnxruntime.so libonnxruntime.arm64.so libonnxruntime.dylib libonnxruntime.arm64.dylib onnxruntime.dll)
 
