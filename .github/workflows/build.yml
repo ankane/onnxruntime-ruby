@@ -22,3 +22,5 @@ jobs:
           bundler-cache: true
       - run: bundle exec rake vendor:platform
       - run: bundle exec rake test
+      - if: ${{ startsWith(matrix.os, 'mac') }}
+        run: ruby test/inference_session_test.rb --name test_providers_coreml
