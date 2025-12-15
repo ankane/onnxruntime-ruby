@@ -19,17 +19,18 @@ module OnnxRuntime
       input = input.to_a unless input.is_a?(Array) || Utils.numo_array?(input)
 
       shape = Utils.input_shape(input)
+      flat_size = shape.reduce(1) { |memo, dim| memo * dim }
       input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
       input_node_dims.write_array_of_int64(shape)
 
       ptr = ::FFI::MemoryPointer.new(:pointer)
       if element_type == :string
         # keep reference to _str_ptrs until FillStringTensor call
-        input_tensor_values, _str_ptrs = create_input_strings(input)
+        input_tensor_values, _str_ptrs = create_input_strings(input, flat_size)
         Utils.check_status FFI.api[:CreateTensorAsOrtValue].call(Utils.allocator, input_node_dims, shape.size, type_enum, ptr)
         Utils.check_status FFI.api[:FillStringTensor].call(ptr.read_pointer, input_tensor_values, input_tensor_values.size / input_tensor_values.type_size)
       else
-        input_tensor_values = create_input_data(input, element_type)
+        input_tensor_values = create_input_data(input, element_type, flat_size)
         Utils.check_status FFI.api[:CreateTensorWithDataAsOrtValue].call(allocator_info, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr)
       end
 
@@ -49,28 +50,29 @@ module OnnxRuntime
       new(ptr.read_pointer)
     end
 
-    def self.create_input_data(input, tensor_type)
+    def self.create_input_data(input, tensor_type, flat_size)
       if Utils.numo_array?(input)
         input.cast_to(Utils.numo_types[tensor_type]).to_binary
       else
-        flat_input = input.flatten.to_a
-        input_tensor_values = ::FFI::MemoryPointer.new(tensor_type, flat_input.size)
-        if tensor_type == :bool
-          input_tensor_values.write_array_of_uint8(flat_input.map { |v| v ? 1 : 0 })
-        else
-          input_tensor_values.send("write_array_of_#{tensor_type}", flat_input)
-        end
-        input_tensor_values
+        input_tensor_values = ::FFI::MemoryPointer.new(tensor_type, flat_size)
+        write_array_to_pointer(input, tensor_type, input_tensor_values, flat_size)
       end
     end
     private_class_method :create_input_data
 
-    def self.create_input_strings(input)
+    def self.create_input_strings(input, flat_size)
       str_ptrs =
         if Utils.numo_array?(input)
-          input.size.times.map { |i| ::FFI::MemoryPointer.from_string(input[i]) }
+          flat_size.times.map { |i| ::FFI::MemoryPointer.from_string(input[i]) }
         else
-          input.flatten.map { |v| ::FFI::MemoryPointer.from_string(v) }
+          values = Array.new(flat_size)
+          idx = 0
+          each_array_element(input) do |value|
+            values[idx] = ::FFI::MemoryPointer.from_string(value)
+            idx += 1
+          end
+          raise ArgumentError, "Input size mismatch" unless idx == flat_size
+          values
         end
 
       input_tensor_values = ::FFI::MemoryPointer.new(:pointer, str_ptrs.size)
@@ -78,6 +80,43 @@ module OnnxRuntime
       [input_tensor_values, str_ptrs]
     end
     private_class_method :create_input_strings
+
+    def self.write_array_to_pointer(input, tensor_type, pointer, flat_size)
+      offset = 0
+      type_symbol = tensor_type == :bool ? :uint8 : tensor_type
+      type_size = ::FFI.type_size(type_symbol)
+      writer = tensor_type == :bool ? :put_array_of_uint8 : :"put_array_of_#{tensor_type}"
+
+      stack = [input]
+      until stack.empty?
+        current = stack.pop
+        if current.is_a?(Array) && !current.empty? && current.first.is_a?(Array)
+          current.reverse_each { |v| stack << v }
+        elsif current.is_a?(Array)
+          values = tensor_type == :bool ? current.map { |v| v ? 1 : 0 } : current
+          pointer.send(writer, offset * type_size, values)
+          offset += values.length
+        else
+          value = tensor_type == :bool ? (current ? 1 : 0) : current
+          pointer.send(writer, offset * type_size, [value])
+          offset += 1
+        end
+      end
+
+      raise ArgumentError, "Input size mismatch" unless offset == flat_size
+
+      pointer
+    end
+    private_class_method :write_array_to_pointer
+
+    def self.each_array_element(value, &block)
+      if value.is_a?(Array)
+        value.each { |v| each_array_element(v, &block) }
+      else
+        yield value
+      end
+    end
+    private_class_method :each_array_element
 
     def tensor?
       FFI::OnnxType[value_type] == :tensor
