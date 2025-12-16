@@ -12,6 +12,40 @@ module OnnxRuntime
       from_array(numo_obj, element_type: element_type)
     end
 
+    def self.from_torch(tensor, element_type: nil)
+      Utils.unsupported_type("Torch", tensor.class.name) unless torch_tensor?(tensor)
+
+      expected_type = element_type
+      element_type ||= torch_dtype_to_ort_type(tensor.dtype)
+      Utils.unsupported_type("Torch dtype", tensor.dtype) unless element_type
+
+      if expected_type && element_type != expected_type
+        target_dtype = ort_type_to_torch_dtype(expected_type)
+        Utils.unsupported_type("element", expected_type) unless target_dtype
+        tensor = tensor.to("cpu", dtype: target_dtype)
+        element_type = expected_type
+      elsif tensor.respond_to?(:device) && tensor.device.respond_to?(:type) && tensor.device.type != :cpu
+        tensor = tensor.to("cpu")
+      end
+
+      tensor = tensor.contiguous if tensor.respond_to?(:contiguous?) && !tensor.contiguous?
+
+      type_enum = FFI::TensorElementDataType[element_type]
+      Utils.unsupported_type("element", element_type) unless type_enum
+
+      shape = tensor.shape.map { |d| Integer(d) }
+      input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
+      input_node_dims.write_array_of_int64(shape)
+
+      byte_size = tensor.numel * tensor.element_size
+      data_ptr = ::FFI::Pointer.new(tensor._data_ptr)
+
+      ptr = ::FFI::MemoryPointer.new(:pointer)
+      Utils.check_status FFI.api[:CreateTensorWithDataAsOrtValue].call(allocator_info, data_ptr, byte_size, input_node_dims, shape.size, type_enum, ptr)
+
+      new(ptr.read_pointer, tensor)
+    end
+
     def self.from_array(input, element_type:)
       type_enum = FFI::TensorElementDataType[element_type]
       Utils.unsupported_type("element", element_type) unless type_enum
@@ -297,6 +331,40 @@ module OnnxRuntime
       end
       arr.to_a
     end
+
+    def self.torch_tensor?(obj)
+      Object.const_defined?(:Torch) && Torch.const_defined?(:Tensor) && obj.is_a?(Torch::Tensor)
+    rescue NameError
+      false
+    end
+    private_class_method :torch_tensor?
+
+    def self.torch_dtype_to_ort_type(dtype)
+      {
+        float32: :float,
+        float64: :double,
+        int64: :int64,
+        int32: :int32,
+        int16: :int16,
+        int8: :int8,
+        uint8: :uint8,
+        bool: :bool
+      }[dtype]
+    end
+
+    def self.ort_type_to_torch_dtype(type)
+      {
+        float: :float32,
+        double: :float64,
+        int64: :int64,
+        int32: :int32,
+        int16: :int16,
+        int8: :int8,
+        uint8: :uint8,
+        bool: :bool
+      }[type]
+    end
+    private_class_method :torch_dtype_to_ort_type, :ort_type_to_torch_dtype
 
     def self.allocator_info
       @allocator_info ||= begin

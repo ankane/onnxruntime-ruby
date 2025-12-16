@@ -276,11 +276,15 @@ module OnnxRuntime
         inp = @inputs.find { |i| i[:name] == input_name.to_s }
         raise Error, "Unknown input: #{input_name}" unless inp
 
+        tensor_type = tensor_types[inp[:type]]
+
         if input.is_a?(OrtValue)
           input
         elsif inp[:type] == "tensor(string)"
           OrtValue.from_array(input, element_type: :string)
-        elsif (tensor_type = tensor_types[inp[:type]])
+        elsif tensor_type && torch_tensor?(input)
+          OrtValue.from_torch(input, element_type: tensor_type)
+        elsif tensor_type
           OrtValue.from_array(input, element_type: tensor_type)
         else
           Utils.unsupported_type("input", inp[:type])
@@ -303,6 +307,12 @@ module OnnxRuntime
 
     def tensor_types
       @tensor_types ||= [:float, :uint8, :int8, :uint16, :int16, :int32, :int64, :bool, :double, :uint32, :uint64].map { |v| ["tensor(#{v})", v] }.to_h
+    end
+
+    def torch_tensor?(obj)
+      Object.const_defined?(:Torch) && Torch.const_defined?(:Tensor) && obj.is_a?(Torch::Tensor)
+    rescue NameError
+      false
     end
 
     def api
