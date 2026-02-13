@@ -200,17 +200,20 @@ module OnnxRuntime
         out.read(:size_t).times.map do |i|
           seq = ::FFI::MemoryPointer.new(:pointer)
           Utils.check_status FFI.api[:GetValue].call(out_ptr, i, Utils.allocator, seq)
-          create_from_onnx_value(seq.read_pointer, output_type)
+          seq = ::FFI::AutoPointer.new(seq.read_pointer, FFI.api[:ReleaseValue])
+          create_from_onnx_value(seq, output_type)
         end
       when :map
         map_keys = ::FFI::MemoryPointer.new(:pointer)
         Utils.check_status FFI.api[:GetValue].call(out_ptr, 0, Utils.allocator, map_keys)
+        map_keys = ::FFI::AutoPointer.new(map_keys.read_pointer, FFI.api[:ReleaseValue])
 
         map_values = ::FFI::MemoryPointer.new(:pointer)
         Utils.check_status FFI.api[:GetValue].call(out_ptr, 1, Utils.allocator, map_values)
+        map_values = ::FFI::AutoPointer.new(map_values.read_pointer, FFI.api[:ReleaseValue])
 
         type_shape = ::FFI::MemoryPointer.new(:pointer)
-        Utils.check_status FFI.api[:GetTensorTypeAndShape].call(map_keys.read_pointer, type_shape)
+        Utils.check_status FFI.api[:GetTensorTypeAndShape].call(map_keys, type_shape)
         type_shape = ::FFI::AutoPointer.new(type_shape.read_pointer, FFI.api[:ReleaseTensorTypeAndShapeInfo])
 
         elem_type = ::FFI::MemoryPointer.new(:int)
@@ -221,8 +224,8 @@ module OnnxRuntime
         case elem_type
         when :int64
           ret = {}
-          keys = create_from_onnx_value(map_keys.read_pointer, output_type)
-          values = create_from_onnx_value(map_values.read_pointer, output_type)
+          keys = create_from_onnx_value(map_keys, output_type)
+          values = create_from_onnx_value(map_values, output_type)
           keys.zip(values).each do |k, v|
             ret[k] = v
           end
