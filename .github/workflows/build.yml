@@ -8,6 +8,7 @@ jobs:
         include:
           - ruby: "4.0"
             os: ubuntu-24.04
+            valgrind: true
           - ruby: 3.4
             os: ubuntu-22.04
           - ruby: 3.3
@@ -26,3 +27,8 @@ jobs:
       - run: bundle exec rake test
       - if: ${{ startsWith(matrix.os, 'mac') }}
         run: ruby test/inference_session_test.rb --name test_providers_coreml
+
+      - if: ${{ matrix.valgrind }}
+        run: |
+          sudo apt-get update && sudo apt-get install valgrind
+          bundle exec rake test:valgrind
