@@ -51,14 +51,23 @@ module OnnxRuntime
 
     def self.create_input_data(input, tensor_type)
       if Utils.numo_array?(input)
-        input.cast_to(Utils.numo_types[tensor_type]).to_binary
+        if tensor_type == :float16 || tensor_type == :bfloat16
+          input.cast_to(Numo::UInt16).to_binary
+        else
+          input.cast_to(Utils.numo_types[tensor_type]).to_binary
+        end
       else
         flat_input = input.flatten.to_a
-        input_tensor_values = ::FFI::MemoryPointer.new(tensor_type, flat_input.size)
-        if tensor_type == :bool
-          input_tensor_values.write_array_of_uint8(flat_input.map { |v| v ? 1 : 0 })
+        if tensor_type == :float16 || tensor_type == :bfloat16
+          input_tensor_values = ::FFI::MemoryPointer.new(:uint16, flat_input.size)
+          input_tensor_values.write_array_of_uint16(flat_input)
         else
-          input_tensor_values.send("write_array_of_#{tensor_type}", flat_input)
+          input_tensor_values = ::FFI::MemoryPointer.new(tensor_type, flat_input.size)
+          if tensor_type == :bool
+            input_tensor_values.write_array_of_uint8(flat_input.map { |v| v ? 1 : 0 })
+          else
+            input_tensor_values.send("write_array_of_#{tensor_type}", flat_input)
+          end
         end
         input_tensor_values
       end
@@ -161,7 +170,6 @@ module OnnxRuntime
         Utils.check_status FFI.api[:GetTensorShapeElementCount].call(typeinfo, out_size)
         output_tensor_size = out_size.read(:size_t)
 
-        # TODO support more types
         type = FFI::TensorElementDataType[type]
 
         case output_type
@@ -171,6 +179,8 @@ module OnnxRuntime
             result = Numo::RObject.new(shape)
             result.allocate
             create_strings_from_onnx_value(out_ptr, output_tensor_size, result)
+          when :float16, :bfloat16
+            Numo::UInt16.from_binary(tensor_data.read_pointer.read_bytes(output_tensor_size * 2), shape)
           else
             numo_type = Utils.numo_types[type]
             Utils.unsupported_type("element", type) unless numo_type
@@ -181,6 +191,8 @@ module OnnxRuntime
             case type
             when :float, :uint8, :int8, :uint16, :int16, :int32, :int64, :double, :uint32, :uint64
               tensor_data.read_pointer.send("read_array_of_#{type}", output_tensor_size)
+            when :float16, :bfloat16
+              tensor_data.read_pointer.read_array_of_uint16(output_tensor_size)
             when :bool
               tensor_data.read_pointer.read_array_of_uint8(output_tensor_size).map { |v| v == 1 }
             when :string
@@ -219,10 +231,9 @@ module OnnxRuntime
         elem_type = ::FFI::MemoryPointer.new(:int)
         Utils.check_status FFI.api[:GetTensorElementType].call(type_shape, elem_type)
 
-        # TODO support more types
         elem_type = FFI::TensorElementDataType[elem_type.read_int]
         case elem_type
-        when :int64
+        when :int64, :string
           ret = {}
           keys = create_from_onnx_value(map_keys, output_type)
           values = create_from_onnx_value(map_values, output_type)

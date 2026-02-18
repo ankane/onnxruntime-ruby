@@ -272,7 +272,6 @@ module OnnxRuntime
 
     def create_input_tensor(input_feed)
       input_feed.map do |input_name, input|
-        # TODO support more types
         inp = @inputs.find { |i| i[:name] == input_name.to_s }
         raise Error, "Unknown input: #{input_name}" unless inp
 
@@ -302,7 +301,7 @@ module OnnxRuntime
     end
 
     def tensor_types
-      @tensor_types ||= [:float, :uint8, :int8, :uint16, :int16, :int32, :int64, :bool, :double, :uint32, :uint64].map { |v| ["tensor(#{v})", v] }.to_h
+      @tensor_types ||= [:float, :uint8, :int8, :uint16, :int16, :int32, :int64, :bool, :double, :uint32, :uint64, :float16, :bfloat16].map { |v| ["tensor(#{v})", v] }.to_h
     end
 
     def api

@@ -297,6 +297,64 @@ class ModelTest < Minitest::Test
     assert_equal 9223372036854775807, metadata[:version]
   end
 
+  def test_float16
+    model = OnnxRuntime::Model.new("test/support/float16_test.onnx")
+
+    expected = [{name: "x", type: "tensor(float16)", shape: [1, 5]}]
+    assert_equal expected, model.inputs
+
+    # float16 for [1.0, 2.0, 3.0, 4.0, 5.0]
+    x = [[15360, 16384, 16896, 17408, 17664]]
+    output = model.predict({x: x})
+    assert_equal [15360, 16384, 16896, 17408, 17664], output["y"].first
+  end
+
+  def test_bfloat16
+    model = OnnxRuntime::Model.new("test/support/bfloat16_test.onnx")
+
+    expected = [{name: "x", type: "tensor(bfloat16)", shape: [1, 5]}]
+    assert_equal expected, model.inputs
+
+    # bfloat16 for [1.0, 2.0, 3.0, 4.0, 5.0]
+    x = [[16256, 16384, 16448, 16512, 16544]]
+    output = model.predict({x: x})
+    assert_equal [16256, 16384, 16448, 16512, 16544], output["y"].first
+  end
+
+  def test_numo_float16
+    skip unless numo?
+
+    model = OnnxRuntime::Model.new("test/support/float16_test.onnx")
+    # float16 for [1.0, 2.0, 3.0, 4.0, 5.0]
+    x = Numo::UInt16.cast([[15360, 16384, 16896, 17408, 17664]])
+    output = model.predict({x: x}, output_type: :numo)
+    assert_kind_of Numo::UInt16, output["y"]
+    assert_equal [15360, 16384, 16896, 17408, 17664], output["y"][0, true].to_a
+  end
+
+  def test_ort_value_float16
+    model = OnnxRuntime::Model.new("test/support/float16_test.onnx")
+    # float16 for [1.0, 2.0, 3.0, 4.0, 5.0]
+    x = [[15360, 16384, 16896, 17408, 17664]]
+    output = model.predict({x: x}, output_type: :ort_value)
+    value = output["y"]
+    assert_equal :float16, value.element_type
+    assert_equal "tensor(float16)", value.data_type
+    assert_equal [1, 5], value.shape
+  end
+
+  def test_string_map
+    model = OnnxRuntime::Model.new("test/support/zipmap_string.onnx")
+
+    expected = [{name: "x", type: "tensor(float)", shape: [1, 3]}]
+    assert_equal expected, model.inputs
+
+    output = model.predict({x: [[0.1, 0.5, 0.4]]})
+    result = output["y"].first
+    assert_equal ["a", "b", "c"], result.keys
+    assert_elements_in_delta [0.1, 0.5, 0.4], result.values
+  end
+
   def test_lib_version
     assert_match(/\A\d+\.\d+\.\d+\z/, OnnxRuntime.lib_version)
   end
