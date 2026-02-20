@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   when "aarch64-linux"
     spec.files << "vendor/libonnxruntime.arm64.so"
   when "x86_64-darwin"
-    spec.files << "vendor/libonnxruntime.dylib"
+    # do nothing
   when "arm64-darwin"
     spec.files << "vendor/libonnxruntime.arm64.dylib"
   when "x64-mingw"

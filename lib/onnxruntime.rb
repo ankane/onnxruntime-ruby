@@ -22,7 +22,7 @@ module OnnxRuntime
       if RbConfig::CONFIG["host_cpu"] =~ /arm|aarch64/i
         "libonnxruntime.arm64.dylib"
       else
-        "libonnxruntime.dylib"
+        # none
       end
     else
       if RbConfig::CONFIG["host_cpu"] =~ /arm|aarch64/i
@@ -32,7 +32,7 @@ module OnnxRuntime
       end
     end
   vendor_lib = File.expand_path("../vendor/#{lib_name}", __dir__)
-  self.ffi_lib = [vendor_lib]
+  self.ffi_lib = [vendor_lib] if lib_name
 
   def self.lib_version
     FFI.OrtGetApiBase[:GetVersionString].call.read_string

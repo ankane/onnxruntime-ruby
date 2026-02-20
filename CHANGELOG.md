@@ -1,3 +1,8 @@
+## 0.11.0 (unreleased)
+
+- Updated ONNX Runtime to 1.24.2
+- Dropped shared library for Mac x86-64
+
 ## 0.10.2 (2026-02-19)
 
 - Fixed uncaught exception with `CoreMLExecutionProvider`
