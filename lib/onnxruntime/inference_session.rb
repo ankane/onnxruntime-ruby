@@ -142,8 +142,8 @@ module OnnxRuntime
       check_status api[:ModelMetadataGetCustomMetadataMapKeys].call(metadata, @allocator, keys, num_keys)
       keys = ::FFI::AutoPointer.new(keys.read_pointer, method(:allocator_free))
       key_ptrs =
-        num_keys.read(:int64_t).times.map do |i|
-          ::FFI::AutoPointer.new(keys.get_pointer(i * ::FFI::Pointer.size), method(:allocator_free))
+        keys.read_array_of_pointer(num_keys.read(:int64_t)).map do |ptr|
+          ::FFI::AutoPointer.new(ptr, method(:allocator_free))
         end
 
       custom_metadata_map = {}
