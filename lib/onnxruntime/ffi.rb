@@ -2,8 +2,9 @@ module OnnxRuntime
   module FFI
     extend ::FFI::Library
 
-    # TODO improve message
-    raise Error, "ffi_lib not set" unless OnnxRuntime.ffi_lib
+    unless OnnxRuntime.ffi_lib
+      raise Error, "Shared library for Mac x86-64 not included in this version"
+    end
 
     ffi_lib OnnxRuntime.ffi_lib
 
