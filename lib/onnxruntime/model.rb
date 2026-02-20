@@ -7,12 +7,7 @@ module OnnxRuntime
     def predict(input_feed, output_names: nil, **run_options)
       predictions = @session.run(output_names, input_feed, **run_options)
       output_names ||= outputs.map { |o| o[:name] }
-
-      result = {}
-      output_names.zip(predictions).each do |k, v|
-        result[k.to_s] = v
-      end
-      result
+      output_names.zip(predictions).to_h { |k, v| [k.to_s, v] }
     end
 
     def inputs

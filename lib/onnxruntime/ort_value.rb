@@ -223,13 +223,9 @@ module OnnxRuntime
         elem_type = FFI::TensorElementDataType[elem_type.read_int]
         case elem_type
         when :int64
-          ret = {}
           keys = create_from_onnx_value(map_keys, output_type)
           values = create_from_onnx_value(map_values, output_type)
-          keys.zip(values).each do |k, v|
-            ret[k] = v
-          end
-          ret
+          keys.zip(values).to_h
         else
           Utils.unsupported_type("element", elem_type)
         end
