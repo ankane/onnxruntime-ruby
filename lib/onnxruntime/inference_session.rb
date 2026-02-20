@@ -104,9 +104,7 @@ module OnnxRuntime
     # TODO support logid
     def run_with_ort_values(output_names, input_feed, log_severity_level: nil, log_verbosity_level: nil, logid: nil, terminate: nil)
       input_tensor = ::FFI::MemoryPointer.new(:pointer, input_feed.size)
-      input_feed.each_with_index do |(_, input), i|
-        input_tensor[i].write_pointer(input.to_ptr)
-      end
+      input_tensor.write_array_of_pointer(input_feed.values)
 
       output_names ||= @outputs.map { |v| v[:name] }
 
