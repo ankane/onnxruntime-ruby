@@ -204,9 +204,11 @@ module OnnxRuntime
       length_ptr = ::FFI::MemoryPointer.new(:int)
       check_status api[:GetAvailableProviders].call(out_ptr, length_ptr)
       length = length_ptr.read_int
-      providers = out_ptr.read_pointer.read_array_of_pointer(length).map(&:read_string)
-      api[:ReleaseAvailableProviders].call(out_ptr.read_pointer, length)
-      providers
+      begin
+        out_ptr.read_pointer.read_array_of_pointer(length).map(&:read_string)
+      ensure
+        api[:ReleaseAvailableProviders].call(out_ptr.read_pointer, length)
+      end
     end
 
     private
