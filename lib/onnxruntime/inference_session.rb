@@ -185,14 +185,14 @@ module OnnxRuntime
     # no way to set providers with C API yet
     # so we can return all available providers
     def providers
-      out_ptr = ::FFI::MemoryPointer.new(:pointer)
+      out_ptr = Pointer.new
       length_ptr = ::FFI::MemoryPointer.new(:int)
-      check_status api[:GetAvailableProviders].call(out_ptr, length_ptr)
+      check_status api[:GetAvailableProviders].call(out_ptr.ref, length_ptr)
       length = length_ptr.read_int
       begin
-        out_ptr.read_pointer.read_array_of_pointer(length).map(&:read_string)
+        out_ptr.read_array_of_pointer(length).map(&:read_string)
       ensure
-        api[:ReleaseAvailableProviders].call(out_ptr.read_pointer, length)
+        api[:ReleaseAvailableProviders].call(out_ptr, length)
       end
     end
 

@@ -22,18 +22,18 @@ module OnnxRuntime
       input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
       input_node_dims.write_array_of_int64(shape)
 
-      ptr = ::FFI::MemoryPointer.new(:pointer)
+      ptr = Pointer.new
       if element_type == :string
         # keep reference to _str_ptrs until FillStringTensor call
         input_tensor_values, _str_ptrs = create_input_strings(input)
-        Utils.check_status FFI.api[:CreateTensorAsOrtValue].call(Utils.allocator, input_node_dims, shape.size, type_enum, ptr)
-        Utils.check_status FFI.api[:FillStringTensor].call(ptr.read_pointer, input_tensor_values, input_tensor_values.size / input_tensor_values.type_size)
+        Utils.check_status FFI.api[:CreateTensorAsOrtValue].call(Utils.allocator, input_node_dims, shape.size, type_enum, ptr.ref)
+        Utils.check_status FFI.api[:FillStringTensor].call(ptr, input_tensor_values, input_tensor_values.size / input_tensor_values.type_size)
       else
         input_tensor_values = create_input_data(input, element_type)
-        Utils.check_status FFI.api[:CreateTensorWithDataAsOrtValue].call(allocator_info, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr)
+        Utils.check_status FFI.api[:CreateTensorWithDataAsOrtValue].call(allocator_info, input_tensor_values, input_tensor_values.size, input_node_dims, shape.size, type_enum, ptr.ref)
       end
 
-      new(ptr.read_pointer, input_tensor_values)
+      new(ptr.to_ptr, input_tensor_values)
     end
 
     def self.from_shape_and_type(shape, element_type)
@@ -43,10 +43,10 @@ module OnnxRuntime
       input_node_dims = ::FFI::MemoryPointer.new(:int64, shape.size)
       input_node_dims.write_array_of_int64(shape)
 
-      ptr = ::FFI::MemoryPointer.new(:pointer)
-      Utils.check_status FFI.api[:CreateTensorAsOrtValue].call(Utils.allocator, input_node_dims, shape.size, type_enum, ptr)
+      ptr = Pointer.new
+      Utils.check_status FFI.api[:CreateTensorAsOrtValue].call(Utils.allocator, input_node_dims, shape.size, type_enum, ptr.ref)
 
-      new(ptr.read_pointer)
+      new(ptr.to_ptr)
     end
 
     def self.create_input_data(input, tensor_type)

@@ -49,9 +49,9 @@ module OnnxRuntime
       case type
       when :tensor
         # don't free tensor_info
-        tensor_info = ::FFI::MemoryPointer.new(:pointer)
-        check_status api[:CastTypeInfoToTensorInfo].call(typeinfo, tensor_info)
-        type, shape = Utils.tensor_type_and_shape(tensor_info.read_pointer)
+        tensor_info = Pointer.new
+        check_status api[:CastTypeInfoToTensorInfo].call(typeinfo, tensor_info.ref)
+        type, shape = Utils.tensor_type_and_shape(tensor_info)
 
         {
           type: "tensor(#{FFI::TensorElementDataType[type]})",
@@ -59,11 +59,11 @@ module OnnxRuntime
         }
       when :sequence
         # don't free sequence_info
-        sequence_type_info = ::FFI::MemoryPointer.new(:pointer)
-        check_status api[:CastTypeInfoToSequenceTypeInfo].call(typeinfo, sequence_type_info)
+        sequence_type_info = Pointer.new
+        check_status api[:CastTypeInfoToSequenceTypeInfo].call(typeinfo, sequence_type_info.ref)
 
         nested_type_info = Pointer.new(api[:ReleaseTypeInfo])
-        check_status api[:GetSequenceElementType].call(sequence_type_info.read_pointer, nested_type_info.ref)
+        check_status api[:GetSequenceElementType].call(sequence_type_info, nested_type_info.ref)
         v = node_info(nested_type_info)[:type]
 
         {
@@ -72,17 +72,17 @@ module OnnxRuntime
         }
       when :map
         # don't free map_type_info
-        map_type_info = ::FFI::MemoryPointer.new(:pointer)
-        check_status api[:CastTypeInfoToMapTypeInfo].call(typeinfo, map_type_info)
+        map_type_info = Pointer.new
+        check_status api[:CastTypeInfoToMapTypeInfo].call(typeinfo, map_type_info.ref)
 
         # key
         key_type = ::FFI::MemoryPointer.new(:int)
-        check_status api[:GetMapKeyType].call(map_type_info.read_pointer, key_type)
+        check_status api[:GetMapKeyType].call(map_type_info, key_type)
         k = FFI::TensorElementDataType[key_type.read_int]
 
         # value
         value_type_info = Pointer.new(api[:ReleaseTypeInfo])
-        check_status api[:GetMapValueType].call(map_type_info.read_pointer, value_type_info.ref)
+        check_status api[:GetMapValueType].call(map_type_info, value_type_info.ref)
         v = node_info(value_type_info)[:type]
 
         {
@@ -130,9 +130,10 @@ module OnnxRuntime
 
     def self.allocator
       @allocator ||= begin
-        allocator = ::FFI::MemoryPointer.new(:pointer)
-        check_status api[:GetAllocatorWithDefaultOptions].call(allocator)
-        allocator.read_pointer # do not free default allocator
+        # do not free default allocator
+        allocator = Pointer.new
+        check_status api[:GetAllocatorWithDefaultOptions].call(allocator.ref)
+        allocator
       end
     end
   end

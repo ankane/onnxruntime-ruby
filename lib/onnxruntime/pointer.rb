@@ -2,9 +2,9 @@ module OnnxRuntime
   class Pointer
     attr_reader :ref
 
-    def initialize(free)
+    def initialize(free = nil)
       @ref = ::FFI::MemoryPointer.new(:pointer)
-      ObjectSpace.define_finalizer(self, self.class.finalize(@ref, free))
+      ObjectSpace.define_finalizer(self, self.class.finalize(@ref, free)) if free
     end
 
     def self.finalize(ref, free)
