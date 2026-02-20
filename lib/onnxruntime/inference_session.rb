@@ -140,65 +140,58 @@ module OnnxRuntime
       keys = ::FFI::MemoryPointer.new(:pointer)
       num_keys = ::FFI::MemoryPointer.new(:int64_t)
       check_status api[:ModelMetadataGetCustomMetadataMapKeys].call(metadata, @allocator, keys, num_keys)
-      keys = keys.read_pointer
+      keys = ::FFI::AutoPointer.new(keys.read_pointer, method(:allocator_free))
 
       custom_metadata_map = {}
       num_keys.read(:int64_t).times do |i|
-        key_ptr = keys.get_pointer(i * ::FFI::Pointer.size)
+        key_ptr = ::FFI::AutoPointer.new(keys.get_pointer(i * ::FFI::Pointer.size), method(:allocator_free))
         key = key_ptr.read_string
         value = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:ModelMetadataLookupCustomMetadataMap].call(metadata, @allocator, key, value)
-        custom_metadata_map[key] = value.read_pointer.read_string
-
-        allocator_free key_ptr
-        allocator_free value.read_pointer
+        value = ::FFI::AutoPointer.new(value.read_pointer, method(:allocator_free))
+        custom_metadata_map[key] = value.read_string
       end
 
       description = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:ModelMetadataGetDescription].call(metadata, @allocator, description)
+      description = ::FFI::AutoPointer.new(description.read_pointer, method(:allocator_free))
 
       domain = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:ModelMetadataGetDomain].call(metadata, @allocator, domain)
+      domain = ::FFI::AutoPointer.new(domain.read_pointer, method(:allocator_free))
 
       graph_name = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:ModelMetadataGetGraphName].call(metadata, @allocator, graph_name)
+      graph_name = ::FFI::AutoPointer.new(graph_name.read_pointer, method(:allocator_free))
 
       graph_description = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:ModelMetadataGetGraphDescription].call(metadata, @allocator, graph_description)
+      graph_description = ::FFI::AutoPointer.new(graph_description.read_pointer, method(:allocator_free))
 
       producer_name = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:ModelMetadataGetProducerName].call(metadata, @allocator, producer_name)
+      producer_name = ::FFI::AutoPointer.new(producer_name.read_pointer, method(:allocator_free))
 
       version = ::FFI::MemoryPointer.new(:int64_t)
       check_status api[:ModelMetadataGetVersion].call(metadata, version)
 
       {
         custom_metadata_map: custom_metadata_map,
-        description: description.read_pointer.read_string,
-        domain: domain.read_pointer.read_string,
-        graph_name: graph_name.read_pointer.read_string,
-        graph_description: graph_description.read_pointer.read_string,
-        producer_name: producer_name.read_pointer.read_string,
+        description: description.read_string,
+        domain: domain.read_string,
+        graph_name: graph_name.read_string,
+        graph_description: graph_description.read_string,
+        producer_name: producer_name.read_string,
         version: version.read(:int64_t)
       }
-    ensure
-      allocator_free keys
-      allocator_free description.read_pointer
-      allocator_free domain.read_pointer
-      allocator_free graph_name.read_pointer
-      allocator_free graph_description.read_pointer
-      allocator_free producer_name.read_pointer
     end
 
     # return value has double underscore like Python
     def end_profiling
       out = ::FFI::MemoryPointer.new(:pointer)
       check_status api[:SessionEndProfiling].call(@session, @allocator, out)
-      begin
-        out.read_pointer.read_string
-      ensure
-        allocator_free out.read_pointer
-      end
+      out = ::FFI::AutoPointer.new(out.read_pointer, method(:allocator_free))
+      out.read_string
     end
 
     # no way to set providers with C API yet
@@ -241,8 +234,8 @@ module OnnxRuntime
       num_input_nodes.read(:size_t).times.map do |i|
         name_ptr = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetInputName].call(@session, i, @allocator, name_ptr)
-        name_str = name_ptr.read_pointer.read_string
-        allocator_free name_ptr.read_pointer
+        name_ptr = ::FFI::AutoPointer.new(name_ptr.read_pointer, method(:allocator_free))
+        name_str = name_ptr.read_string
 
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetInputTypeInfo].call(@session, i, typeinfo)
@@ -259,8 +252,8 @@ module OnnxRuntime
       num_output_nodes.read(:size_t).times.map do |i|
         name_ptr = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetOutputName].call(@session, i, @allocator, name_ptr)
-        name_str = name_ptr.read_pointer.read_string
-        allocator_free name_ptr.read_pointer
+        name_ptr = ::FFI::AutoPointer.new(name_ptr.read_pointer, method(:allocator_free))
+        name_str = name_ptr.read_string
 
         typeinfo = ::FFI::MemoryPointer.new(:pointer)
         check_status api[:SessionGetOutputTypeInfo].call(@session, i, typeinfo)
