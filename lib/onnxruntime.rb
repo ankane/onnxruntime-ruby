@@ -6,6 +6,7 @@ require_relative "onnxruntime/datasets"
 require_relative "onnxruntime/inference_session"
 require_relative "onnxruntime/model"
 require_relative "onnxruntime/ort_value"
+require_relative "onnxruntime/pointer"
 require_relative "onnxruntime/utils"
 require_relative "onnxruntime/version"
 

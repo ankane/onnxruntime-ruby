@@ -85,9 +85,8 @@ module OnnxRuntime
 
     def data_type
       @data_type ||= begin
-        typeinfo = ::FFI::MemoryPointer.new(:pointer)
-        Utils.check_status FFI.api[:GetTypeInfo].call(@ptr, typeinfo)
-        typeinfo = ::FFI::AutoPointer.new(typeinfo.read_pointer, FFI.api[:ReleaseTypeInfo])
+        typeinfo = Pointer.new(FFI.api[:ReleaseTypeInfo])
+        Utils.check_status FFI.api[:GetTypeInfo].call(@ptr, typeinfo.ref)
         Utils.node_info(typeinfo)[:type]
       end
     end
@@ -134,9 +133,8 @@ module OnnxRuntime
 
     def type_and_shape_info
       @type_and_shape_info ||= begin
-        typeinfo = ::FFI::MemoryPointer.new(:pointer)
-        Utils.check_status FFI.api[:GetTensorTypeAndShape].call(@ptr, typeinfo)
-        typeinfo = ::FFI::AutoPointer.new(typeinfo.read_pointer, FFI.api[:ReleaseTensorTypeAndShapeInfo])
+        typeinfo = Pointer.new(FFI.api[:ReleaseTensorTypeAndShapeInfo])
+        Utils.check_status FFI.api[:GetTensorTypeAndShape].call(@ptr, typeinfo.ref)
         Utils.tensor_type_and_shape(typeinfo)
       end
     end
@@ -148,9 +146,8 @@ module OnnxRuntime
 
       case type
       when :tensor
-        typeinfo = ::FFI::MemoryPointer.new(:pointer)
-        Utils.check_status FFI.api[:GetTensorTypeAndShape].call(out_ptr, typeinfo)
-        typeinfo = ::FFI::AutoPointer.new(typeinfo.read_pointer, FFI.api[:ReleaseTensorTypeAndShapeInfo])
+        typeinfo = Pointer.new(FFI.api[:ReleaseTensorTypeAndShapeInfo])
+        Utils.check_status FFI.api[:GetTensorTypeAndShape].call(out_ptr, typeinfo.ref)
 
         type, shape = Utils.tensor_type_and_shape(typeinfo)
 
@@ -198,23 +195,19 @@ module OnnxRuntime
         Utils.check_status FFI.api[:GetValueCount].call(out_ptr, out)
 
         out.read(:size_t).times.map do |i|
-          seq = ::FFI::MemoryPointer.new(:pointer)
-          Utils.check_status FFI.api[:GetValue].call(out_ptr, i, Utils.allocator, seq)
-          seq = ::FFI::AutoPointer.new(seq.read_pointer, FFI.api[:ReleaseValue])
+          seq = Pointer.new(FFI.api[:ReleaseValue])
+          Utils.check_status FFI.api[:GetValue].call(out_ptr, i, Utils.allocator, seq.ref)
           create_from_onnx_value(seq, output_type)
         end
       when :map
-        map_keys = ::FFI::MemoryPointer.new(:pointer)
-        Utils.check_status FFI.api[:GetValue].call(out_ptr, 0, Utils.allocator, map_keys)
-        map_keys = ::FFI::AutoPointer.new(map_keys.read_pointer, FFI.api[:ReleaseValue])
+        map_keys = Pointer.new(FFI.api[:ReleaseValue])
+        Utils.check_status FFI.api[:GetValue].call(out_ptr, 0, Utils.allocator, map_keys.ref)
 
-        map_values = ::FFI::MemoryPointer.new(:pointer)
-        Utils.check_status FFI.api[:GetValue].call(out_ptr, 1, Utils.allocator, map_values)
-        map_values = ::FFI::AutoPointer.new(map_values.read_pointer, FFI.api[:ReleaseValue])
+        map_values = Pointer.new(FFI.api[:ReleaseValue])
+        Utils.check_status FFI.api[:GetValue].call(out_ptr, 1, Utils.allocator, map_values.ref)
 
-        type_shape = ::FFI::MemoryPointer.new(:pointer)
-        Utils.check_status FFI.api[:GetTensorTypeAndShape].call(map_keys, type_shape)
-        type_shape = ::FFI::AutoPointer.new(type_shape.read_pointer, FFI.api[:ReleaseTensorTypeAndShapeInfo])
+        type_shape = Pointer.new(FFI.api[:ReleaseTensorTypeAndShapeInfo])
+        Utils.check_status FFI.api[:GetTensorTypeAndShape].call(map_keys, type_shape.ref)
 
         elem_type = ::FFI::MemoryPointer.new(:int)
         Utils.check_status FFI.api[:GetTensorElementType].call(type_shape, elem_type)
@@ -260,9 +253,9 @@ module OnnxRuntime
 
     def self.allocator_info
       @allocator_info ||= begin
-        allocator_info = ::FFI::MemoryPointer.new(:pointer)
-        Utils.check_status FFI.api[:CreateCpuMemoryInfo].call(1, 0, allocator_info)
-        ::FFI::AutoPointer.new(allocator_info.read_pointer, FFI.api[:ReleaseMemoryInfo])
+        allocator_info = Pointer.new(FFI.api[:ReleaseMemoryInfo])
+        Utils.check_status FFI.api[:CreateCpuMemoryInfo].call(1, 0, allocator_info.ref)
+        allocator_info
       end
     end
   end
