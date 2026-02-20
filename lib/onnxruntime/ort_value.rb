@@ -116,9 +116,9 @@ module OnnxRuntime
     end
 
     def data_ptr
-      tensor_data = ::FFI::MemoryPointer.new(:pointer)
-      FFI.api[:GetTensorMutableData].call(@ptr, tensor_data)
-      tensor_data.read_pointer
+      tensor_data = Pointer.new
+      FFI.api[:GetTensorMutableData].call(@ptr, tensor_data.ref)
+      tensor_data.to_ptr
     end
 
     private
@@ -151,8 +151,8 @@ module OnnxRuntime
 
         type, shape = Utils.tensor_type_and_shape(typeinfo)
 
-        tensor_data = ::FFI::MemoryPointer.new(:pointer)
-        Utils.check_status FFI.api[:GetTensorMutableData].call(out_ptr, tensor_data)
+        tensor_data = Pointer.new
+        Utils.check_status FFI.api[:GetTensorMutableData].call(out_ptr, tensor_data.ref)
 
         out_size = ::FFI::MemoryPointer.new(:size_t)
         Utils.check_status FFI.api[:GetTensorShapeElementCount].call(typeinfo, out_size)
@@ -171,15 +171,15 @@ module OnnxRuntime
           else
             numo_type = Utils.numo_types[type]
             Utils.unsupported_type("element", type) unless numo_type
-            numo_type.from_binary(tensor_data.read_pointer.read_bytes(output_tensor_size * numo_type::ELEMENT_BYTE_SIZE), shape)
+            numo_type.from_binary(tensor_data.to_ptr.read_bytes(output_tensor_size * numo_type::ELEMENT_BYTE_SIZE), shape)
           end
         when :ruby
           arr =
             case type
             when :float, :uint8, :int8, :uint16, :int16, :int32, :int64, :double, :uint32, :uint64
-              tensor_data.read_pointer.send("read_array_of_#{type}", output_tensor_size)
+              tensor_data.to_ptr.send("read_array_of_#{type}", output_tensor_size)
             when :bool
-              tensor_data.read_pointer.read_array_of_uint8(output_tensor_size).map { |v| v == 1 }
+              tensor_data.to_ptr.read_array_of_uint8(output_tensor_size).map { |v| v == 1 }
             when :string
               create_strings_from_onnx_value(out_ptr, output_tensor_size, [])
             else
