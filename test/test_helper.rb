@@ -11,7 +11,7 @@ class Minitest::Test
     GC.stress = true if stress?
 
     # avoid hanging from too many threads on CI
-    GC.start if linux? && ci?
+    GC.start if linux?
   end
 
   def teardown
