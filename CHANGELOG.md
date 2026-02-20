@@ -1,4 +1,4 @@
-## 0.10.2 (unreleased)
+## 0.10.2 (2026-02-19)
 
 - Fixed uncaught exception with `CoreMLExecutionProvider`
 - Fixed memory leak with `map` and `seq` outputs
