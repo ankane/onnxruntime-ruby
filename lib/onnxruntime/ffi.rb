@@ -2,11 +2,15 @@ module OnnxRuntime
   module FFI
     extend ::FFI::Library
 
-    unless OnnxRuntime.ffi_lib
-      raise Error, "Shared library for Mac x86-64 not included in this version"
+    begin
+      ffi_lib OnnxRuntime.ffi_lib
+    rescue LoadError => e
+      if e.message.include?("Could not open library '/usr/local/opt/onnxruntime/lib/libonnxruntime.dylib'")
+        raise LoadError, "ONNX Runtime not found. Run `brew install onnxruntime`"
+      else
+        raise e
+      end
     end
-
-    ffi_lib OnnxRuntime.ffi_lib
 
     # https://github.com/microsoft/onnxruntime/blob/master/include/onnxruntime/core/session/onnxruntime_c_api.h
     # keep same order

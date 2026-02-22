@@ -10,9 +10,9 @@ jobs:
             os: ubuntu-24.04
             valgrind: true
           - ruby: 3.4
-            os: ubuntu-22.04
-          - ruby: 3.3
             os: macos-latest
+          - ruby: 3.3
+            os: macos-15-intel
           - ruby: 3.2
             os: windows-latest
     runs-on: ${{ matrix.os }}
@@ -23,7 +23,10 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-      - run: bundle exec rake vendor:platform
+      - if: ${{ runner.os != 'macOS' || runner.arch != 'X64' }}
+        run: bundle exec rake vendor:platform
+      - if: ${{ runner.os == 'macOS' && runner.arch == 'X64' }}
+        run: brew install onnxruntime
       - run: bundle exec rake test
       - if: ${{ runner.os == 'macOS' }}
         run: ruby test/inference_session_test.rb --name test_providers_coreml
