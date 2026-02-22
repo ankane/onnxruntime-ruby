@@ -16,6 +16,8 @@ Add this line to your application’s Gemfile:
 gem "onnxruntime"
 ```
 
+On Mac x86-64, also run `brew install onnxruntime` to install the shared library
+
 ## Getting Started
 
 Load a model and make predictions

@@ -1,4 +1,4 @@
-## 0.11.0 (unreleased)
+## 0.11.0 (2026-02-22)
 
 - Updated ONNX Runtime to 1.24.2
 - Dropped shared library for Mac x86-64 (no longer provided by upstream)
