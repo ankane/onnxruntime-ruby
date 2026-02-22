@@ -13,7 +13,7 @@ end
 
 task default: :test
 
-shared_libraries = %w(libonnxruntime.so libonnxruntime.arm64.so libonnxruntime.dylib libonnxruntime.arm64.dylib onnxruntime.dll)
+shared_libraries = %w(libonnxruntime.so libonnxruntime.arm64.so libonnxruntime.arm64.dylib onnxruntime.dll)
 
 # ensure vendor files exist
 task :ensure_vendor do
