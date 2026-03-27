@@ -297,6 +297,18 @@ class ModelTest < Minitest::Test
     assert_equal 9223372036854775807, metadata[:version]
   end
 
+  def test_string_map
+    model = OnnxRuntime::Model.new("test/support/zipmap_string.onnx")
+
+    expected = [{name: "x", type: "tensor(float)", shape: [1, 3]}]
+    assert_equal expected, model.inputs
+
+    output = model.predict({x: [[0.1, 0.5, 0.4]]})
+    result = output["y"].first
+    assert_equal ["a", "b", "c"], result.keys
+    assert_elements_in_delta [0.1, 0.5, 0.4], result.values
+  end
+
   def test_lib_version
     assert_match(/\A\d+\.\d+\.\d+\z/, OnnxRuntime.lib_version)
   end
