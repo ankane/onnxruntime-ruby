@@ -183,24 +183,26 @@ class ModelTest < Minitest::Test
   end
 
   def test_session_options
-    optimized_path = "#{Dir.tmpdir}/optimized.onnx"
+    Dir.mktmpdir do |dir|
+      optimized_path = "#{dir}/optimized.onnx"
 
-    session_options = {
-      execution_mode: :sequential,
-      graph_optimization_level: :all,
-      inter_op_num_threads: 1,
-      intra_op_num_threads: 1,
-      log_severity_level: 4,
-      log_verbosity_level: 4,
-      logid: "test",
-      optimized_model_filepath: optimized_path
-    }
+      session_options = {
+        execution_mode: :sequential,
+        graph_optimization_level: :all,
+        inter_op_num_threads: 1,
+        intra_op_num_threads: 1,
+        log_severity_level: 4,
+        log_verbosity_level: 4,
+        logid: "test",
+        optimized_model_filepath: optimized_path
+      }
 
-    model = OnnxRuntime::Model.new("test/support/lightgbm.onnx", **session_options)
-    x = [[5.8, 2.8]]
-    model.predict({input: x})
+      model = OnnxRuntime::Model.new("test/support/lightgbm.onnx", **session_options)
+      x = [[5.8, 2.8]]
+      model.predict({input: x})
 
-    assert_match "onnx", File.binread(optimized_path)
+      assert_match "onnx", File.binread(optimized_path)
+    end
   end
 
   def test_free_dimension_overrides_by_denotation
