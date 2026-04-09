@@ -138,7 +138,7 @@ class ModelTest < Minitest::Test
 
     x = [[5.8, 2.8]]
 
-    output = model.predict({input: x}) #, output_names: ["label"])
+    output = model.predict({input: x})
     assert_equal [1], output["label"]
     probabilities = output["probabilities"].first
     assert_equal [0, 1, 2], probabilities.keys
