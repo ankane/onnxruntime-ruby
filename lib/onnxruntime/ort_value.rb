@@ -212,10 +212,9 @@ module OnnxRuntime
         elem_type = ::FFI::MemoryPointer.new(:int)
         Utils.check_status FFI.api[:GetTensorElementType].call(type_shape, elem_type)
 
-        # TODO support more types
         elem_type = FFI::TensorElementDataType[elem_type.read_int]
         case elem_type
-        when :int64
+        when :int64, :string
           keys = create_from_onnx_value(map_keys, output_type)
           values = create_from_onnx_value(map_values, output_type)
           keys.zip(values).to_h
