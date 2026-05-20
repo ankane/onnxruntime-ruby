@@ -206,21 +206,9 @@ module OnnxRuntime
         map_values = Pointer.new(FFI.api[:ReleaseValue])
         Utils.check_status FFI.api[:GetValue].call(out_ptr, 1, Utils.allocator, map_values.ref)
 
-        type_shape = Pointer.new(FFI.api[:ReleaseTensorTypeAndShapeInfo])
-        Utils.check_status FFI.api[:GetTensorTypeAndShape].call(map_keys, type_shape.ref)
-
-        elem_type = ::FFI::MemoryPointer.new(:int)
-        Utils.check_status FFI.api[:GetTensorElementType].call(type_shape, elem_type)
-
-        elem_type = FFI::TensorElementDataType[elem_type.read_int]
-        case elem_type
-        when :int64, :string
-          keys = create_from_onnx_value(map_keys, output_type)
-          values = create_from_onnx_value(map_values, output_type)
-          keys.zip(values).to_h
-        else
-          Utils.unsupported_type("element", elem_type)
-        end
+        keys = create_from_onnx_value(map_keys, output_type)
+        values = create_from_onnx_value(map_values, output_type)
+        keys.zip(values).to_h
       else
         Utils.unsupported_type("ONNX", type)
       end
