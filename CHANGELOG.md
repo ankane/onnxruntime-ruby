@@ -1,4 +1,4 @@
-## 0.11.4 (unreleased)
+## 0.11.4 (2026-06-22)
 
 - Updated ONNX Runtime to 1.27.0
 - Added support for string keys in `map` outputs
