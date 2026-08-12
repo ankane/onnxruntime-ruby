@@ -48,7 +48,7 @@ task :release_platform do
 end
 
 def version
-  "1.28.0"
+  "1.29.0"
 end
 
 def download_official(library, remote_lib, file, sha256)
@@ -85,16 +85,16 @@ end
 # https://github.com/microsoft/onnxruntime/releases
 namespace :vendor do
   task :linux do
-    download_official("libonnxruntime.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-x64-#{version}.tgz", "a3e1b79d7bb1bf09696ce675f49e4064e6c81f6202b8225624fff0e93f8d6407")
-    download_official("libonnxruntime.arm64.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-aarch64-#{version}.tgz", "e15ff8b5d85afe6c144d97c6fd432254bf76a219daaf17658087d6ecb3e8f0bb")
+    download_official("libonnxruntime.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-x64-#{version}.tgz", "c3fddc4f139a045b0c4902c57410f0694f1c2fdf9b6939fbe38b1aeae7cd14ba")
+    download_official("libonnxruntime.arm64.so", "libonnxruntime.so.#{version}", "onnxruntime-linux-aarch64-#{version}.tgz", "e1799098ebc054b370f6176a450f158720f297818c613e5dc99b92e2ec82346f")
   end
 
   task :mac do
-    download_official("libonnxruntime.arm64.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-arm64-#{version}.tgz", "1268b359718099bde2cedb55787f182a130067bc4f31e8c88478c445b850d3d8")
+    download_official("libonnxruntime.arm64.dylib", "libonnxruntime.#{version}.dylib", "onnxruntime-osx-arm64-#{version}.tgz", "d0706fc34f315d8c88639d0a8c81f2e09e815f282cabed3493c06a054352cf92")
   end
 
   task :windows do
-    download_official("onnxruntime.dll", "onnxruntime.dll", "onnxruntime-win-x64-#{version}.zip", "abef733dacbe2f571547a7150b479b5cb9cc0df22f96c24983a42cadb1b4f8bc")
+    download_official("onnxruntime.dll", "onnxruntime.dll", "onnxruntime-win-x64-#{version}.zip", "c9b4b7086b529ad814f428c1bad028e20a25d7dc0699836775faace4ab5b78b2")
   end
 
   task all: [:linux, :mac, :windows]
