@@ -314,7 +314,8 @@ module OnnxRuntime
       # use mutex for thread-safety
       Utils.mutex.synchronize do
         @@env ||= begin
-          env = Pointer.new(api[:ReleaseEnv])
+          # cannot pass api[:ReleaseEnv] since no way to guarantee runs last
+          env = Pointer.new
           check_status api[:CreateEnv].call(3, "Default", env.ref)
           # disable telemetry
           # https://github.com/microsoft/onnxruntime/blob/master/docs/Privacy.md
