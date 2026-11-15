@@ -65,8 +65,8 @@ def download_official(library, remote_lib, file, sha256)
 
   Dir.chdir(Dir.mktmpdir) do
     File.binwrite(file, contents)
-    command = file.end_with?(".zip") ? "unzip -q" : "tar xf"
-    system "#{command} #{file}"
+    command = file.end_with?(".zip") ? ["unzip", "-q", file] : ["tar", "xf", file]
+    system *command, exception: true
     src = file[0..-5]
     dest = File.expand_path("vendor", __dir__)
 
